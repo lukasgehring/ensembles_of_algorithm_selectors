@@ -3,6 +3,7 @@ import sys
 import configparser
 import multiprocessing as mp
 import database_utils
+from ensembles.voting import Voting
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -82,6 +83,8 @@ def create_approach(approach_names):
             approaches.append(SATzilla07())
         if approach_name == 'isac':
             approaches.append(ISAC())
+        if approach_name == 'voting':
+            approaches.append(Voting())
     return approaches
 
 
