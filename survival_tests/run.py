@@ -3,6 +3,7 @@ import sys
 import configparser
 import multiprocessing as mp
 import database_utils
+from ensembles.bagging import Bagging
 from ensembles.voting import Voting
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
@@ -85,6 +86,8 @@ def create_approach(approach_names):
             approaches.append(ISAC())
         if approach_name == 'voting':
             approaches.append(Voting())
+        if approach_name == 'bagging':
+            approaches.append(Bagging())
     return approaches
 
 
