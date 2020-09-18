@@ -13,7 +13,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 
 class PerAlgorithmRegressor:
 
-    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False):
+    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, data_weights=None):
         self.scikit_regressor = scikit_regressor
         self.logger = logging.getLogger("per_algorithm_regressor")
         self.logger.addHandler(logging.StreamHandler())
@@ -23,6 +23,7 @@ class PerAlgorithmRegressor:
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1
         self.impute_censored = impute_censored
+        self.data_weights = data_weights
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
@@ -52,7 +53,10 @@ class PerAlgorithmRegressor:
                     X_train, y_train, censored, model, distr_func, self.algorithm_cutoff_time)
 
             else:
-                model.fit(X_train, y_train)
+                if self.data_weights is None:
+                    model.fit(X_train, y_train)
+                else:
+                    model.fit(X_train, y_train, self.data_weights)
 
             self.trained_models.append(model)
 
@@ -93,6 +97,9 @@ class PerAlgorithmRegressor:
                                                                                          scenario.algorithm_cutoff_time)
 
         return X_for_algorithm_id, y_for_algorithm_id
+
+    def update_weights(self, weights):
+        self.data_weights = weights
 
     def construct_dataset_for_algorithm_id(self, instance_features, performances, algorithm_id: int,
                                            algorithm_cutoff_time):
