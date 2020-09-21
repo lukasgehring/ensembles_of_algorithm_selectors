@@ -5,6 +5,7 @@ from scipy.stats import rankdata
 from sklearn.utils import resample
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
+from math import log, exp
 
 from number_unsolved_instances import NumberUnsolvedInstances
 
@@ -22,18 +23,20 @@ class Boosting:
         self.metric = NumberUnsolvedInstances(False)
 
     def update_weights(self, scenario: ASlibScenario, fold: int, iteration: int, amount_of_training_instances: int):
-        test_scenario, train_scenario = scenario.get_split(indx=fold)
 
-        feature_data = train_scenario.feature_data.to_numpy()
-        performance_data = train_scenario.performance_data.to_numpy()
-        feature_cost_data = train_scenario.feature_cost_data.to_numpy() if train_scenario.feature_cost_data is not None else None
+        feature_data = scenario.feature_data.to_numpy()
+        performance_data = scenario.performance_data.to_numpy()
+        feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
+
+        incorrect_predictions = list()
+        total_error = 0
 
         for instance_id in range(amount_of_training_instances):
             x_test = feature_data[instance_id]
             y_test = performance_data[instance_id]
 
             accumulated_feature_time = 0
-            if train_scenario.feature_cost_data is not None:
+            if scenario.feature_cost_data is not None:
                 feature_time = feature_cost_data[instance_id]
                 accumulated_feature_time = np.sum(feature_time)
 
@@ -46,17 +49,27 @@ class Boosting:
 
             predicted_scores = self.base_learners[iteration].predict(x_test, instance_id)
             if self.metric.evaluate(y_test, predicted_scores, accumulated_feature_time, scenario.algorithm_cutoff_time):
-                self.data_weights[instance_id] = self.data_weights[instance_id] * 2
+                total_error = total_error + 1
+                incorrect_predictions.append(True)
             else:
-                self.data_weights[instance_id] = self.data_weights[instance_id] / 2
+                incorrect_predictions.append(False)
+
+        total_error = total_error / amount_of_training_instances
+        performance = 0.5 * log((1 - total_error) / total_error)
+
+        for i, weight in enumerate(self.data_weights):
+            if incorrect_predictions[i]:
+                self.data_weights[i] = weight * exp(performance)
+            else:
+                self.data_weights[i] = weight * exp(-performance)
+        self.data_weights = self.data_weights / np.sum(self.data_weights)
+
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
 
-        test_scenario, train_scenario = scenario.get_split(indx=fold)
-
         if amount_of_training_instances == -1:
-            amount_of_training_instances = len(train_scenario.instances)
+            amount_of_training_instances = len(scenario.instances)
         self.num_algorithms = len(scenario.algorithms)
 
         self.data_weights = np.ones(amount_of_training_instances)
@@ -77,4 +90,4 @@ class Boosting:
         return resample(feature_data, performance_data, n_samples=num_instances, random_state=random_state)
 
     def get_name(self):
-        return "boosting"
+        return "boosting_update"
