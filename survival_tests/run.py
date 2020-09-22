@@ -88,7 +88,7 @@ def create_approach(approach_names):
         if approach_name == 'voting':
             approaches.append(Voting())
         if approach_name == 'bagging':
-            approaches.append(Bagging())
+            approaches.append(Bagging(10))
         if approach_name == 'boosting':
             approaches.append(Boosting())
     return approaches
