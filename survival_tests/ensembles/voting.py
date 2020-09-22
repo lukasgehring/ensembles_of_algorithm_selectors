@@ -41,7 +41,7 @@ class Voting:
         for base_learner in self.trained_models:
             base_learner.fit(scenario, fold, amount_of_training_instances)
 
-        self.weights = self.differential_evolution(scenario, amount_of_training_instances)
+        self.weights = self.differential_evolution(scenario, fold,amount_of_training_instances)
 
     def validation(self, scenario: ASlibScenario, amount_of_training_instances: int, weights):
         # TODO: Add 10 fold cross validation?
@@ -66,7 +66,7 @@ class Voting:
                                                  scenario.algorithm_cutoff_time)
         return par10 / amount_of_training_instances
 
-    def differential_evolution(self, scenario: ASlibScenario, amount_of_training_instances):
+    def differential_evolution(self, scenario: ASlibScenario, fold:int, amount_of_training_instances):
         # at least 4
         num_individuals = 10
         min_bound = 0
@@ -77,6 +77,7 @@ class Voting:
         optimal_weights = self.weights
 
         #TODO: Seed
+	np.random.seed(fold)
         population = np.random.rand(num_individuals, self.num_models)
         population_fit_to_bounds = min_bound + population * diff
         scaling_factor = 0.8
