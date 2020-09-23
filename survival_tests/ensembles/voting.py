@@ -36,20 +36,22 @@ class Voting:
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
         self.num_algorithms = len(scenario.algorithms)
         self.create_base_learner()
-        self.weights = np.ones(self.num_models) / self.num_models
+
+        weights_denorm = list()
 
         for base_learner in self.trained_models:
             base_learner.fit(scenario, fold, amount_of_training_instances)
+            weights_denorm.append(self.base_learner_performance(scenario, amount_of_training_instances, base_learner))
 
-        self.weights = self.differential_evolution(scenario, fold,amount_of_training_instances)
+        weights_denorm = [max(weights_denorm) / float(i) for i in weights_denorm]
+        self.weights = [float(i) / sum(weights_denorm) for i in weights_denorm]
 
-    def validation(self, scenario: ASlibScenario, amount_of_training_instances: int, weights):
-        # TODO: Add 10 fold cross validation?
+    def base_learner_performance(self, scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
         feature_data = scenario.feature_data.to_numpy()
         performance_data = scenario.performance_data.to_numpy()
         feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
 
-        par10 = 0
+        performance_measure = 0
         for instance_id in range(amount_of_training_instances):
             x_test = feature_data[instance_id]
             y_test = performance_data[instance_id]
@@ -59,61 +61,10 @@ class Voting:
                 feature_time = feature_cost_data[instance_id]
                 accumulated_feature_time = np.sum(feature_time)
 
-            self.weights = weights
-
-            predicted_scores = self.predict(x_test, instance_id)
-            par10 = par10 + self.metric.evaluate(y_test, predicted_scores, accumulated_feature_time,
+            predicted_scores = base_learner.predict(x_test, instance_id)
+            performance_measure = performance_measure + self.metric.evaluate(y_test, predicted_scores, accumulated_feature_time,
                                                  scenario.algorithm_cutoff_time)
-        return par10 / amount_of_training_instances
-
-    def differential_evolution(self, scenario: ASlibScenario, fold:int, amount_of_training_instances):
-        # at least 4
-        num_individuals = 10
-        min_bound = 0
-        max_bound = 5
-        diff = max_bound - min_bound
-
-        best_score = 1000000
-        optimal_weights = self.weights
-
-        #TODO: Seed
-	np.random.seed(fold)
-        population = np.random.rand(num_individuals, self.num_models)
-        population_fit_to_bounds = min_bound + population * diff
-        scaling_factor = 0.8
-        crossover = 0.5
-        generation = 0
-        while generation < 20:
-            print("Generation", generation, "started its training now")
-            for i in range(num_individuals):
-                selections = [j for j in range(num_individuals) if j != i]
-                random_selections = np.random.choice(selections, 3,
-                                                     replace=False)
-                a, b, c = population[random_selections]
-                mutant = a + scaling_factor * (b - c)
-                j_random = np.random.rand(1, 1)
-                tail = list()
-                for j in range(self.num_models):
-                    rand = np.random.rand(1, 1)
-                    if rand < crossover or rand == j_random:
-                        tail.append(mutant[j])
-                    else:
-                        tail.append(population[i][j])
-                tail_score = self.validation(scenario, amount_of_training_instances, tail)
-                pop_score = self.validation(scenario, amount_of_training_instances, population[i])
-                if tail_score < pop_score:
-                    population[i] = tail
-                    if tail_score < best_score:
-                        best_score = tail_score
-                        optimal_weights = tail
-                else:
-                    if pop_score < best_score:
-                        best_score = pop_score
-                        optimal_weights = pop_score[i]
-
-            generation = generation + 1
-
-        return optimal_weights
+        return performance_measure / amount_of_training_instances
 
     def predict(self, features_of_test_instance, instance_id: int):
         predictions = np.zeros((self.num_algorithms, 1))
