@@ -140,7 +140,7 @@ for fold in range(1, 11):
 
             #evaluate_scenario(scenario, approach, metrics,
             #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
-            print('Finished evaluation of fold')
+            #print('Finished evaluation of fold')
 
 pool.close()
 pool.join()
