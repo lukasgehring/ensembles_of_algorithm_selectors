@@ -5,6 +5,7 @@ import multiprocessing as mp
 import database_utils
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
+from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
@@ -91,6 +92,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(10))
         if approach_name == 'boosting':
             approaches.append(Boosting())
+        if approach_name == 'stacking':
+            approaches.append(Stacking())
     return approaches
 
 
