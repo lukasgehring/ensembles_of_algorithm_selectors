@@ -75,7 +75,6 @@ class Boosting:
         self.data_weights = np.ones(amount_of_training_instances)
 
         for iteration in range(10):
-            print(self.data_weights)
             self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
             self.update_weights(scenario, fold, iteration, amount_of_training_instances)
@@ -90,4 +89,4 @@ class Boosting:
         return resample(feature_data, performance_data, n_samples=num_instances, random_state=random_state)
 
     def get_name(self):
-        return "boosting_update"
+        return "boosting"
