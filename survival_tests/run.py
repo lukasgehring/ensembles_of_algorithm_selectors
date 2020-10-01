@@ -87,8 +87,26 @@ def create_approach(approach_names):
             approaches.append(ISAC())
         if approach_name == 'voting':
             approaches.append(Voting())
-        if approach_name == 'bagging':
+        if approach_name == 'bagging10':
             approaches.append(Bagging(10))
+        if approach_name == 'bagging20':
+            approaches.append(Bagging(20))
+        if approach_name == 'bagging30':
+            approaches.append(Bagging(30))
+        if approach_name == 'bagging40':
+            approaches.append(Bagging(40))
+        if approach_name == 'bagging50':
+            approaches.append(Bagging(50))
+        if approach_name == 'bagging60':
+            approaches.append(Bagging(60))
+        if approach_name == 'bagging70':
+            approaches.append(Bagging(70))
+        if approach_name == 'bagging80':
+            approaches.append(Bagging(80))
+        if approach_name == 'bagging90':
+            approaches.append(Bagging(90))
+        if approach_name == 'bagging100':
+            approaches.append(Bagging(100))
         if approach_name == 'boosting':
             approaches.append(Boosting())
     return approaches

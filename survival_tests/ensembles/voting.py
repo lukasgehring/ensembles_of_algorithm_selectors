@@ -77,7 +77,7 @@ class Voting:
         optimal_weights = self.weights
 
         #TODO: Seed
-	np.random.seed(fold)
+        np.random.seed(fold)
         population = np.random.rand(num_individuals, self.num_models)
         population_fit_to_bounds = min_bound + population * diff
         scaling_factor = 0.8
