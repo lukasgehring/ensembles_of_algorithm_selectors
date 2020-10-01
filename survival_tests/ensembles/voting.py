@@ -73,60 +73,7 @@ class Voting:
             predicted_scores = base_learner.predict(x_test, instance_id)
             performance_measure = performance_measure + self.metric.evaluate(y_test, predicted_scores, accumulated_feature_time,
                                                  scenario.algorithm_cutoff_time)
-<<<<<<< HEAD
-        return par10 / amount_of_training_instances
-
-    def differential_evolution(self, scenario: ASlibScenario, fold:int, amount_of_training_instances):
-        # at least 4
-        num_individuals = 10
-        min_bound = 0
-        max_bound = 5
-        diff = max_bound - min_bound
-
-        best_score = 1000000
-        optimal_weights = self.weights
-
-        #TODO: Seed
-        np.random.seed(fold)
-        population = np.random.rand(num_individuals, self.num_models)
-        population_fit_to_bounds = min_bound + population * diff
-        scaling_factor = 0.8
-        crossover = 0.5
-        generation = 0
-        while generation < 20:
-            print("Generation", generation, "started its training now")
-            for i in range(num_individuals):
-                selections = [j for j in range(num_individuals) if j != i]
-                random_selections = np.random.choice(selections, 3,
-                                                     replace=False)
-                a, b, c = population[random_selections]
-                mutant = a + scaling_factor * (b - c)
-                j_random = np.random.rand(1, 1)
-                tail = list()
-                for j in range(self.num_models):
-                    rand = np.random.rand(1, 1)
-                    if rand < crossover or rand == j_random:
-                        tail.append(mutant[j])
-                    else:
-                        tail.append(population[i][j])
-                tail_score = self.validation(scenario, amount_of_training_instances, tail)
-                pop_score = self.validation(scenario, amount_of_training_instances, population[i])
-                if tail_score < pop_score:
-                    population[i] = tail
-                    if tail_score < best_score:
-                        best_score = tail_score
-                        optimal_weights = tail
-                else:
-                    if pop_score < best_score:
-                        best_score = pop_score
-                        optimal_weights = pop_score[i]
-
-            generation = generation + 1
-
-        return optimal_weights
-=======
         return performance_measure / amount_of_training_instances
->>>>>>> 708f48a3bbeef6ff3f3e0ec80b56b065e8d4b84b
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.ranking:
