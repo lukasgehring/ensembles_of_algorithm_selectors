@@ -88,6 +88,8 @@ def create_approach(approach_names):
             approaches.append(ISAC())
         if approach_name == 'voting':
             approaches.append(Voting())
+        if approach_name == 'voting_rank':
+            approaches.append(Voting(ranking=True))
         if approach_name == 'bagging10':
             approaches.append(Bagging(10))
         if approach_name == 'bagging20':
