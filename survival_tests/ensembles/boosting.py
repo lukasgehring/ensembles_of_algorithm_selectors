@@ -55,6 +55,8 @@ class Boosting:
                 incorrect_predictions.append(False)
 
         total_error = total_error / amount_of_training_instances
+        if total_error == 0:
+            return False
         performance = 0.5 * log((1 - total_error) / total_error)
 
         for i, weight in enumerate(self.data_weights):
@@ -63,6 +65,8 @@ class Boosting:
             else:
                 self.data_weights[i] = weight * exp(-performance)
         self.data_weights = self.data_weights / np.sum(self.data_weights)
+
+        return True
 
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
@@ -75,9 +79,11 @@ class Boosting:
         self.data_weights = np.ones(amount_of_training_instances)
 
         for iteration in range(10):
+            print("Iteration: ", iteration)
             self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
-            self.update_weights(scenario, fold, iteration, amount_of_training_instances)
+            if not self.update_weights(scenario, fold, iteration, amount_of_training_instances):
+                break
 
     def predict(self, features_of_test_instance, instance_id: int):
         return self.base_learners[-1].predict(features_of_test_instance, instance_id)
