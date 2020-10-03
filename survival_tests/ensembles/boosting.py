@@ -107,4 +107,4 @@ class Boosting:
         return resample(feature_data, performance_data, n_samples=num_instances, random_state=random_state)
 
     def get_name(self):
-        return "boosting"
+        return "boosting" + self.algorithm_name + str(self.num_iterations)

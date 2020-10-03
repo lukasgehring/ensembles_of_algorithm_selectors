@@ -26,7 +26,6 @@ class MultiClassAlgorithmSelector:
         self.data_weights = data_weights
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        print("Run fit on " + self.get_name() + " for fold " + str(fold))
         self.num_algorithms = len(scenario.algorithms)
         self.algorithm_cutoff_time = scenario.algorithm_cutoff_time
 
@@ -47,9 +46,6 @@ class MultiClassAlgorithmSelector:
             self.trained_model.fit(X_train, y_train)
         else:
             self.trained_model.fit(X_train, y_train, sample_weight=self.data_weights)
-
-
-        print("Finished training " + str(self.num_algorithms) + " models on " + str(amount_of_training_instances) + " instances.")
 
     def predict(self, features_of_test_instance, instance_id: int):
         X_test = np.reshape(features_of_test_instance, (1, len(features_of_test_instance)))
