@@ -1,8 +1,11 @@
 import logging
+import sys
 
 import numpy as np
 from scipy.stats import rankdata
 from sklearn.utils import resample
+
+from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 from math import log, exp
@@ -12,7 +15,8 @@ from number_unsolved_instances import NumberUnsolvedInstances
 
 class Boosting:
 
-    def __init__(self):
+    def __init__(self, algorithm_name):
+        self.algorithm_name = algorithm_name
         self.logger = logging.getLogger("boosting")
         self.logger.addHandler(logging.StreamHandler())
         self.num_algorithms = 0
@@ -80,7 +84,14 @@ class Boosting:
 
         for iteration in range(10):
             print("Iteration: ", iteration)
-            self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
+
+            if self.algorithm_name == 'per_algorithm_regressor':
+                self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
+            if self.algorithm_name == 'multiclass_algorithm_selector':
+                self.base_learners.append(MultiClassAlgorithmSelector(data_weights=self.data_weights))
+            else:
+                sys.exit('Wrong base learner for boosting!')
+
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
             if not self.update_weights(scenario, fold, iteration, amount_of_training_instances):
                 break

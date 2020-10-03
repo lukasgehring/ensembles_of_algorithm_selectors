@@ -14,7 +14,7 @@ from sklearn.base import clone
 
 class MultiClassAlgorithmSelector:
 
-    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100)):
+    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None):
         self.scikit_classifier= scikit_classifier
         self.logger = logging.getLogger("multiclass_algorithm_selector")
         self.logger.addHandler(logging.StreamHandler())
@@ -23,6 +23,7 @@ class MultiClassAlgorithmSelector:
         self.standard_scaler = None
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1;
+        self.data_weights = data_weights
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
@@ -41,7 +42,12 @@ class MultiClassAlgorithmSelector:
 
         self.trained_model = clone(self.scikit_classifier)
         self.trained_model.set_params(random_state=fold)
-        self.trained_model.fit(X_train, y_train)
+
+        if self.data_weights is None:
+            self.trained_model.fit(X_train, y_train)
+        else:
+            self.trained_model.fit(X_train, y_train, sample_weight=self.data_weights)
+
 
         print("Finished training " + str(self.num_algorithms) + " models on " + str(amount_of_training_instances) + " instances.")
 

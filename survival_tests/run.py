@@ -111,7 +111,9 @@ def create_approach(approach_names):
         if approach_name == 'bagging100':
             approaches.append(Bagging(100))
         if approach_name == 'boosting':
-            approaches.append(Boosting())
+            approaches.append(Boosting('per_algorithm_regressor'))
+        if approach_name == 'boosting_multiclass':
+            approaches.append(Boosting('multiclass_algorithm_selector'))
         if approach_name == 'stacking':
             approaches.append(Stacking())
     return approaches

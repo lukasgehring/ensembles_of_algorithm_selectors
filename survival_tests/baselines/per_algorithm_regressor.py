@@ -56,7 +56,7 @@ class PerAlgorithmRegressor:
                 if self.data_weights is None:
                     model.fit(X_train, y_train)
                 else:
-                    model.fit(X_train, y_train, self.data_weights)
+                    model.fit(X_train, y_train, sample_weight=self.data_weights)
 
             self.trained_models.append(model)
 
