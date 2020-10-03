@@ -15,8 +15,9 @@ from number_unsolved_instances import NumberUnsolvedInstances
 
 class Boosting:
 
-    def __init__(self, algorithm_name):
+    def __init__(self, algorithm_name, num_iterations=10):
         self.algorithm_name = algorithm_name
+        self.num_iterations = num_iterations
         self.logger = logging.getLogger("boosting")
         self.logger.addHandler(logging.StreamHandler())
         self.num_algorithms = 0
@@ -82,7 +83,7 @@ class Boosting:
 
         self.data_weights = np.ones(amount_of_training_instances)
 
-        for iteration in range(10):
+        for iteration in range(self.num_iterations):
             print("Iteration: ", iteration)
 
             if self.algorithm_name == 'per_algorithm_regressor':
