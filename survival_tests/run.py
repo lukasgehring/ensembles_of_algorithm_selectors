@@ -116,8 +116,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('multiclass_algorithm_selector'))
         if approach_name == 'boosting_multiclass_100':
             approaches.append(Boosting('multiclass_algorithm_selector', num_iterations=100))
-        if approach_name == 'boosting_PAR10SurvivalForest':
-            approaches.append(Boosting('PAR10SurvivalForest'))
+        if approach_name == 'boosting_ExponentialSurvivalForest':
+            approaches.append(Boosting('ExponentialSurvivalForest'))
         if approach_name == 'stacking':
             approaches.append(Stacking())
     return approaches
@@ -164,11 +164,11 @@ for fold in range(1, 11):
                 metrics.append(NumberUnsolvedInstances(True))
             logger.info("Submitted pool task for approach \"" +
                         str(approach.get_name()) + "\" on scenario: " + scenario)
-            pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
-                                                      amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
+            #pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
+            #                                          amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
 
-            #evaluate_scenario(scenario, approach, metrics,
-            #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
+            evaluate_scenario(scenario, approach, metrics,
+                             amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
             #print('Finished evaluation of fold')
 
 pool.close()
