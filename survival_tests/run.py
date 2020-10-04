@@ -116,6 +116,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('multiclass_algorithm_selector'))
         if approach_name == 'boosting_multiclass_100':
             approaches.append(Boosting('multiclass_algorithm_selector', num_iterations=100))
+        if approach_name == 'boosting_PAR10SurvivalForest':
+            approaches.append(Boosting('PAR10SurvivalForest'))
         if approach_name == 'stacking':
             approaches.append(Stacking())
     return approaches

@@ -5,6 +5,7 @@ import numpy as np
 from scipy.stats import rankdata
 from sklearn.utils import resample
 
+from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
@@ -88,8 +89,10 @@ class Boosting:
 
             if self.algorithm_name == 'per_algorithm_regressor':
                 self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
-            if self.algorithm_name == 'multiclass_algorithm_selector':
+            elif self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector(data_weights=self.data_weights))
+            elif self.algorithm_name == 'PAR10SurvivalForest':
+                self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10', data_weights=self.data_weights))
             else:
                 sys.exit('Wrong base learner for boosting!')
 
@@ -107,4 +110,4 @@ class Boosting:
         return resample(feature_data, performance_data, n_samples=num_instances, random_state=random_state)
 
     def get_name(self):
-        return "boosting" + self.algorithm_name + str(self.num_iterations)
+        return "boosting_" + self.algorithm_name + "_" + str(self.num_iterations)

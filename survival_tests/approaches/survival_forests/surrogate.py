@@ -14,11 +14,12 @@ from operator import itemgetter
 
 class SurrogateSurvivalForest:
 
-    def __init__(self, criterion='Expectation'):
+    def __init__(self, criterion='Expectation', data_weights=None):
         self.logger = logging.getLogger("" + criterion + "SurvivalForest")
         self.logger.addHandler(logging.StreamHandler())
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1;
+        self.data_weights = data_weights
 
         self.n_estimators = 100 #1000
         self.min_samples_split = 10
@@ -246,7 +247,10 @@ class SurrogateSurvivalForest:
             X_train, Y_train = self.construct_dataset_for_algorithm_id(features, performances, alg_id, self.algorithm_cutoff_time)            
             X_train = imputer[alg_id].fit_transform(features)
             X_train = scaler[alg_id].fit_transform(X_train)
-            models[alg_id].fit(X_train, Y_train)
+            if self.data_weights is None:
+                models[alg_id].fit(X_train, Y_train)
+            else:
+                models[alg_id].fit(X_train, Y_train, sample_weight=self.data_weights)
         
         return imputer, scaler, models
     
