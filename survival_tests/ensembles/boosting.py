@@ -76,8 +76,7 @@ class Boosting:
 
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        print("Run fit on " + self.get_name() + " for fold " + str(fold))
-
+        print("Start training")
         if amount_of_training_instances == -1:
             amount_of_training_instances = len(scenario.instances)
         self.num_algorithms = len(scenario.algorithms)
@@ -85,20 +84,20 @@ class Boosting:
         self.data_weights = np.ones(amount_of_training_instances)
 
         for iteration in range(self.num_iterations):
-            print("Iteration: ", iteration)
-
+            print("Start training on iteration", iteration)
             if self.algorithm_name == 'per_algorithm_regressor':
                 self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
-            elif self.algorithm_name == 'multiclass_algorithm_selector':
+            if self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector(data_weights=self.data_weights))
-            elif self.algorithm_name == 'PAR10SurvivalForest':
-                self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10', data_weights=self.data_weights))
+            if self.algorithm_name == 'ExponentialSurvivalForest':
+                self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential', data_weights=self.data_weights))
             else:
                 sys.exit('Wrong base learner for boosting!')
 
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
             if not self.update_weights(scenario, fold, iteration, amount_of_training_instances):
                 break
+        print("Finished training")
 
     def predict(self, features_of_test_instance, instance_id: int):
         return self.base_learners[-1].predict(features_of_test_instance, instance_id)
