@@ -13,12 +13,13 @@ import copy
 
 class Stacking:
 
-    def __init__(self):
+    def __init__(self, cross_validation=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
         self.meta_learner = PerAlgorithmRegressor()
         self.base_learners = list()
+        self.cross_validation = cross_validation
 
         self.num_models = 0
 
@@ -42,20 +43,26 @@ class Stacking:
         feature_data = scenario.feature_data.to_numpy()
         new_feature_data = np.zeros((len(scenario.instances), len(self.base_learners)))
         instance_counter = 0
+        if self.cross_validation:
+            for sub_fold in range(1, 11):
+                test_scenario, training_scenario = self.split_scenario(scenario, sub_fold, num_instances, index_array)
 
-        for sub_fold in range(1, 11):
-            test_scenario, training_scenario = self.split_scenario(scenario, sub_fold, num_instances, index_array)
+                # train base learner
+                for learner_index, base_learner in enumerate(self.base_learners):
+                    print("Start training of base learner on subfold", sub_fold)
+                    base_learner.fit(training_scenario, fold, amount_of_training_instances)
 
+                    for instance_number in range(instance_counter, instance_counter + len(test_scenario.instances)):
+                        prediction = base_learner.predict(feature_data[instance_number], instance_number)
+                        new_feature_data[instance_number][learner_index] = np.argmin(prediction)
+                instance_counter = instance_counter + len(test_scenario.instances)
+        else:
             # train base learner
             for learner_index, base_learner in enumerate(self.base_learners):
-                print("Start training of base learner on subfold", sub_fold)
-                base_learner.fit(training_scenario, fold, amount_of_training_instances)
-
-                for instance_number in range(instance_counter, instance_counter + len(test_scenario.instances)):
+                base_learner.fit(scenario, fold, amount_of_training_instances)
+                for instance_number in range(amount_of_training_instances):
                     prediction = base_learner.predict(feature_data[instance_number], instance_number)
                     new_feature_data[instance_number][learner_index] = np.argmin(prediction)
-                    #feature_data[instance_number] = np.concatenate(feature_data[instance_number], np.argmin(prediction), axis=1)
-            instance_counter = instance_counter + len(test_scenario.instances)
 
         # add predictions to the features of the instances
         new_feature_data = np.concatenate((feature_data, new_feature_data), axis=1)
@@ -139,4 +146,7 @@ class Stacking:
         return self.meta_learner.predict(features_of_test_instance, instance_id)
 
     def get_name(self):
-        return "stacking"
+        name = "stacking"
+        if self.cross_validation:
+            name = name + "_cross_validation"
+        return name
