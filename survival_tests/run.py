@@ -118,6 +118,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('multiclass_algorithm_selector', num_iterations=100))
         if approach_name == 'stacking':
             approaches.append(Stacking())
+        if approach_name == 'stacking_cross_validation':
+            approaches.append(Stacking(cross_validation=True))
     return approaches
 
 
