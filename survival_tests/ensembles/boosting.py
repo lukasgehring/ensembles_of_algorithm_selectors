@@ -92,7 +92,7 @@ class Boosting:
             if self.algorithm_name == 'ExponentialSurvivalForest':
                 self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential', data_weights=self.data_weights))
             else:
-                sys.exit('Wrong base learner for boosting!')
+                sys.exit('Wrong base learner for boosting')
 
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
             if not self.update_weights(scenario, fold, iteration, amount_of_training_instances):

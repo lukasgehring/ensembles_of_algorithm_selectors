@@ -120,6 +120,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('ExponentialSurvivalForest'))
         if approach_name == 'stacking':
             approaches.append(Stacking())
+        if approach_name == 'stacking_cross_validation':
+            approaches.append(Stacking(cross_validation=True))
     return approaches
 
 
