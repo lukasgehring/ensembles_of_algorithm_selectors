@@ -90,26 +90,16 @@ def create_approach(approach_names):
             approaches.append(Voting())
         if approach_name == 'voting_rank':
             approaches.append(Voting(ranking=True))
-        if approach_name == 'bagging10':
-            approaches.append(Bagging(10))
-        if approach_name == 'bagging20':
-            approaches.append(Bagging(20))
-        if approach_name == 'bagging30':
-            approaches.append(Bagging(30))
-        if approach_name == 'bagging40':
-            approaches.append(Bagging(40))
-        if approach_name == 'bagging50':
-            approaches.append(Bagging(50))
-        if approach_name == 'bagging60':
-            approaches.append(Bagging(60))
-        if approach_name == 'bagging70':
-            approaches.append(Bagging(70))
-        if approach_name == 'bagging80':
-            approaches.append(Bagging(80))
-        if approach_name == 'bagging90':
-            approaches.append(Bagging(90))
-        if approach_name == 'bagging100':
-            approaches.append(Bagging(100))
+        if approach_name == 'bagging_10_per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging_10_sunny':
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY()))
+        if approach_name == 'bagging_20_sunny':
+            approaches.append(Bagging(num_base_learner=20, base_learner=SUNNY()))
+        if approach_name == 'bagging_50_sunny':
+            approaches.append(Bagging(num_base_learner=50, base_learner=SUNNY()))
+        if approach_name == 'bagging_100_sunny':
+            approaches.append(Bagging(num_base_learner=100, base_learner=SUNNY()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'boosting_multiclass':
