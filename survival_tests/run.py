@@ -89,7 +89,9 @@ def create_approach(approach_names):
         if approach_name == 'voting':
             approaches.append(Voting())
         if approach_name == 'voting_rank':
-            approaches.append(Voting(ranking=True))
+            approaches.append(Voting(agg_method='ranking'))
+        if approach_name == 'voting_stv':
+            approaches.append(Voting(agg_method='stv'))
         if approach_name == 'bagging_10_per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging_10_sunny':
@@ -100,6 +102,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=50, base_learner=SUNNY()))
         if approach_name == 'bagging_100_sunny':
             approaches.append(Bagging(num_base_learner=100, base_learner=SUNNY()))
+        if approach_name == 'bagging_500_sunny':
+            approaches.append(Bagging(num_base_learner=500, base_learner=SUNNY()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'boosting_multiclass':
@@ -156,11 +160,11 @@ for fold in range(1, 11):
                 metrics.append(NumberUnsolvedInstances(True))
             logger.info("Submitted pool task for approach \"" +
                         str(approach.get_name()) + "\" on scenario: " + scenario)
-            pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
-                                                      amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
+            #pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
+            #                                          amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
 
-            #evaluate_scenario(scenario, approach, metrics,
-            #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
+            evaluate_scenario(scenario, approach, metrics,
+                             amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
             #print('Finished evaluation of fold')
 
 pool.close()

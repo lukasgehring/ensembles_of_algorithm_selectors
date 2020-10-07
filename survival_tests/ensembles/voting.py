@@ -12,13 +12,13 @@ from par_10_metric import Par10Metric
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False):
+    def __init__(self, agg_method='default', weighting=False):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
 
         # parameter
-        self.ranking = ranking
+        self.agg_method = agg_method
         self.weighting = weighting
 
         # attributes
@@ -32,9 +32,9 @@ class Voting:
         self.trained_models = list()
 
         self.trained_models.append(PerAlgorithmRegressor())
-        self.trained_models.append(SUNNY())
-        self.trained_models.append(ISAC())
-        self.trained_models.append(SATzilla11())
+        #self.trained_models.append(SUNNY())
+        #self.trained_models.append(ISAC())
+        #self.trained_models.append(SATzilla11())
         self.trained_models.append(SurrogateAutoSurvivalForest())
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
@@ -76,8 +76,11 @@ class Voting:
         return performance_measure / amount_of_training_instances
 
     def predict(self, features_of_test_instance, instance_id: int):
-        if self.ranking:
+        if self.agg_method is 'ranking':
             return self.predict_with_ranking(features_of_test_instance, instance_id)
+
+        if self.agg_method is 'stv':
+            return self.predict_with_stv(features_of_test_instance, instance_id)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
@@ -108,10 +111,50 @@ class Voting:
                     self.num_algorithms, 1)
         return predictions / sum(predictions)
 
+    def predict_with_stv(self, features_of_test_instance, instance_id: int):
+        print("Predict with stv")
+        # quota to find the top three algorithms
+        quota = int(self.num_algorithms * len(self.trained_models) / 2)
+
+        predictions = np.zeros((len(self.trained_models), self.num_algorithms))
+        for i, model in enumerate(self.trained_models):
+            predictions[i] = rankdata(model.predict(features_of_test_instance, instance_id))#.reshape(self.num_algorithms, 1)
+
+        final_prediction = None
+        while final_prediction is None:
+            colum_sum = np.count_nonzero(predictions == 1, axis=0)
+            print(predictions)
+            print(colum_sum)
+            max_index = np.argmax(colum_sum)
+            print(max_index)
+            if colum_sum[max_index] > quota:
+                print("final prediction")
+                final_prediction = np.ones(self.num_algorithms)
+                final_prediction[max_index] = 0
+            else:
+                min_index = self.min_without_zero(colum_sum)
+                print("Min index:", min_index)
+                for i in range(len(self.trained_models)):
+                    print(np.argmin(predictions[i]) == min_index)
+                    if np.argmin(predictions[i]) == min_index:
+                        print("hier")
+                        # TODO: change max value
+                        predictions[i][min_index] = 100000
+                        predictions[i] = rankdata(predictions[i])
+
+        return final_prediction
+
+    def min_without_zero(self, array):
+        lowest_value = 100000
+        i = 0
+        for i, value in enumerate(array):
+            if value < lowest_value and value != 0:
+                lowest_value = value
+                min_index = i
+        return i
+
     def get_name(self):
-        name = "voting"
-        if self.ranking:
-            name = name + "_ranking"
+        name = "voting" + "_" + self.agg_method
         if self.weighting:
             name = name + "_weighting"
         return name
