@@ -90,6 +90,8 @@ def create_approach(approach_names):
             approaches.append(Voting())
         if approach_name == 'voting_rank':
             approaches.append(Voting(ranking=True))
+        if approach_name == 'voting_weight':
+            approaches.append(Voting(weighting=True))
         if approach_name == 'bagging_10_per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging_10_sunny':
