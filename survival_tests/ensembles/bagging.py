@@ -49,15 +49,63 @@ class Bagging:
         for index in range(self.num_base_learner):
             self.base_learners.append(copy.copy(self.base_learner))
             scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = bootstrap_samples[index]
+            print(scenario.feature_data)
             self.base_learners[index].fit(scenario, fold, amount_of_training_instances)
 
     def predict(self, features_of_test_instance, instance_id: int):
+        return self.predict_with_stv(features_of_test_instance, instance_id)
+
         predictions = np.zeros((self.num_algorithms, 1))
         for model in self.base_learners:
             ranked_prediction = rankdata(model.predict(features_of_test_instance, instance_id)).reshape(
                 self.num_algorithms, 1)
             predictions = predictions + (((self.num_algorithms + 1) - ranked_prediction) / self.num_algorithms)
         return 1 - predictions / self.num_base_learner
+
+    def predict_with_stv(self, features_of_test_instance, instance_id: int):
+        print("Predict with stv")
+        # quota to find the top three algorithms
+        quota = int(self.num_base_learner / 2)
+
+        predictions = np.zeros((self.num_base_learner, self.num_algorithms))
+        ranked_data = np.zeros((self.num_base_learner, self.num_algorithms))
+        for i, model in enumerate(self.base_learners):
+            predictions[i] = model.predict(features_of_test_instance, instance_id).ravel()
+            ranked_data[i] = rankdata(predictions[i])
+
+        final_prediction = None
+        while final_prediction is None:
+            colum_sum = np.count_nonzero(ranked_data == 1, axis=0)
+            print(ranked_data)
+            print(colum_sum)
+            max_index = np.argmax(colum_sum)
+            print(colum_sum[max_index], "+", quota)
+            if colum_sum[max_index] > quota:
+                print("final prediction")
+                final_prediction = np.ones(self.num_algorithms)
+                final_prediction[max_index] = 0
+            else:
+                min_index = self.min_without_zero(colum_sum)
+                print("Min index:", min_index)
+                for i in range(self.num_base_learner):
+                    print(np.argmin(ranked_data[i]) == min_index)
+                    if np.argmin(ranked_data[i]) == min_index:
+                        print("hier")
+                        # TODO: change max value
+                        predictions[i][min_index] = 100000
+                        ranked_data[i] = rankdata(predictions[i])
+
+        return final_prediction
+
+    def min_without_zero(self, array):
+        lowest_value = 100000
+        i = 0
+        min_index = 0
+        for i, value in enumerate(array):
+            if value < lowest_value and value != 0:
+                lowest_value = value
+                min_index = i
+        return min_index
 
     def get_name(self):
 
