@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from scipy.stats import rankdata
-from approaches.survival_forests.auto_surrogate import SurrogateAutoSurvivalForest
+from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from baselines.satzilla11 import SATzilla11
@@ -35,7 +35,8 @@ class Voting:
         self.trained_models.append(SUNNY())
         self.trained_models.append(ISAC())
         self.trained_models.append(SATzilla11())
-        self.trained_models.append(SurrogateAutoSurvivalForest())
+        self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
+        self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
