@@ -32,12 +32,12 @@ class Voting_Cross:
         # clean up list and init base learners
         self.trained_models = list()
 
-        #self.trained_models.append(PerAlgorithmRegressor())
+        self.trained_models.append(PerAlgorithmRegressor())
         self.trained_models.append(SUNNY())
         self.trained_models.append(ISAC())
-        #self.trained_models.append(SATzilla11())
-        #self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
-        #self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
+        self.trained_models.append(SATzilla11())
+        self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
+        self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
@@ -55,16 +55,13 @@ class Voting_Cross:
             test_scenario, training_scenario = self.split_scenario(scenario, sub_fold, num_instances, index_array)
             # train base learner and calculate the weights
             for i, base_learner in enumerate(self.trained_models):
-                print("Base learner", i)
                 base_learner.fit(training_scenario, fold, amount_of_training_instances)
                 weights_denorm[i] = weights_denorm[i] + self.base_learner_performance(test_scenario, base_learner)
-            print("weights", weights_denorm)
 
         base_learner.fit(scenario, fold, amount_of_training_instances)
 
         weights_denorm = [max(weights_denorm) / float(i) for i in weights_denorm]
         self.weights = [float(i) / sum(weights_denorm) for i in weights_denorm]
-        print(self.weights)
 
     def base_learner_performance(self, scenario: ASlibScenario, base_learner):
         # extract data from scenario
