@@ -11,7 +11,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 from par_10_metric import Par10Metric
 
 
-class Voting:
+class Voting_Cross:
 
     def __init__(self, ranking=False, weighting=False):
         # logger

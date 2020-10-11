@@ -7,6 +7,7 @@ from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.stacking import Stacking
 from ensembles.voting import Voting
+from ensembles.voting_cross_validation import Voting_Cross
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -92,6 +93,8 @@ def create_approach(approach_names):
             approaches.append(Voting(ranking=True))
         if approach_name == 'voting_weight':
             approaches.append(Voting(weighting=True))
+        if approach_name == 'voting_weight_cross':
+            approaches.append(Voting_Cross(weighting=True))
         if approach_name == 'bagging_10_per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging_10_sunny':
