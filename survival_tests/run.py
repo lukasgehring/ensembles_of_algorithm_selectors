@@ -105,6 +105,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=50, base_learner=SUNNY()))
         if approach_name == 'bagging_100_sunny':
             approaches.append(Bagging(num_base_learner=100, base_learner=SUNNY()))
+        if approach_name == 'bagging_500_sunny':
+            approaches.append(Bagging(num_base_learner=500, base_learner=SUNNY()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'boosting_multiclass':
