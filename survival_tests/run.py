@@ -146,7 +146,7 @@ amount_of_scenario_training_instances = int(
     config["EXPERIMENTS"]["amount_of_training_scenario_instances"])
 tune_hyperparameters = bool(int(config["EXPERIMENTS"]["tune_hyperparameters"]))
 
-for fold in range(1, 11):
+for fold in range(7, 8):
 
     for scenario in scenarios:
         approaches = create_approach(approach_names)
