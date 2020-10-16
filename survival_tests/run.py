@@ -5,7 +5,6 @@ import multiprocessing as mp
 import database_utils
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
-from ensembles.boosting_stump import GradientBoosting
 from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
@@ -112,8 +111,6 @@ def create_approach(approach_names):
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True))
-        if approach_name == 'gradient_boosting':
-            approaches.append(GradientBoosting())
         if approach_name == 'boosting_multiclass':
             approaches.append(Boosting('multiclass_algorithm_selector'))
         if approach_name == 'boosting_multiclass_100':
