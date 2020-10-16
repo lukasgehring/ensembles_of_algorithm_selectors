@@ -13,7 +13,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 
 class PerAlgorithmRegressor:
 
-    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, data_weights=None):
+    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, data_weights=None, stump=False):
         self.scikit_regressor = scikit_regressor
         self.logger = logging.getLogger("per_algorithm_regressor")
         self.logger.addHandler(logging.StreamHandler())
@@ -24,6 +24,7 @@ class PerAlgorithmRegressor:
         self.algorithm_cutoff_time = -1
         self.impute_censored = impute_censored
         self.data_weights = data_weights
+        self.stump = stump
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         #print("Run fit on " + self.get_name() + " for fold " + str(fold))
@@ -45,7 +46,10 @@ class PerAlgorithmRegressor:
             self.trained_scalers.append(standard_scaler)
 
             model = clone(self.scikit_regressor)
-            model.set_params(random_state=fold)
+            if self.stump:
+                model.set_params(random_state=fold, max_depth=1)
+            else:
+                model.set_params(random_state=fold)
 
             if self.impute_censored:
                 censored = y_train >= self.algorithm_cutoff_time

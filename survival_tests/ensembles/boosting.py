@@ -16,7 +16,7 @@ from number_unsolved_instances import NumberUnsolvedInstances
 
 class Boosting:
 
-    def __init__(self, algorithm_name, num_iterations=10):
+    def __init__(self, algorithm_name, num_iterations=10, stump=False):
         self.algorithm_name = algorithm_name
         self.num_iterations = num_iterations
         self.logger = logging.getLogger("boosting")
@@ -27,6 +27,8 @@ class Boosting:
         self.num_base_learner = 10
         self.data_weights = list()
         self.metric = NumberUnsolvedInstances(False)
+        self.performances = list()
+        self.stump = stump
 
     def update_weights(self, scenario: ASlibScenario, fold: int, iteration: int, amount_of_training_instances: int):
 
@@ -71,6 +73,7 @@ class Boosting:
             else:
                 self.data_weights[i] = weight * exp(-performance)
         self.data_weights = self.data_weights / np.sum(self.data_weights)
+        self.performances.append(performance)
 
         return True
 
@@ -80,16 +83,18 @@ class Boosting:
         if amount_of_training_instances == -1:
             amount_of_training_instances = len(scenario.instances)
         self.num_algorithms = len(scenario.algorithms)
-
         self.data_weights = np.ones(amount_of_training_instances)
 
         for iteration in range(self.num_iterations):
             print("Start training on iteration", iteration)
             if self.algorithm_name == 'per_algorithm_regressor':
-                self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
-            if self.algorithm_name == 'multiclass_algorithm_selector':
+                if self.stump:
+                    self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights, stump=True))
+                else:
+                    self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights))
+            elif self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector(data_weights=self.data_weights))
-            if self.algorithm_name == 'ExponentialSurvivalForest':
+            elif self.algorithm_name == 'ExponentialSurvivalForest':
                 self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential', data_weights=self.data_weights))
             else:
                 sys.exit('Wrong base learner for boosting')
@@ -100,13 +105,21 @@ class Boosting:
         print("Finished training")
 
     def predict(self, features_of_test_instance, instance_id: int):
-        return self.base_learners[-1].predict(features_of_test_instance, instance_id)
+        prediction = np.zeros(self.num_algorithms)
+        for index, base_learner in enumerate(self.base_learners):
+            base_learner_prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
+            base_learner_prediction = [max(base_learner_prediction) / float(i + 0.01) for i in base_learner_prediction]
+            base_learner_prediction = [float(i) / sum(base_learner_prediction) for i in base_learner_prediction]
+            base_learner_prediction = np.array(base_learner_prediction)
+            prediction = prediction + self.performances[index] * base_learner_prediction
 
-    # TODO: What does this method?
-    def _resample_instances(self, feature_data, performance_data, num_instances, random_state):
-        num_instances = min(num_instances, np.size(performance_data, axis=0)) if num_instances > 0 else np.size(
-            performance_data, axis=0)
-        return resample(feature_data, performance_data, n_samples=num_instances, random_state=random_state)
+        prediction = [max(prediction) / float(i + 0.01) for i in prediction]
+        prediction = [float(i) / sum(prediction) for i in prediction]
+
+        return prediction
 
     def get_name(self):
-        return "boosting_" + self.algorithm_name + "_" + str(self.num_iterations)
+        name = "boosting_" + self.algorithm_name + "_" + str(self.num_iterations)
+        if self.stump:
+            name = name + "_stump"
+        return name
