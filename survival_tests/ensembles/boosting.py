@@ -16,7 +16,7 @@ from number_unsolved_instances import NumberUnsolvedInstances
 
 class Boosting:
 
-    def __init__(self, algorithm_name, num_iterations=10, stump=False):
+    def __init__(self, algorithm_name, num_iterations=10, stump=False, singlelearner=False):
         self.algorithm_name = algorithm_name
         self.num_iterations = num_iterations
         self.logger = logging.getLogger("boosting")
@@ -29,6 +29,7 @@ class Boosting:
         self.metric = NumberUnsolvedInstances(False)
         self.performances = list()
         self.stump = stump
+        self.singlelearner = singlelearner
 
     def update_weights(self, scenario: ASlibScenario, fold: int, iteration: int, amount_of_training_instances: int):
 
@@ -105,18 +106,21 @@ class Boosting:
         print("Finished training")
 
     def predict(self, features_of_test_instance, instance_id: int):
-        prediction = np.zeros(self.num_algorithms)
-        for index, base_learner in enumerate(self.base_learners):
-            base_learner_prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
-            base_learner_prediction = [max(base_learner_prediction) / float(i + 0.01) for i in base_learner_prediction]
-            base_learner_prediction = [float(i) / sum(base_learner_prediction) for i in base_learner_prediction]
-            base_learner_prediction = np.array(base_learner_prediction)
-            prediction = prediction + self.performances[index] * base_learner_prediction
+        if self.singlelearner:
+            return self.base_learners[-1].predict(features_of_test_instance, instance_id).flatten()
+        else:
+            prediction = np.zeros(self.num_algorithms)
+            for index, base_learner in enumerate(self.base_learners):
+                base_learner_prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
+                base_learner_prediction = [max(base_learner_prediction) / float(i + 0.01) for i in base_learner_prediction]
+                base_learner_prediction = [float(i) / sum(base_learner_prediction) for i in base_learner_prediction]
+                base_learner_prediction = np.array(base_learner_prediction)
+                prediction = prediction + self.performances[index] * base_learner_prediction
 
-        prediction = [max(prediction) / float(i + 0.01) for i in prediction]
-        prediction = [float(i) / sum(prediction) for i in prediction]
+            prediction = [max(prediction) / float(i + 0.01) for i in prediction]
+            prediction = [float(i) / sum(prediction) for i in prediction]
 
-        return prediction
+            return prediction
 
     def get_name(self):
         name = "boosting_" + self.algorithm_name + "_" + str(self.num_iterations)
