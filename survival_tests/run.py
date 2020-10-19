@@ -111,6 +111,10 @@ def create_approach(approach_names):
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True))
+        if approach_name == 'adaboost_stump_100':
+            approaches.append(Boosting('per_algorithm_regressor', num_iterations=100, stump=True))
+        if approach_name == 'adaboost_stump_500':
+            approaches.append(Boosting('per_algorithm_regressor', num_iterations=500, stump=True))
         if approach_name == 'boosting_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True, singlelearner=True))
         if approach_name == 'boosting_multiclass':
