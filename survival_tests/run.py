@@ -95,8 +95,18 @@ def create_approach(approach_names):
             approaches.append(Voting(weighting=True))
         if approach_name == 'voting_weight_cross':
             approaches.append(Voting_Cross(weighting=True))
+        if approach_name == 'bagging_2_per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=2, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging_4_per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging_6_per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=6, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging_8_per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=8, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging_10_per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging_10_per_algorithm_regressor_without_ranking':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=False))
         if approach_name == 'bagging_10_sunny':
             approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY()))
         if approach_name == 'bagging_20_sunny':
@@ -176,9 +186,9 @@ for fold in range(1, 11):
             pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
                                                       amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
 
-            #evaluate_scenario(scenario, approach, metrics,
-            #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
-            #print('Finished evaluation of fold')
+            evaluate_scenario(scenario, approach, metrics,
+                             amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
+            print('Finished evaluation of fold')
 
 pool.close()
 pool.join()
