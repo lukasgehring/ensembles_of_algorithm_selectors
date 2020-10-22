@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import numpy as np
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
@@ -27,10 +28,10 @@ class Stacking:
         self.base_learners.append(PerAlgorithmRegressor())
         self.base_learners.append(SUNNY())
         self.base_learners.append(ISAC())
-        self.base_learners.append(SATzilla11())
-        self.base_learners.append(MultiClassAlgorithmSelector())
-        self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        #self.base_learners.append(SATzilla11())
+        #self.base_learners.append(MultiClassAlgorithmSelector())
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Start training on fold:", fold)
@@ -72,6 +73,7 @@ class Stacking:
         print("Start training of the meta-learner")
         self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection)
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)
+        #sys.exit("Ende2")
 
     def split_scenario(self, scenario: ASlibScenario, sub_fold: int, num_instances: int, index):
         fold_len = int(num_instances / 10)

@@ -1,4 +1,5 @@
 import logging
+import sys
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
@@ -39,17 +40,18 @@ class PerAlgorithmRegressor:
                 scenario, amount_of_training_instances, algorithm_id, fold)
 
             # pipeline
-            print(self.feature_selection)
             if self.feature_selection is None:
                 pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler())])
             elif self.feature_selection == 'VarianceThreshold':
                 pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('VarianceThreshold', VarianceThreshold(threshold=(.8 * (1 - .8))))])
             elif self.feature_selection == 'SelectKBest_f_regression':
-                # TODO: size of k?
-                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_f_regression', SelectKBest(f_regression, k=2))])
+                optimal_feature_number = self.calculate_optimal_feature_number('SelectKBest_f_regression', X_train, y_train)
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_f_regression', SelectKBest(f_regression, k=optimal_feature_number))])
             elif self.feature_selection == 'SelectKBest_mutual_info_regression':
-                # TODO: size of k?
-                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_mutual_info_regression', SelectKBest(mutual_info_regression, k=20))])
+                optimal_feature_number = self.calculate_optimal_feature_number('SelectKBest_mutual_info_regression', X_train, y_train, fold)
+                print("Create new final Pipe")
+                #sys.exit("Ende")
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_mutual_info_regression', SelectKBest(mutual_info_regression, k=optimal_feature_number))])
 
             X_train = pipe.fit_transform(X_train, y_train)
             self.trained_pipes.append(pipe)
@@ -88,6 +90,54 @@ class PerAlgorithmRegressor:
             predicted_risk_scores.append(prediction)
 
         return np.asarray(predicted_risk_scores)
+
+    def calculate_optimal_feature_number(self, feature_selector, X_data, y_data, fold:int):
+        X_train, y_train, X_test, y_test = self.create_fold(1, X_data, y_data)
+        best_score = 0
+        optimal_number = 1
+        for number_of_features in range(1, len(X_train[0])):
+            pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_mutual_info_regression', SelectKBest(mutual_info_regression, k=number_of_features))])
+            X_train_validation = pipe.fit_transform(X_train, y_train)
+            X_test_validation = pipe.transform(X_test)
+
+            model = clone(self.scikit_regressor)
+            model.set_params(random_state=fold)
+            model.fit(X_train_validation, y_train)
+
+            score = 0
+            for i, x_test in enumerate(X_test_validation):
+                prediction = model.predict(x_test.reshape(1, -1))
+                if prediction == y_test[i]:
+                    score = score + 1
+            if best_score < score:
+                best_score = score
+                optimal_number = number_of_features
+            print("Score", score, "with", number_of_features, "features.")
+
+        return optimal_number
+
+    def create_fold(self, fold, X_data, y_data):
+        fold_lenght = int(len(X_data) / 10)
+        if fold == 1:
+            X_test = X_data[:fold * fold_lenght]
+            y_test = y_data[:fold * fold_lenght]
+
+            X_train = X_data[fold * fold_lenght:]
+            y_train = y_data[fold * fold_lenght:]
+        elif fold == 11:
+            X_test = X_data[(fold - 1) * fold_lenght:]
+            y_test = y_data[(fold - 1) * fold_lenght:]
+
+            X_train = X_data[:(fold - 1) * fold_lenght]
+            y_train = y_data[:(fold - 1) * fold_lenght]
+        else:
+            X_test = X_data[(fold - 1) * fold_lenght:fold * fold_lenght]
+            y_test = y_data[(fold - 1) * fold_lenght:fold * fold_lenght]
+
+            X_train = X_data[:(fold - 1) * fold_lenght] + X_data[fold * fold_lenght:]
+            y_train = y_data[:(fold - 1) * fold_lenght] + y_data[fold * fold_lenght:]
+        return X_train, y_train, X_test, y_test
+
 
     def get_x_y(self, scenario: ASlibScenario, num_requested_instances: int, algorithm_id: int, fold: int):
         amount_of_training_instances = min(num_requested_instances,
