@@ -137,8 +137,12 @@ def create_approach(approach_names):
             approaches.append(Boosting('ExponentialSurvivalForest'))
         if approach_name == 'stacking':
             approaches.append(Stacking())
-        if approach_name == 'stacking_with_feature_selection':
-            approaches.append(Stacking(feature_selection=True))
+        if approach_name == 'stacking_with_VarianceThreshold':
+            approaches.append(Stacking(feature_selection='VarianceThreshold'))
+        if approach_name == 'stacking_with_SelectKBest_f_regression':
+            approaches.append(Stacking(feature_selection='SelectKBest_f_regression'))
+        if approach_name == 'stacking_with_SelectKBest_mutual_info_regression':
+            approaches.append(Stacking(feature_selection='SelectKBest_mutual_info_regression'))
         if approach_name == 'stacking_cross_validation':
             approaches.append(Stacking(cross_validation=True))
     return approaches

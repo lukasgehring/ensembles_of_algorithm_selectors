@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import numpy as np
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
@@ -10,20 +9,17 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 import copy
-from sklearn.feature_selection import VarianceThreshold
 
 
 class Stacking:
 
-    def __init__(self, cross_validation=False, feature_selection=False):
+    def __init__(self, cross_validation=False, feature_selection=None):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
-
-        self.meta_learner = PerAlgorithmRegressor()
+        self.meta_learner = None
         self.base_learners = list()
         self.cross_validation = cross_validation
         self.feature_selection = feature_selection
-        self.sel = None
 
         self.num_models = 0
 
@@ -72,15 +68,9 @@ class Stacking:
         new_feature_data = np.concatenate((feature_data, new_feature_data), axis=1)
         scenario.feature_data = new_feature_data
 
-        #feature selection
-        if self.feature_selection:
-            print("feature selection")
-            self.sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
-            scenario.feature_data = self.sel.fit_transform(scenario.feature_data)
-
         # meta learner training
         print("Start training of the meta-learner")
-        self.meta_learner = PerAlgorithmRegressor()
+        self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection)
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)
 
     def split_scenario(self, scenario: ASlibScenario, sub_fold: int, num_instances: int, index):
@@ -152,9 +142,6 @@ class Stacking:
             new_feature_data[i] = np.argmin(base_learner_predictions[i])
         features_of_test_instance = np.concatenate((features_of_test_instance, new_feature_data), axis=0)
 
-        if self.feature_selection:
-            features_of_test_instance = self.sel.transform(features_of_test_instance.reshape(1, -1)).flatten()
-
         # final prediction
         return self.meta_learner.predict(features_of_test_instance, instance_id)
 
@@ -162,6 +149,6 @@ class Stacking:
         name = "stacking"
         if self.cross_validation:
             name = name + "_cross_validation"
-        if self.feature_selection:
-            name = name + "_feature_selection"
+        if self.feature_selection is not None:
+            name = name + "_" + self.feature_selection
         return name

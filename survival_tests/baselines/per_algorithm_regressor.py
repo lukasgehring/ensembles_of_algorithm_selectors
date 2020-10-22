@@ -1,28 +1,31 @@
 import logging
 import pandas as pd
 import numpy as np
-from matplotlib.pyplot import sci
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_regression, mutual_info_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.utils import resample
 from sklearn.base import clone
 from .utils import impute_censored, distr_func
 from aslib_scenario.aslib_scenario import ASlibScenario
+from sklearn.pipeline import Pipeline
 
 
 class PerAlgorithmRegressor:
 
-    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, data_weights=None, stump=False):
+    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, feature_selection=None, data_weights=None, stump=False):
         self.scikit_regressor = scikit_regressor
         self.logger = logging.getLogger("per_algorithm_regressor")
         self.logger.addHandler(logging.StreamHandler())
         self.trained_models = list()
         self.trained_imputers = list()
         self.trained_scalers = list()
+        self.trained_pipes = list()
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1
         self.impute_censored = impute_censored
+        self.feature_selection = feature_selection
         self.data_weights = data_weights
         self.stump = stump
 
@@ -35,15 +38,21 @@ class PerAlgorithmRegressor:
             X_train, y_train = self.get_x_y(
                 scenario, amount_of_training_instances, algorithm_id, fold)
 
-            # impute missing values
-            imputer = SimpleImputer()
-            X_train = imputer.fit_transform(X_train)
-            self.trained_imputers.append(imputer)
+            # pipeline
+            print(self.feature_selection)
+            if self.feature_selection is None:
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler())])
+            elif self.feature_selection == 'VarianceThreshold':
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('VarianceThreshold', VarianceThreshold(threshold=(.8 * (1 - .8))))])
+            elif self.feature_selection == 'SelectKBest_f_regression':
+                # TODO: size of k?
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_f_regression', SelectKBest(f_regression, k=2))])
+            elif self.feature_selection == 'SelectKBest_mutual_info_regression':
+                # TODO: size of k?
+                pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler()), ('SelectKBest_mutual_info_regression', SelectKBest(mutual_info_regression, k=20))])
 
-            # standardize feature values
-            standard_scaler = StandardScaler()
-            X_train = standard_scaler.fit_transform(X_train)
-            self.trained_scalers.append(standard_scaler)
+            X_train = pipe.fit_transform(X_train, y_train)
+            self.trained_pipes.append(pipe)
 
             model = clone(self.scikit_regressor)
             if self.stump:
@@ -64,9 +73,6 @@ class PerAlgorithmRegressor:
 
             self.trained_models.append(model)
 
-        #print("Finished training " + str(self.num_algorithms) +
-        #      " models on " + str(amount_of_training_instances) + " instances.")
-
     def predict(self, features_of_test_instance, instance_id: int):
         predicted_risk_scores = list()
 
@@ -74,11 +80,7 @@ class PerAlgorithmRegressor:
             X_test = np.reshape(features_of_test_instance,
                                 (1, len(features_of_test_instance)))
 
-            imputer = self.trained_imputers[algorithm_id]
-            X_test = imputer.transform(X_test)
-
-            scaler = self.trained_scalers[algorithm_id]
-            X_test = scaler.transform(X_test)
+            X_test = self.trained_pipes[algorithm_id].transform(X_test)
 
             model = self.trained_models[algorithm_id]
 
