@@ -40,7 +40,7 @@ class Stacking:
         self.num_algorithms = len(scenario.algorithms)
         num_instances = len(scenario.instances)
         feature_data = scenario.feature_data.to_numpy()
-        new_feature_data = np.zeros(num_instances, self.num_algorithms)
+        new_feature_data = np.zeros((num_instances, self.num_algorithms))
 
         instance_counter = 0
 
