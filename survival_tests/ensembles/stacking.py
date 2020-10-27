@@ -12,13 +12,15 @@ import copy
 
 class Stacking:
 
-    def __init__(self, cross_validation=False, feature_selection=None):
+    def __init__(self, meta_learner_type='per_algorithm_regessor', cross_validation=False, feature_selection=None):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
         # parameters
         self.cross_validation = cross_validation
         self.feature_selection = feature_selection
+        self.meta_learner_type = meta_learner_type
+
 
         # attributes
         self.meta_learner = None
@@ -74,7 +76,10 @@ class Stacking:
         scenario.feature_data = new_feature_data
 
         # meta learner training with or without feature selection
-        self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection)
+        if self.meta_learner_type == 'per_algorithm_regressor':
+            self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection)
+        elif self.meta_learner_type == 'multiclass_algorithm_selector':
+            self.meta_learner = MultiClassAlgorithmSelector(feature_selection=self.feature_selection)
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)
 
     def split_scenario(self, scenario: ASlibScenario, sub_fold: int, num_instances: int):
@@ -151,9 +156,10 @@ class Stacking:
         return self.meta_learner.predict(features_of_test_instance, instance_id)
 
     def get_name(self):
-        name = "stacking"
+        name = "stacking_" + self.meta_learner_type
         if self.cross_validation:
             name = name + "_cross_validation"
         if self.feature_selection is not None:
             name = name + "_" + self.feature_selection
+
         return name

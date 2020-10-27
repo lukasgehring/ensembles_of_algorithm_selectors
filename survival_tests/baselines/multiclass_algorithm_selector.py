@@ -8,16 +8,16 @@ from sklearn.impute import SimpleImputer
 from sklearn.utils import resample
 import logging
 from sklearn.base import clone
-#import matplotlib.pyplot as plt
-#import seaborn as sns
 
 
 class MultiClassAlgorithmSelector:
 
-    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None):
+    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None, feature_selection=None):
         self.scikit_classifier= scikit_classifier
         self.logger = logging.getLogger("multiclass_algorithm_selector")
         self.logger.addHandler(logging.StreamHandler())
+
+        # attributes
         self.trained_model = None
         self.imputer = None
         self.standard_scaler = None

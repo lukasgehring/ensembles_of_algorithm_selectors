@@ -145,6 +145,8 @@ def create_approach(approach_names):
             approaches.append(Stacking(feature_selection='SelectKBest_mutual_info_regression'))
         if approach_name == 'stacking_cross_validation':
             approaches.append(Stacking(cross_validation=True))
+        if approach_name == 'stacking_multiclass':
+            approaches.append(Stacking(meta_learner_type='multiclass_algorithm_selector'))
     return approaches
 
 
