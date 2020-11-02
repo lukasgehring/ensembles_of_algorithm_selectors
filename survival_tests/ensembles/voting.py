@@ -7,12 +7,14 @@ from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 from aslib_scenario.aslib_scenario import ASlibScenario
+
+from ensembles.validation import base_learner_performance, split_scenario
 from par_10_metric import Par10Metric
 
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False):
+    def __init__(self, ranking=False, weighting=False, cross_validation=False):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
@@ -20,6 +22,7 @@ class Voting:
         # parameter
         self.ranking = ranking
         self.weighting = weighting
+        self.cross_validation = cross_validation
 
         # attributes
         self.trained_models = list()
@@ -43,38 +46,32 @@ class Voting:
         self.num_algorithms = len(scenario.algorithms)
         self.create_base_learner()
 
-        weights_denorm = list()
+        if self.cross_validation:
+            weights_denorm = np.zeros(len(self.trained_models))
+            num_instances = len(scenario.instances)
 
-        # train base learner and calculate the weights
-        for base_learner in self.trained_models:
-            base_learner.fit(scenario, fold, amount_of_training_instances)
-            if self.weighting:
-                weights_denorm.append(self.base_learner_performance(scenario, amount_of_training_instances, base_learner))
+            # cross validation for the weight
+            for sub_fold in range(1, 11):
+                test_scenario, training_scenario = split_scenario(scenario, sub_fold, num_instances)
+                # train base learner and calculate the weights
+                for i, base_learner in enumerate(self.trained_models):
+                    base_learner.fit(training_scenario, fold, amount_of_training_instances)
+                    weights_denorm[i] = weights_denorm[i] + self.base_learner_performance(test_scenario, base_learner)
+            # train base learner on the original scenario
+            for base_learner in self.trained_models:
+                base_learner.fit(scenario, fold, amount_of_training_instances)
+        else:
+            weights_denorm = list()
+
+            # train base learner and calculate the weights
+            for base_learner in self.trained_models:
+                base_learner.fit(scenario, fold, amount_of_training_instances)
+                if self.weighting:
+                    weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
 
         weights_denorm = [max(weights_denorm) / float(i) for i in weights_denorm]
         self.weights = [float(i) / sum(weights_denorm) for i in weights_denorm]
 
-    def base_learner_performance(self, scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
-        # extract data from scenario
-        feature_data = scenario.feature_data.to_numpy()
-        performance_data = scenario.performance_data.to_numpy()
-        feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
-
-        # performance_measure hold the PAR10 score for every instance
-        performance_measure = 0
-        for instance_id in range(amount_of_training_instances):
-            x_test = feature_data[instance_id]
-            y_test = performance_data[instance_id]
-
-            accumulated_feature_time = 0
-            if scenario.feature_cost_data is not None:
-                feature_time = feature_cost_data[instance_id]
-                accumulated_feature_time = np.sum(feature_time)
-
-            predicted_scores = base_learner.predict(x_test, instance_id)
-            performance_measure = performance_measure + self.metric.evaluate(y_test, predicted_scores, accumulated_feature_time,
-                                                 scenario.algorithm_cutoff_time)
-        return performance_measure / amount_of_training_instances
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.ranking:
