@@ -94,7 +94,7 @@ def create_approach(approach_names):
         if approach_name == 'voting_weight':
             approaches.append(Voting(weighting=True))
         if approach_name == 'voting_weight_cross':
-            approaches.append(Voting_Cross(weighting=True))
+            approaches.append(Voting(weighting=True, cross_validation=True))
         if approach_name == 'bagging_2_per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=2, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging_4_per_algorithm_regressor':
