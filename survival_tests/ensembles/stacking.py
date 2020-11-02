@@ -12,7 +12,7 @@ import copy
 
 class Stacking:
 
-    def __init__(self, meta_learner_type='per_algorithm_regessor', cross_validation=False, feature_selection=None):
+    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -28,13 +28,13 @@ class Stacking:
         self.num_algorithms = 0
 
     def create_base_learner(self):
-        self.base_learners.append(PerAlgorithmRegressor())
+        #self.base_learners.append(PerAlgorithmRegressor())
         self.base_learners.append(SUNNY())
         self.base_learners.append(ISAC())
-        self.base_learners.append(SATzilla11())
-        self.base_learners.append(MultiClassAlgorithmSelector())
-        self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        #self.base_learners.append(SATzilla11())
+        #self.base_learners.append(MultiClassAlgorithmSelector())
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
@@ -82,64 +82,6 @@ class Stacking:
         elif self.meta_learner_type == 'multiclass_algorithm_selector':
             self.meta_learner = MultiClassAlgorithmSelector(feature_selection=self.feature_selection)
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)
-
-    def split_scenario(self, scenario: ASlibScenario, sub_fold: int, num_instances: int):
-        fold_len = int(num_instances / 10)
-
-        # TODO: Do I need this? ----------------
-        instances = scenario.instances
-        if sub_fold < 10:
-            test_insts = instances[(sub_fold - 1) * fold_len:sub_fold * fold_len]
-            training_insts = instances[:(sub_fold - 1) * fold_len]
-            training_insts = np.append(training_insts, instances[sub_fold * fold_len:])
-        else:
-            test_insts = instances[(sub_fold - 1) * fold_len:]
-            training_insts = instances[:(sub_fold - 1) * fold_len]
-        # TODO: --------------------------------
-
-        test = copy.copy(scenario)
-        training = copy.copy(scenario)
-
-        # feature_data
-        test.feature_data = test.feature_data.drop(training_insts).sort_index()
-        training.feature_data = training.feature_data.drop(
-            test_insts).sort_index()
-        # performance_data
-        test.performance_data = test.performance_data.drop(
-            training_insts).sort_index()
-        training.performance_data = training.performance_data.drop(
-            test_insts).sort_index()
-        # runstatus_data
-        test.runstatus_data = test.runstatus_data.drop(
-            training_insts).sort_index()
-        training.runstatus_data = training.runstatus_data.drop(
-            test_insts).sort_index()
-        # self.feature_runstatus_data
-        test.feature_runstatus_data = test.feature_runstatus_data.drop(
-            training_insts).sort_index()
-        training.feature_runstatus_data = training.feature_runstatus_data.drop(
-            test_insts).sort_index()
-        # feature_cost_data
-        if scenario.feature_cost_data is not None:
-            test.feature_cost_data = test.feature_cost_data.drop(
-                training_insts).sort_index()
-            training.feature_cost_data = training.feature_cost_data.drop(
-                test_insts).sort_index()
-        # ground_truth_data
-        if scenario.ground_truth_data is not None:
-            test.ground_truth_data = test.ground_truth_data.drop(
-                training_insts).sort_index()
-            training.ground_truth_data = training.ground_truth_data.drop(
-                test_insts).sort_index()
-        test.cv_data = None
-        training.cv_data = None
-
-        test.instances = test_insts
-        training.instances = training_insts
-
-        scenario.used_feature_groups = None
-
-        return test, training
 
 
     def predict(self, features_of_test_instance, instance_id: int):
