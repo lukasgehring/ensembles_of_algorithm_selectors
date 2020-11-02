@@ -28,13 +28,13 @@ class Stacking:
         self.num_algorithms = 0
 
     def create_base_learner(self):
-        #self.base_learners.append(PerAlgorithmRegressor())
+        self.base_learners.append(PerAlgorithmRegressor())
         self.base_learners.append(SUNNY())
         self.base_learners.append(ISAC())
-        #self.base_learners.append(SATzilla11())
-        #self.base_learners.append(MultiClassAlgorithmSelector())
-        #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        self.base_learners.append(SATzilla11())
+        self.base_learners.append(MultiClassAlgorithmSelector())
+        self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+        self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
