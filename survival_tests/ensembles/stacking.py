@@ -28,13 +28,13 @@ class Stacking:
         self.num_algorithms = 0
 
     def create_base_learner(self):
-        self.base_learners.append(PerAlgorithmRegressor())
+        #self.base_learners.append(PerAlgorithmRegressor())
         self.base_learners.append(SUNNY())
         self.base_learners.append(ISAC())
-        self.base_learners.append(SATzilla11())
-        self.base_learners.append(MultiClassAlgorithmSelector())
-        self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        #self.base_learners.append(SATzilla11())
+        #self.base_learners.append(MultiClassAlgorithmSelector())
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+        #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
@@ -67,10 +67,11 @@ class Stacking:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
 
                 # create new feature data
-                for instance_number in range(amount_of_training_instances):
+                num_iterations = len(scenario.instances) if amount_of_training_instances == -1 else amount_of_training_instances
+
+                for instance_number in range(num_iterations):
                     prediction = base_learner.predict(feature_data[instance_number], instance_number)
                     new_feature_data[instance_number][np.argmin(prediction)] = new_feature_data[instance_number][np.argmin(prediction)] + 1
-
         # add predictions to the features of the instances
         new_feature_data = np.concatenate((feature_data, new_feature_data), axis=1)
         scenario.feature_data = new_feature_data
