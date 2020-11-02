@@ -56,7 +56,7 @@ class Voting:
                 # train base learner and calculate the weights
                 for i, base_learner in enumerate(self.trained_models):
                     base_learner.fit(training_scenario, fold, amount_of_training_instances)
-                    weights_denorm[i] = weights_denorm[i] + self.base_learner_performance(test_scenario, base_learner)
+                    weights_denorm[i] = weights_denorm[i] + base_learner_performance(test_scenario, amount_of_training_instances, base_learner)
             # train base learner on the original scenario
             for base_learner in self.trained_models:
                 base_learner.fit(scenario, fold, amount_of_training_instances)

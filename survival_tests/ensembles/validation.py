@@ -12,10 +12,11 @@ def base_learner_performance(scenario: ASlibScenario, amount_of_training_instanc
     performance_data = scenario.performance_data.to_numpy()
     feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
     metric = Par10Metric()
+    num_iterations = len(scenario.instances) if amount_of_training_instances == -1 else amount_of_training_instances
 
     # performance_measure hold the PAR10 score for every instance
     performance_measure = 0
-    for instance_id in range(amount_of_training_instances):
+    for instance_id in range(num_iterations):
         x_test = feature_data[instance_id]
         y_test = performance_data[instance_id]
 
@@ -28,7 +29,7 @@ def base_learner_performance(scenario: ASlibScenario, amount_of_training_instanc
         performance_measure = performance_measure + metric.evaluate(y_test, predicted_scores,
                                                                     accumulated_feature_time,
                                                                     scenario.algorithm_cutoff_time)
-    return performance_measure / amount_of_training_instances
+    return performance_measure / num_iterations
 
 
 def split_scenario(scenario: ASlibScenario, sub_fold: int, num_instances: int):
