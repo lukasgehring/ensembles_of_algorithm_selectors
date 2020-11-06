@@ -73,7 +73,7 @@ class Voting:
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
         #TODO: normaize or min/max scaling?
-        self.weights = [float(i) / sum(weights_denorm) for i in weights_denorm]
+        self.weights = [float(i) / max(weights_denorm) for i in weights_denorm]
 
 
     def predict(self, features_of_test_instance, instance_id: int):
@@ -115,7 +115,7 @@ class Voting:
         if self.ranking:
             name = name + "_ranking"
         if self.weighting:
-            name = name + "_weighting_norm"
+            name = name + "_weighting_scale"
         if self.cross_validation:
             name = name + "_cross"
         return name
