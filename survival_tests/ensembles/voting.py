@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 from scipy.stats import rankdata
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
@@ -69,7 +70,9 @@ class Voting:
                 if self.weighting:
                     weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
 
-        weights_denorm = [max(weights_denorm) / float(i) for i in weights_denorm]
+        # Turn around values (lowest (best) gets highest weight) and normalize
+        weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
+        #TODO: normaize or min/max scaling?
         self.weights = [float(i) / sum(weights_denorm) for i in weights_denorm]
 
 
@@ -89,6 +92,7 @@ class Voting:
                 predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i]
             else:
                 predictions[index_of_minimum] = predictions[index_of_minimum] + 1
+
         return 1 - predictions / sum(predictions)
 
     def predict_with_ranking(self, features_of_test_instance, instance_id: int):
@@ -97,13 +101,13 @@ class Voting:
         for i, model in enumerate(self.trained_models):
             # rank output from the base learner (best algorithm gets rank 1 - worst algorithm gets rank len(algorithms))
             if self.weighting:
-                predictions = predictions + self.weights[i] * rankdata(
+                predictions = predictions.reshape(self.num_algorithms) + self.weights[i] * rankdata(
                     model.predict(features_of_test_instance, instance_id)).reshape(
-                    self.num_algorithms, 1)
+                    self.num_algorithms)
             else:
-                predictions = predictions + rankdata(
-                    model.predict(features_of_test_instance, instance_id)).reshape(
-                    self.num_algorithms, 1)
+                predictions = predictions.reshape(self.num_algorithms) + rankdata(
+                    model.predict(features_of_test_instance, instance_id))
+
         return predictions / sum(predictions)
 
     def get_name(self):
@@ -111,5 +115,7 @@ class Voting:
         if self.ranking:
             name = name + "_ranking"
         if self.weighting:
-            name = name + "_weighting"
+            name = name + "_weighting_norm"
+        if self.cross_validation:
+            name = name + "_cross"
         return name
