@@ -15,7 +15,7 @@ from par_10_metric import Par10Metric
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False, cross_validation=False):
+    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner_test=None):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
@@ -24,6 +24,7 @@ class Voting:
         self.ranking = ranking
         self.weighting = weighting
         self.cross_validation = cross_validation
+        self.base_learner_test = base_learner_test
 
         # attributes
         self.trained_models = list()
@@ -35,12 +36,20 @@ class Voting:
         # clean up list and init base learners
         self.trained_models = list()
 
-        self.trained_models.append(PerAlgorithmRegressor())
-        self.trained_models.append(SUNNY())
-        self.trained_models.append(ISAC())
-        self.trained_models.append(SATzilla11())
-        self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
-        self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
+        if self.base_learner_test != 1:
+            self.trained_models.append(PerAlgorithmRegressor())
+        if self.base_learner_test != 2:
+            self.trained_models.append(SUNNY())
+        if self.base_learner_test != 3:
+            self.trained_models.append(ISAC())
+        if self.base_learner_test != 4:
+            self.trained_models.append(SATzilla11())
+        if self.base_learner_test != 5:
+            self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
+        if self.base_learner_test != 6:
+            self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
+
+        print(self.trained_models)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
@@ -115,7 +124,9 @@ class Voting:
         if self.ranking:
             name = name + "_ranking"
         if self.weighting:
-            name = name + "_weighting_scale"
+            name = name + "_weighting"
         if self.cross_validation:
             name = name + "_cross"
+        if self.base_learner_test:
+            name = name + "_without_" + str(self.base_learner_test)
         return name
