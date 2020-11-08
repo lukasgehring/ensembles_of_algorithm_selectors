@@ -95,10 +95,11 @@ def create_approach(approach_names):
             approaches.append(Voting(weighting=True))
         if approach_name == 'voting_weight_cross':
             approaches.append(Voting(weighting=True, cross_validation=True))
-        if approach_name == 'voting_base_learner_test':
+        if approach_name == 'voting_base_learner_test1':
             approaches.append(Voting(base_learner_test=1))
             approaches.append(Voting(base_learner_test=2))
             approaches.append(Voting(base_learner_test=3))
+        if approach_name == 'voting_base_learner_test2':
             approaches.append(Voting(base_learner_test=4))
             approaches.append(Voting(base_learner_test=5))
             approaches.append(Voting(base_learner_test=6))
