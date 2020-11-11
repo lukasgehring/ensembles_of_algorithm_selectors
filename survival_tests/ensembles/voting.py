@@ -9,6 +9,7 @@ from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 from aslib_scenario.aslib_scenario import ASlibScenario
 
+from ensembles.prediction import predict_with_ranking
 from ensembles.validation import base_learner_performance, split_scenario
 from par_10_metric import Par10Metric
 
@@ -87,7 +88,10 @@ class Voting:
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.ranking:
-            return self.predict_with_ranking(features_of_test_instance, instance_id)
+            if self.weighting:
+                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=self.weights)
+            else:
+                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=None)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
@@ -104,20 +108,20 @@ class Voting:
 
         return 1 - predictions / sum(predictions)
 
-    def predict_with_ranking(self, features_of_test_instance, instance_id: int):
-        # use all predictions (ranking) of the base learner
-        predictions = np.zeros((self.num_algorithms, 1))
-        for i, model in enumerate(self.trained_models):
-            # rank output from the base learner (best algorithm gets rank 1 - worst algorithm gets rank len(algorithms))
-            if self.weighting:
-                predictions = predictions.reshape(self.num_algorithms) + self.weights[i] * rankdata(
-                    model.predict(features_of_test_instance, instance_id)).reshape(
-                    self.num_algorithms)
-            else:
-                predictions = predictions.reshape(self.num_algorithms) + rankdata(
-                    model.predict(features_of_test_instance, instance_id))
-
-        return predictions / sum(predictions)
+    # def predict_with_ranking(self, features_of_test_instance, instance_id: int):
+    #     # use all predictions (ranking) of the base learner
+    #     predictions = np.zeros((self.num_algorithms, 1))
+    #     for i, model in enumerate(self.trained_models):
+    #         # rank output from the base learner (best algorithm gets rank 1 - worst algorithm gets rank len(algorithms))
+    #         if self.weighting:
+    #             predictions = predictions.reshape(self.num_algorithms) + self.weights[i] * rankdata(
+    #                 model.predict(features_of_test_instance, instance_id)).reshape(
+    #                 self.num_algorithms)
+    #         else:
+    #             predictions = predictions.reshape(self.num_algorithms) + rankdata(
+    #                 model.predict(features_of_test_instance, instance_id))
+    #
+    #     return predictions / sum(predictions)
 
     def get_name(self):
         name = "voting"

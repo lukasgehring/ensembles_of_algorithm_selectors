@@ -2,22 +2,26 @@ import copy
 import logging
 import sys
 import numpy as np
-import pandas as pd
 from scipy.stats import rankdata
-from sklearn.utils import resample
 
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 
+from ensembles.prediction import predict_with_ranking
+
 
 class Bagging:
 
-    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=True):
+    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False):
         self.logger = logging.getLogger("bagging")
         self.logger.addHandler(logging.StreamHandler())
+
+        # attributes
         self.num_algorithms = 0
-        self.base_learner = base_learner
         self.base_learners = list()
+
+        # parameters
+        self.base_learner = base_learner
         self.num_base_learner = num_base_learner
         self.use_ranking = use_ranking
 
@@ -46,8 +50,10 @@ class Bagging:
         print("Run fit on " + self.get_name() + " for fold " + str(fold))
         self.num_algorithms = len(scenario.algorithms)
 
+        # create all bootstrap samples
         bootstrap_samples = self.generate_bootstrap_sample(scenario, fold, self.num_base_learner)
 
+        # train each base learner on a different sample
         for index in range(self.num_base_learner):
             self.base_learners.append(copy.deepcopy(self.base_learner))
             scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = bootstrap_samples[index]
@@ -55,22 +61,18 @@ class Bagging:
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.use_ranking:
-            predictions = np.zeros((self.num_algorithms, 1))
-            for model in self.base_learners:
-                ranked_prediction = rankdata(model.predict(features_of_test_instance, instance_id)).reshape(
-                    self.num_algorithms, 1)
-                predictions = predictions + (((self.num_algorithms + 1) - ranked_prediction) / self.num_algorithms)
-            return 1 - predictions / self.num_base_learner
-        else:
-            predictions = np.zeros((self.num_algorithms, 1))
-            for learner_index, base_learner in enumerate(self.base_learners):
-                prediction = base_learner.predict(features_of_test_instance, instance_id)
-                index = np.argmin(prediction)
-                predictions[index] = predictions[index] + 1
+            return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.base_learners)
 
-            predictions = [max(predictions) / float(i + 1) for i in predictions]
-            predictions = [float(i) / sum(predictions) for i in predictions]
-            return np.array(predictions).flatten()
+        # only using the prediction of the algorithm
+        predictions = np.zeros(self.num_algorithms)
+        for i, model in enumerate(self.base_learners):
+            # get prediction of base learner and find prediction (lowest value)
+            base_prediction = model.predict(features_of_test_instance, instance_id).reshape(self.num_algorithms)
+            index_of_minimum = np.where(base_prediction == min(base_prediction))
+
+            predictions[index_of_minimum] = predictions[index_of_minimum] + 1
+
+        return 1 - predictions / sum(predictions)
 
 
     def get_name(self):
