@@ -103,28 +103,10 @@ def create_approach(approach_names):
             approaches.append(Voting(base_learner_test=4))
             approaches.append(Voting(base_learner_test=5))
             approaches.append(Voting(base_learner_test=6))
-        if approach_name == 'bagging_2_per_algorithm_regressor':
-            approaches.append(Bagging(num_base_learner=2, base_learner=PerAlgorithmRegressor()))
-        if approach_name == 'bagging_4_per_algorithm_regressor':
-            approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
-        if approach_name == 'bagging_6_per_algorithm_regressor':
-            approaches.append(Bagging(num_base_learner=6, base_learner=PerAlgorithmRegressor()))
-        if approach_name == 'bagging_8_per_algorithm_regressor':
-            approaches.append(Bagging(num_base_learner=8, base_learner=PerAlgorithmRegressor()))
-        if approach_name == 'bagging_10_per_algorithm_regressor':
+        if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
-        if approach_name == 'bagging_10_per_algorithm_regressor_without_ranking':
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=False))
-        if approach_name == 'bagging_10_sunny':
-            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(),use_ranking=False))
-        if approach_name == 'bagging_20_sunny':
-            approaches.append(Bagging(num_base_learner=20, base_learner=SUNNY(),use_ranking=False))
-        if approach_name == 'bagging_50_sunny':
-            approaches.append(Bagging(num_base_learner=50, base_learner=SUNNY(),use_ranking=False))
-        if approach_name == 'bagging_100_sunny':
-            approaches.append(Bagging(num_base_learner=100, base_learner=SUNNY(),use_ranking=False))
-        if approach_name == 'bagging_500_sunny':
-            approaches.append(Bagging(num_base_learner=500, base_learner=SUNNY(),use_ranking=False))
+        if approach_name == 'bagging-satzilla-11':
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
