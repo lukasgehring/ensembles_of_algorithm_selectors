@@ -105,6 +105,8 @@ def create_approach(approach_names):
             approaches.append(Voting(base_learner_test=6))
         if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-per_algorithm_regressor_rank':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(use_ranking=True)))
         if approach_name == 'bagging-satzilla-11':
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
         if approach_name == 'bagging-ExpectationSurvivalForest':
