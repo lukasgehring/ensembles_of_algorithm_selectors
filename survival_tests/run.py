@@ -111,6 +111,16 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
         if approach_name == 'bagging-ExpectationSurvivalForest':
             approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
+        if approach_name == 'bagging-number_of_base_learner':
+            approaches.append(Bagging(num_base_learner=2, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=6, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=8, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=12, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=14, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=16, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=18, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=20, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
