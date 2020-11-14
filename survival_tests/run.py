@@ -2,6 +2,9 @@ import logging
 import sys
 import configparser
 import multiprocessing as mp
+
+from sklearn.ensemble import RandomForestRegressor
+
 import database_utils
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
@@ -105,6 +108,10 @@ def create_approach(approach_names):
             approaches.append(Voting(base_learner_test=6))
         if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-decision_tree':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
+            approaches.append(Bagging(num_base_learner=100, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
+            approaches.append(Bagging(num_base_learner=200, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
         if approach_name == 'bagging-per_algorithm_regressor_rank':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
         if approach_name == 'bagging-satzilla-11':
