@@ -109,9 +109,7 @@ def create_approach(approach_names):
         if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging-decision_tree':
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
-            approaches.append(Bagging(num_base_learner=100, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
-            approaches.append(Bagging(num_base_learner=200, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1))))
+            approaches.append(Bagging(num_base_learner=1000, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1, bootstrap=False))))
         if approach_name == 'bagging-per_algorithm_regressor_rank':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
         if approach_name == 'bagging-satzilla-11':
