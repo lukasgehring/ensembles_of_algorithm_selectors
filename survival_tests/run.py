@@ -117,6 +117,10 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
         if approach_name == 'bagging-ExpectationSurvivalForest':
             approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
+        if approach_name == 'bagging-SUNNY':
+            approaches.append(Bagging(num_base_learner=1000, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
+        if approach_name == 'bagging-ISAC':
+            approaches.append(Bagging(num_base_learner=1000, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
         if approach_name == 'bagging-number_of_base_learner':
             approaches.append(Bagging(num_base_learner=2, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
