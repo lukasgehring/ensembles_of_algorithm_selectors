@@ -131,6 +131,12 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=16, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=18, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=20, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-number_of_base_learner-2':
+            approaches.append(Bagging(num_base_learner=24, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=28, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=32, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=36, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=40, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
