@@ -8,11 +8,12 @@ from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 
 from ensembles.prediction import predict_with_ranking
+from ensembles.validation import base_learner_performance
 
 
 class Bagging:
 
-    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False):
+    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False, weighting=False):
         self.logger = logging.getLogger("bagging")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -24,6 +25,7 @@ class Bagging:
         self.base_learner = base_learner
         self.num_base_learner = num_base_learner
         self.use_ranking = use_ranking
+        self.weighting = weighting
 
     # generate number_of_samples bootstrap samples from the scenario and returns them in a list
     def generate_bootstrap_sample(self, scenario: ASlibScenario, fold: int, number_of_samples: int):
@@ -53,11 +55,19 @@ class Bagging:
         # create all bootstrap samples
         bootstrap_samples = self.generate_bootstrap_sample(scenario, fold, self.num_base_learner)
 
+        weights_denorm = list()
+
         # train each base learner on a different sample
         for index in range(self.num_base_learner):
             self.base_learners.append(copy.deepcopy(self.base_learner))
             scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = bootstrap_samples[index]
             self.base_learners[index].fit(scenario, fold, amount_of_training_instances)
+            if self.weighting:
+                weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, self.base_learners[index]))
+
+        # Turn around values (lowest (best) gets highest weight) and normalize
+        weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
+        self.weights = [float(i) / max(weights_denorm) for i in weights_denorm]
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.use_ranking:
@@ -70,7 +80,11 @@ class Bagging:
             base_prediction = model.predict(features_of_test_instance, instance_id).reshape(self.num_algorithms)
             index_of_minimum = np.where(base_prediction == min(base_prediction))
 
-            predictions[index_of_minimum] = predictions[index_of_minimum] + 1
+            # add [1 * weight for base learner] to vote for the algorithm
+            if self.weighting:
+                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i]
+            else:
+                predictions[index_of_minimum] = predictions[index_of_minimum] + 1
 
         return 1 - predictions / sum(predictions)
 
@@ -81,5 +95,8 @@ class Bagging:
             name = name + "_with_ranking"
         else:
             name = name + "_without_ranking"
+
+        if self.weighting:
+            name = name + "_weighting"
 
         return name
