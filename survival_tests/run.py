@@ -147,6 +147,22 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=52, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=56, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=60, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-number_of_base_learner_SUNNY':
+            approaches.append(Bagging(num_base_learner=4, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=8, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=12, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=16, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=20, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=24, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=28, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=32, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=36, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=40, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=44, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=48, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=52, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=56, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=60, base_learner=SUNNY()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
