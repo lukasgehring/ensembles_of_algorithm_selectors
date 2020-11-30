@@ -107,6 +107,8 @@ def create_approach(approach_names):
             approaches.append(Voting(base_learner_test=6))
         if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-per_multiclass_algorithm_selector':
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
         if approach_name == 'bagging-per_algorithm_regressor_weight':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True))
         if approach_name == 'bagging-decision_tree':
