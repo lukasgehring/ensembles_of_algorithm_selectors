@@ -1,8 +1,6 @@
 import copy
 import logging
-import sys
 import numpy as np
-from scipy.stats import rankdata
 
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
@@ -82,7 +80,7 @@ class Bagging:
 
             # add [1 * weight for base learner] to vote for the algorithm
             if self.weighting:
-                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i]
+                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i] * self.weights[i]
             else:
                 predictions[index_of_minimum] = predictions[index_of_minimum] + 1
 
@@ -97,6 +95,6 @@ class Bagging:
             name = name + "_without_ranking"
 
         if self.weighting:
-            name = name + "_weighting"
+            name = name + "_weighting^2"
 
         return name
