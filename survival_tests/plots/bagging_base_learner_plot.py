@@ -184,37 +184,41 @@ def generate_sbs_vbs_change_table():
     b.append("56")
     b.append("60")
 
-    width = 0.5  # the width of the bars
+    width = 0.3
+    # the width of the bars
     ind = np.arange(len(b))
 
 
-    ax.bar(ind + width / 2, a, width, color=color1, label='60 Base Learner')
-    ax.bar(ind - width / 2, c, width, color=color2, label='60 Base Learner')
+    ax.bar(ind + width / 2, a, width, color=color1, label='PerAlgorithmRegressor')
+    ax.bar(ind - width / 2, c, width, color=color2, label='SUNNY')
 
-    ax.set_xticks(ind + width / 2)
+    ax.set_xticks(ind)
     ax.set_xticklabels(b)
-    #ax.set_ylim(bottom=0.36)
 
     plt.xlabel('Number of Base Learner')
     plt.ylabel('nPAR10')
 
     # 100 linearly spaced numbers
     x = np.linspace(0, 14, 15)
-    print(x)
 
     # approximation plot for PerAlgorithmRegressor
     y = 0.0007905*(x** 2) + (-0.01650208)*x + 0.47456491
-    ax.plot(x, y, 'r', color= color3)
+    ax.plot(x, y, 'r', color= color1, linewidth=2, label="PerAlgorithmRegressor approximation")
 
     # approximation plot for SUNNY
     y = 0.0009834 * (x ** 2) + (-0.018609) * x + 0.46738839
-    ax.plot(x, y, 'r', color= color4)
+    ax.plot(x, y, 'r', color= color2, linewidth=2, label="SUNNY approximation")
 
-    ax.set_ylim(bottom=0.35)
-    ax.set_ylim(top=0.5)
+    ax.set_ylim(bottom=0.36)
+    ax.set_ylim(top=0.48)
 
     plt.xticks(rotation=90)
+
+    plt.legend()
+
     plt.show()
+
+    #fig.savefig("foo.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

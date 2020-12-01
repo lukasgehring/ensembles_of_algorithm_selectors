@@ -32,7 +32,6 @@ class Boosting:
         self.singlelearner = singlelearner
 
     def update_weights(self, scenario: ASlibScenario, fold: int, iteration: int, amount_of_training_instances: int):
-
         feature_data = scenario.feature_data.to_numpy()
         performance_data = scenario.performance_data.to_numpy()
         feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
@@ -80,14 +79,11 @@ class Boosting:
 
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        print("Start training")
-        if amount_of_training_instances == -1:
-            amount_of_training_instances = len(scenario.instances)
+        actual_num_training_instances = amount_of_training_instances if amount_of_training_instances != -1 else len(scenario.instances)
         self.num_algorithms = len(scenario.algorithms)
-        self.data_weights = np.ones(amount_of_training_instances)
+        self.data_weights = np.ones(actual_num_training_instances)
 
         for iteration in range(self.num_iterations):
-            print("Start training on iteration", iteration)
             if self.algorithm_name == 'per_algorithm_regressor':
                 if self.stump:
                     self.base_learners.append(PerAlgorithmRegressor(data_weights=self.data_weights, stump=True))
@@ -101,7 +97,7 @@ class Boosting:
                 sys.exit('Wrong base learner for boosting')
 
             self.base_learners[iteration].fit(scenario, fold, amount_of_training_instances)
-            if not self.update_weights(scenario, fold, iteration, amount_of_training_instances):
+            if not self.update_weights(scenario, fold, iteration, actual_num_training_instances):
                 break
         print("Finished training")
 
