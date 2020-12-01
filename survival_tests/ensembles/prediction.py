@@ -9,14 +9,14 @@ def predict_with_ranking(features_of_test_instance, instance_id: int, num_algori
         if weights:
             if log:
                 predictions = predictions.reshape(num_algorithms) + weights[i] * np.log(
-                    rankdata(model.predict(features_of_test_instance, instance_id))) * (-1)
+                    rankdata(model.predict(features_of_test_instance, instance_id)))
             else:
                 predictions = predictions.reshape(num_algorithms) + weights[i] * rankdata(
                     model.predict(features_of_test_instance, instance_id)).reshape(num_algorithms)
         else:
             if log:
                 predictions = predictions.reshape(num_algorithms) + np.log(
-                    rankdata(model.predict(features_of_test_instance, instance_id))) * (-1)
+                    rankdata(model.predict(features_of_test_instance, instance_id)))
             else:
                 predictions = predictions.reshape(num_algorithms) + rankdata(
                     model.predict(features_of_test_instance, instance_id))
