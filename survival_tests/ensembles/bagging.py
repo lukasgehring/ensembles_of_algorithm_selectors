@@ -80,7 +80,7 @@ class Bagging:
 
             # add [1 * weight for base learner] to vote for the algorithm
             if self.weighting:
-                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i] * self.weights[i]
+                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i]
             else:
                 predictions[index_of_minimum] = predictions[index_of_minimum] + 1
 
@@ -95,6 +95,6 @@ class Bagging:
             name = name + "_without_ranking"
 
         if self.weighting:
-            name = name + "_weighting^2"
+            name = name + "_weighting"
 
         return name
