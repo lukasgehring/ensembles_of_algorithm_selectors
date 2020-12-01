@@ -12,7 +12,7 @@ from ensembles.validation import base_learner_performance
 
 class Bagging:
 
-    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False, weighting=False):
+    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False, log_ranking=False, weighting=False):
         self.logger = logging.getLogger("bagging")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -24,6 +24,7 @@ class Bagging:
         self.base_learner = base_learner
         self.num_base_learner = num_base_learner
         self.use_ranking = use_ranking
+        self.log_ranking = log_ranking
         self.weighting = weighting
 
     # generate number_of_samples bootstrap samples from the scenario and returns them in a list
@@ -97,7 +98,7 @@ class Bagging:
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.use_ranking:
-            return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.base_learners)
+            return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.base_learners, log=self.log_ranking)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
@@ -119,6 +120,8 @@ class Bagging:
         name = "bagging_" + str(self.num_base_learner) + "_" + self.base_learner.get_name()
         if self.use_ranking:
             name = name + "_with_ranking"
+            if self.log_ranking:
+                name = name + "_log"
         else:
             name = name + "_without_ranking"
 
