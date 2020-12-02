@@ -98,7 +98,12 @@ class Bagging:
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.use_ranking:
-            return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.base_learners, log=self.log_ranking)
+            if self.weighting:
+                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                            self.base_learners, weights=self.weights, log=self.log_ranking)
+            else:
+                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                            self.base_learners, log=self.log_ranking)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
