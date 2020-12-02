@@ -59,7 +59,6 @@ def generate_sbs_vbs_change_table():
     ax.set_xticks(ind)
     ax.set_xticklabels(names)
 
-    # TODO: write values on bars
     for i, value in enumerate(base_learner):
         ax.text(i, value, round(value, 2), ha='center', va='bottom', rotation=0)
 

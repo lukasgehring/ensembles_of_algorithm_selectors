@@ -35,6 +35,8 @@ def generate_sbs_vbs_change_table():
     bagging_data.append(float(bagging_rank.result))
     bagging_data.append(float(bagging_weight_rank.result))
 
+    print(bagging_data)
+
     bagging_name.append('Bagging')
     bagging_name.append('Bagging Ranking')
     bagging_name.append('Bagging Weighting Ranking')
@@ -45,12 +47,15 @@ def generate_sbs_vbs_change_table():
     width = 0.2  # the width of the bars
     ind = np.arange(len(bagging_name))
     ax.bar(ind, bagging_data, width, color=color1,
-           label='SUNNY')
+           label='PerAlgorithmRegressor')
+
+    for i, value in enumerate(bagging_data):
+        ax.text(i, value, round(value, 3), ha='center', va='bottom', rotation=0)
 
     ax.set_xticks(ind)
     ax.set_xticklabels(bagging_name)
 
-    ax.set_ylim(bottom=0.38)
+    #ax.set_ylim(bottom=0.38)
     ax.set_ylim(top=0.44)
 
     #plt.xticks(rotation=90)

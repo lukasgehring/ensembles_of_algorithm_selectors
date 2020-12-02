@@ -18,6 +18,8 @@ def generate_sbs_vbs_change_table():
     color5 = '#251314'
 
     # PerAlgorithmRegressor
+    per_algorithm_regressor = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, base_learner.approach, vbs_sbs.metric, base_learner.result, ((base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN base_learner ON vbs_sbs.scenario_name = base_learner.scenario_name AND vbs_sbs.fold = base_learner.fold AND vbs_sbs.metric = base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='per_algorithm_RandomForestRegressor_regressor' GROUP BY scenario_name")
     bagging_4 = get_dataframe_for_sql_query(
         "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_number_of_base_learner.approach, vbs_sbs.metric, bagging_number_of_base_learner.result, ((bagging_number_of_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_number_of_base_learner ON vbs_sbs.scenario_name = bagging_number_of_base_learner.scenario_name AND vbs_sbs.fold = bagging_number_of_base_learner.fold AND vbs_sbs.metric = bagging_number_of_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_4_per_algorithm_RandomForestRegressor_regressor_without_ranking' GROUP BY scenario_name")
     bagging_8 = get_dataframe_for_sql_query(
@@ -85,27 +87,27 @@ def generate_sbs_vbs_change_table():
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
     # PerAlgorithmRegressor
-    frames = [bagging_4.result, bagging_8.result, bagging_12.result, bagging_16.result, bagging_20.result,
+    frames = [per_algorithm_regressor.result, bagging_4.result, bagging_8.result, bagging_12.result, bagging_16.result, bagging_20.result,
               bagging_24.result, bagging_28.result, bagging_32.result, bagging_36.result, bagging_40.result,
               bagging_44.result, bagging_48.result, bagging_52.result, bagging_56.result, bagging_60.result]
     result = pd.concat(frames, axis=1).T
     result['average'] = result.mean(numeric_only=True, axis=1)
     result['median'] = result.median(numeric_only=True, axis=1)
-    result = result.round(6).T
+    result = result.round(2).T
     table = result.to_latex()
-    table.replace("0 ", "ASP-POTASSCO ")
-    table.replace("1 ", "BNSL-2016 ")
-    table.replace("2 ", "CPMP-2015 ")
-    table.replace("3 ", "CSP-2010 ")
-    table.replace("4 ", "CSP-Minizinc-Time-2016 ")
-    table.replace("5 ", "CSP-MZN-2013 ")
-    table.replace("6 ", "GLUHACK-18 ")
-    table.replace("7 ", "MAXSAT12-PMS ")
-    table.replace("8 ", "MAXSAT15-PMS-INDU ")
-    table.replace("9 ", "QBF-2011 ")
-    table.replace("10 ", "SAT03-16\_INDU ")
-    table.replace("11 ", "SAT12-INDU ")
-    table.replace("12 ", "SAT18-EXP ")
+    table = table.replace("\n0  ", "\nASP-POTASSCO          ")
+    table = table.replace("\n1  ", "\nBNSL-2016             ")
+    table = table.replace("\n2  ", "\nCPMP-2015             ")
+    table = table.replace("\n3  ", "\nCSP-2010              ")
+    table = table.replace("\n4  ", "\nCSP-Minizinc-Time-2016")
+    table = table.replace("\n5  ", "\nCSP-MZN-2013          ")
+    table = table.replace("\n6  ", "\nGLUHACK-18            ")
+    table = table.replace("\n7  ", "\nMAXSAT12-PMS          ")
+    table = table.replace("\n8  ", "\nMAXSAT15-PMS-INDU     ")
+    table = table.replace("\n9  ", "\nQBF-2011              ")
+    table = table.replace("\n10 ", "\nSAT03-16\_INDU        ")
+    table = table.replace("\n11 ", "\nSAT12-INDU            ")
+    table = table.replace("\n12 ", "\nSAT18-EXP             ")
     print(table)
 
     # SUNNY
@@ -115,7 +117,7 @@ def generate_sbs_vbs_change_table():
     result = pd.concat(frames, axis=1).T
     result['average'] = result.mean(numeric_only=True, axis=1)
     result['median'] = result.median(numeric_only=True, axis=1)
-    result = result.round(6).T
+    result = result.round(2).T
     table = result.to_latex()
     table.replace("0 ", "ASP-POTASSCO ")
     table.replace("1 ", "BNSL-2016 ")

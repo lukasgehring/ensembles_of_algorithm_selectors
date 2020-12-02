@@ -24,6 +24,7 @@ def generate_sbs_vbs_change_table():
 
     bagging_data = list()
     bagging_weight_data = list()
+    bagging_oos_data = list()
     bagging_name = list()
 
     for i in zip(bagging.approach, bagging.result):
@@ -32,20 +33,31 @@ def generate_sbs_vbs_change_table():
         elif 'sunny' in i[0]:
             bagging_data.append(i[1])
 
-    for i in bagging_weight.result:
-        bagging_weight_data.append(i)
+    for i in zip(bagging_weight.approach, bagging_weight.result):
+        if 'oos' not in i[0]:
+            bagging_weight_data.append(i[1])
 
-    bagging_name.append('PerAlgorithmRegressor')
-    bagging_name.append('SUNNY')
+    for i in zip(bagging_weight.approach, bagging_weight.result):
+        if 'oos' in i[0]:
+            bagging_oos_data.append(i[1])
+
+    bagging_name.append("PerAlgorithmRegressor")
+    bagging_name.append("SUNNY")
+
+    print(bagging_data)
+    print(bagging_weight_data)
+    print(bagging_oos_data)
+
 
 
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
     width = 0.2  # the width of the bars
     ind = np.arange(len(bagging_name))
-    ax.bar(ind - width / 2, bagging_data, width, color=color1,
+    ax.bar(ind - width, bagging_data, width, color=color1,
            label='Bagging without weighting')
-    ax.bar(ind + width / 2, bagging_weight_data, width, color=color2, label='Bagging with weighting')
+    ax.bar(ind, bagging_weight_data, width, color=color2, label='Bagging with weighting')
+    ax.bar(ind + width, bagging_oos_data, width, color=color3, label='Bagging with oos weighting')
 
     ax.set_xticks(ind)
     ax.set_xticklabels(bagging_name)
