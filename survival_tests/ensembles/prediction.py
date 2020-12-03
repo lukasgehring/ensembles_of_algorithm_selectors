@@ -10,12 +10,12 @@ def predict_with_ranking(features_of_test_instance, instance_id: int, num_algori
         # rank output from the base learner (best algorithm gets rank 1 - worst algorithm gets rank len(algorithms))
         if weights:
             if performance_rank:
-                predictions = predictions.reshape(num_algorithms) + weights[i] * (prediction / sum(prediction))
+                predictions = predictions.reshape(num_algorithms) + weights[i] * (prediction / sum(prediction)).reshape(num_algorithms)
             else:
                 predictions = predictions.reshape(num_algorithms) + weights[i] * rankdata(prediction).reshape(num_algorithms)
         else:
             if performance_rank:
-                predictions = predictions.reshape(num_algorithms) + (prediction / sum(prediction))
+                predictions = predictions.reshape(num_algorithms) + (prediction / sum(prediction)).reshape(num_algorithms)
             else:
                 predictions = predictions.reshape(num_algorithms) + rankdata(prediction)
 
