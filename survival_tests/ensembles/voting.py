@@ -16,7 +16,7 @@ from par_10_metric import Par10Metric
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner_test=None):
+    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner_test=None, rank_method='average'):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
@@ -26,6 +26,7 @@ class Voting:
         self.weighting = weighting
         self.cross_validation = cross_validation
         self.base_learner_test = base_learner_test
+        self.rank_method = rank_method
 
         # attributes
         self.trained_models = list()
@@ -91,7 +92,7 @@ class Voting:
             if self.weighting:
                 return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=self.weights)
             else:
-                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=None)
+                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=None, rank_method=self.rank_method)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
@@ -127,6 +128,8 @@ class Voting:
         name = "voting"
         if self.ranking:
             name = name + "_ranking"
+        if self.rank_method != 'average':
+            name = name + "_" + self.rank_method
         if self.weighting:
             name = name + "_weighting"
         if self.cross_validation:

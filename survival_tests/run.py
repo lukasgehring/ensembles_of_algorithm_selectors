@@ -94,6 +94,8 @@ def create_approach(approach_names):
             approaches.append(Voting())
         if approach_name == 'voting_rank':
             approaches.append(Voting(ranking=True))
+        if approach_name == 'voting_rank_min':
+            approaches.append(Voting(ranking=True, rank_method='min'))
         if approach_name == 'voting_weight':
             approaches.append(Voting(weighting=True))
         if approach_name == 'voting_weight_cross':
