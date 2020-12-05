@@ -8,9 +8,11 @@ from sklearn.ensemble import RandomForestRegressor
 import database_utils
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
+from ensembles.create_base_learner import CreateBaseLearner
 from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
+from ensembles.voting_pre_computed import VotingPreComputed
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -210,6 +212,16 @@ def create_approach(approach_names):
             approaches.append(Stacking(cross_validation=True))
         if approach_name == 'stacking_multiclass':
             approaches.append(Stacking(meta_learner_type='multiclass_algorithm_selector'))
+
+        if approach_name == 'create_base_learner':
+            approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
+            approaches.append(CreateBaseLearner(algorithm='sunny'))
+            approaches.append(CreateBaseLearner(algorithm='isac'))
+            approaches.append(CreateBaseLearner(algorithm='satzilla'))
+            approaches.append(CreateBaseLearner(algorithm='expectation'))
+            approaches.append(CreateBaseLearner(algorithm='par10'))
+        if approach_name == 'voting_pre_computed':
+            approaches.append(VotingPreComputed())
     return approaches
 
 
