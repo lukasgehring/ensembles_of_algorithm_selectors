@@ -220,6 +220,7 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='satzilla'))
             approaches.append(CreateBaseLearner(algorithm='expectation'))
             approaches.append(CreateBaseLearner(algorithm='par10'))
+            approaches.append(CreateBaseLearner(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
             approaches.append(VotingPreComputed())
     return approaches

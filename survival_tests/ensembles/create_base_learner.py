@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import rankdata
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
+from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
@@ -37,6 +38,8 @@ class CreateBaseLearner:
             base_learner = SurrogateSurvivalForest(criterion='Expectation')
         elif self.algorithm == 'par10':
             base_learner = SurrogateSurvivalForest(criterion='PAR10')
+        elif self.algorithm == 'multiclass':
+            base_learner = MultiClassAlgorithmSelector()
         else:
             sys.exit('Wrong base learner')
         base_learner.fit(scenario, fold, amount_of_training_instances)
