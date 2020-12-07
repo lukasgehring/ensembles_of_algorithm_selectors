@@ -93,7 +93,7 @@ def create_approach(approach_names):
         if approach_name == 'isac':
             approaches.append(ISAC())
         if approach_name == 'voting':
-            approaches.append(Voting())
+            approaches.append(Voting(base_learner=[1,2,3,4,5,6,7]))
         if approach_name == 'voting_rank':
             approaches.append(Voting(ranking=True))
         if approach_name == 'voting_rank_min':
@@ -212,7 +212,6 @@ def create_approach(approach_names):
             approaches.append(Stacking(cross_validation=True))
         if approach_name == 'stacking_multiclass':
             approaches.append(Stacking(meta_learner_type='multiclass_algorithm_selector'))
-
         if approach_name == 'create_base_learner':
             approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
             approaches.append(CreateBaseLearner(algorithm='sunny'))
@@ -221,16 +220,17 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='expectation'))
             approaches.append(CreateBaseLearner(algorithm='par10'))
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
-        if approach_name == 'create_prediction':
-            approaches.append(CreatePrediction(algorithm='per_algorithm_regressor'))
-            approaches.append(CreatePrediction(algorithm='sunny'))
-            approaches.append(CreatePrediction(algorithm='isac'))
-            approaches.append(CreatePrediction(algorithm='satzilla'))
-            approaches.append(CreatePrediction(algorithm='expectation'))
-            approaches.append(CreatePrediction(algorithm='par10'))
-            approaches.append(CreatePrediction(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
-            approaches.append(VotingPreComputed())
+            combinations = list()
+            for x in range(1, 8):
+                combination = list()
+                for y in range(x, 8):
+                    combination.append(y)
+                    if 7 > len(combination) > 1:
+                        combinations.append(combination.copy())
+
+            for c in combinations:
+                approaches.append(VotingPreComputed(base_learner=c))
     return approaches
 
 

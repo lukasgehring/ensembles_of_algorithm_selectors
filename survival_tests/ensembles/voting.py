@@ -1,9 +1,9 @@
 import logging
 
 import numpy as np
-from scipy.stats import rankdata
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
+from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
@@ -16,7 +16,7 @@ from par_10_metric import Par10Metric
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner_test=None, rank_method='average'):
+    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner=None, rank_method='average'):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
@@ -25,7 +25,7 @@ class Voting:
         self.ranking = ranking
         self.weighting = weighting
         self.cross_validation = cross_validation
-        self.base_learner_test = base_learner_test
+        self.base_learner = base_learner
         self.rank_method = rank_method
 
         # attributes
@@ -38,18 +38,20 @@ class Voting:
         # clean up list and init base learners
         self.trained_models = list()
 
-        if self.base_learner_test != 1:
+        if 1 in self.base_learner:
             self.trained_models.append(PerAlgorithmRegressor())
-        if self.base_learner_test != 2:
+        if 2 in self.base_learner:
             self.trained_models.append(SUNNY())
-        if self.base_learner_test != 3:
+        if 3 in self.base_learner:
             self.trained_models.append(ISAC())
-        if self.base_learner_test != 4:
+        if 4 in self.base_learner:
             self.trained_models.append(SATzilla11())
-        if self.base_learner_test != 5:
+        if 5 in self.base_learner:
             self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
-        if self.base_learner_test != 6:
+        if 6 in self.base_learner:
             self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
+        if 7 in self.base_learner:
+            self.trained_models.append(MultiClassAlgorithmSelector())
 
         print(self.trained_models)
 
@@ -109,21 +111,6 @@ class Voting:
 
         return 1 - predictions / sum(predictions)
 
-    # def predict_with_ranking(self, features_of_test_instance, instance_id: int):
-    #     # use all predictions (ranking) of the base learner
-    #     predictions = np.zeros((self.num_algorithms, 1))
-    #     for i, model in enumerate(self.trained_models):
-    #         # rank output from the base learner (best algorithm gets rank 1 - worst algorithm gets rank len(algorithms))
-    #         if self.weighting:
-    #             predictions = predictions.reshape(self.num_algorithms) + self.weights[i] * rankdata(
-    #                 model.predict(features_of_test_instance, instance_id)).reshape(
-    #                 self.num_algorithms)
-    #         else:
-    #             predictions = predictions.reshape(self.num_algorithms) + rankdata(
-    #                 model.predict(features_of_test_instance, instance_id))
-    #
-    #     return predictions / sum(predictions)
-
     def get_name(self):
         name = "voting"
         if self.ranking:
@@ -134,6 +121,6 @@ class Voting:
             name = name + "_weighting"
         if self.cross_validation:
             name = name + "_cross"
-        if self.base_learner_test:
-            name = name + "_without_" + str(self.base_learner_test)
+        if self.base_learner:
+            name = name + "_" + str(self.base_learner).replace('[', '').replace(']', '').replace(', ', '_')
         return name
