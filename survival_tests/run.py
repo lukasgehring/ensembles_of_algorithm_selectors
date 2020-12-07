@@ -6,9 +6,11 @@ import multiprocessing as mp
 from sklearn.ensemble import RandomForestRegressor
 
 import database_utils
+from ensembles.PreComputedPredictions import PreComputedPredictions
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
+from ensembles.create_predictions import CreatePrediction
 from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
@@ -221,6 +223,14 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='expectation'))
             approaches.append(CreateBaseLearner(algorithm='par10'))
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
+        if approach_name == 'create_prediction':
+            approaches.append(CreatePrediction(algorithm='per_algorithm_regressor'))
+            approaches.append(CreatePrediction(algorithm='sunny'))
+            approaches.append(CreatePrediction(algorithm='isac'))
+            approaches.append(CreatePrediction(algorithm='satzilla'))
+            approaches.append(CreatePrediction(algorithm='expectation'))
+            approaches.append(CreatePrediction(algorithm='par10'))
+            approaches.append(CreatePrediction(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
             approaches.append(VotingPreComputed())
     return approaches
