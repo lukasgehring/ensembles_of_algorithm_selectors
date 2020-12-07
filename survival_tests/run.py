@@ -6,6 +6,7 @@ import multiprocessing as mp
 from sklearn.ensemble import RandomForestRegressor
 
 import database_utils
+from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
@@ -184,6 +185,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=60, base_learner=SATzilla11()))
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
+        if approach_name == 'adaboostR2':
+            approaches.append(AdaboostR2('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True))
         if approach_name == 'adaboost_stump_100':
