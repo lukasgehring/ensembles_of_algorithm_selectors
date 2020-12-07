@@ -8,7 +8,7 @@ class VotingPreComputed(Voting):
 
     def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner=None,
                  rank_method='average'):
-        Voting.__init__(self, base_learner_test=base_learner)
+        Voting.__init__(self, base_learner=base_learner)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.num_algorithms = len(scenario.algorithms)
