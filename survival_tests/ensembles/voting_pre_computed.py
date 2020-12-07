@@ -18,6 +18,7 @@ class VotingPreComputed(Voting):
         self.trained_models.append(self.open_base_learner('satzilla', scenario.scenario, fold))
         self.trained_models.append(self.open_base_learner('expectation', scenario.scenario, fold))
         self.trained_models.append(self.open_base_learner('par10', scenario.scenario, fold))
+        self.trained_models.append(self.open_base_learner('multiclass', scenario.scenario, fold))
 
     def predict(self, features_of_test_instance, instance_id: int):
         return Voting.predict(self, features_of_test_instance, instance_id)
