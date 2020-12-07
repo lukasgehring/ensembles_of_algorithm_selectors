@@ -232,7 +232,7 @@ def create_approach(approach_names):
             approaches.append(CreatePrediction(algorithm='par10'))
             approaches.append(CreatePrediction(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
-            approaches.append(PreComputedPredictions())
+            approaches.append(VotingPreComputed())
     return approaches
 
 
