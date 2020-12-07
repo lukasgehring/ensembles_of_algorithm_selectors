@@ -6,11 +6,9 @@ import multiprocessing as mp
 from sklearn.ensemble import RandomForestRegressor
 
 import database_utils
-from ensembles.pre_computed_predictions import PreComputedPredictions
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
-from ensembles.create_predictions import CreatePrediction
 from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
