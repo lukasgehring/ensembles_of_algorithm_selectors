@@ -6,7 +6,7 @@ import multiprocessing as mp
 from sklearn.ensemble import RandomForestRegressor
 
 import database_utils
-from ensembles.PreComputedPredictions import PreComputedPredictions
+from ensembles.pre_computed_predictions import PreComputedPredictions
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
@@ -232,7 +232,7 @@ def create_approach(approach_names):
             approaches.append(CreatePrediction(algorithm='par10'))
             approaches.append(CreatePrediction(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
-            approaches.append(VotingPreComputed())
+            approaches.append(PreComputedPredictions())
     return approaches
 
 
