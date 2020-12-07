@@ -221,16 +221,14 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='par10'))
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
         if approach_name == 'voting_pre_computed':
-            combinations = list()
-            for x in range(1, 8):
-                combination = list()
-                for y in range(x, 8):
-                    combination.append(y)
-                    if 7 > len(combination) > 1:
-                        combinations.append(combination.copy())
-
-            for c in combinations:
-                approaches.append(VotingPreComputed(base_learner=c))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[2, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6]))
     return approaches
 
 
