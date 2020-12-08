@@ -26,7 +26,7 @@ class PreComputed:
             self.trained_model = self.open_base_learner('multiclass', scenario.scenario, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
-        return self.trained_model.predict(self, features_of_test_instance, instance_id)
+        return self.trained_model.predict(features_of_test_instance, instance_id)
 
     # open pre computed base learner
     def open_base_learner(self, base_learner_name, scenario_name, fold):
