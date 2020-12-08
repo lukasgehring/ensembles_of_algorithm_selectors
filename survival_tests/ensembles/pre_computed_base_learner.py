@@ -37,4 +37,4 @@ class PreComputed:
             return dill.load(input)
 
     def get_name(self):
-        return self.base_learner
+        return str(self.base_learner)
