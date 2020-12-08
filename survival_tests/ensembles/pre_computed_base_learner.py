@@ -10,19 +10,19 @@ class PreComputed:
         self.trained_model = None
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        if 1 in self.base_learner:
+        if 1 == self.base_learner:
             self.trained_model = self.open_base_learner('per_algorithm_regressor', scenario.scenario, fold)
-        if 2 in self.base_learner:
+        if 2 == self.base_learner:
             self.trained_model = self.open_base_learner('sunny', scenario.scenario, fold)
-        if 3 in self.base_learner:
+        if 3 == self.base_learner:
             self.trained_model = self.open_base_learner('isac', scenario.scenario, fold)
-        if 4 in self.base_learner:
+        if 4 == self.base_learner:
             self.trained_model = self.open_base_learner('satzilla', scenario.scenario, fold)
-        if 5 in self.base_learner:
+        if 5 == self.base_learner:
             self.trained_model = self.open_base_learner('expectation', scenario.scenario, fold)
-        if 6 in self.base_learner:
+        if 6 == self.base_learner:
             self.trained_model = self.open_base_learner('par10', scenario.scenario, fold)
-        if 7 in self.base_learner:
+        if 7 == self.base_learner:
             self.trained_model = self.open_base_learner('multiclass', scenario.scenario, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
