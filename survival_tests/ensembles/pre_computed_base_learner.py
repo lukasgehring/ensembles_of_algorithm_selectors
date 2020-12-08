@@ -1,5 +1,4 @@
 from aslib_scenario.aslib_scenario import ASlibScenario
-from ensembles.voting import Voting
 import dill
 import sys
 
@@ -36,4 +35,4 @@ class PreComputed:
             return dill.load(input)
 
     def get_name(self):
-        return Voting.get_name(self) + '_pre'
+        return self.base_learner
