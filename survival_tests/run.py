@@ -237,13 +237,13 @@ def create_approach(approach_names):
             approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
             approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
         if approach_name == 'pre_computed_base_learner':
-            approaches.append(PreComputed(base_learner=[1]))
-            approaches.append(PreComputed(base_learner=[2]))
-            approaches.append(PreComputed(base_learner=[3]))
-            approaches.append(PreComputed(base_learner=[4]))
-            approaches.append(PreComputed(base_learner=[5]))
-            approaches.append(PreComputed(base_learner=[6]))
-            approaches.append(PreComputed(base_learner=[7]))
+            approaches.append(PreComputed(base_learner=list(1)))
+            approaches.append(PreComputed(base_learner=list(2)))
+            approaches.append(PreComputed(base_learner=list(3)))
+            approaches.append(PreComputed(base_learner=list(4)))
+            approaches.append(PreComputed(base_learner=list(5)))
+            approaches.append(PreComputed(base_learner=list(6)))
+            approaches.append(PreComputed(base_learner=list(7)))
     return approaches
 
 
