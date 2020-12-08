@@ -11,35 +11,37 @@ def load_configuration():
 
 
 def generate_sbs_vbs_change_table():
-    boosting_color = '#2a9d8f'
-    adaboost_color = '#e9c46a'
+    color1 = '#264653'
+    color2 = '#2a9d8f'
+    color3 = '#e76f51'
+    color4 = '#e9c46a'
+    color5 = '#251314'
 
+    #TODO: correct version for voting normal??
+    adaboostR2 = get_dataframe_for_sql_query(
+        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, AdaBoostR2.approach, vbs_sbs.metric, AdaBoostR2.result, ((AdaBoostR2.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN AdaBoostR2 ON vbs_sbs.scenario_name = AdaBoostR2.scenario_name AND vbs_sbs.fold = AdaBoostR2.fold AND vbs_sbs.metric = AdaBoostR2.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach='adaboostR2_per_algorithm_regressor_10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
     boosting = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, boosting.approach, vbs_sbs.metric, boosting.result, ((boosting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN boosting ON vbs_sbs.scenario_name = boosting.scenario_name AND vbs_sbs.fold = boosting.fold AND vbs_sbs.metric = boosting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach='boosting' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY scenario_name")
-    adaboost = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboost.approach, vbs_sbs.metric, adaboost.result, ((adaboost.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboost ON vbs_sbs.scenario_name = adaboost.scenario_name AND vbs_sbs.fold = adaboost.fold AND vbs_sbs.metric = adaboost.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY scenario_name")
+        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, boosting.approach, vbs_sbs.metric, boosting.result, ((boosting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN boosting ON vbs_sbs.scenario_name = boosting.scenario_name AND vbs_sbs.fold = boosting.fold AND vbs_sbs.metric = boosting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach='boosting' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
 
+    print(boosting)
+    print(adaboostR2)
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
-    plt.axhline(np.average(adaboost.result), color=adaboost_color, linestyle='dashed', linewidth=1)
-    plt.axhline(np.average(boosting.result), color=boosting_color, linestyle='dashed', linewidth=1)
+    width = 0.5  # the width of the bars
+    ax.bar(1, adaboostR2.result, width, color=color1, label='AdaBoostR2')
+    ax.bar(2, boosting.result, width, color=color1, label='Boosting')
 
-    width = 0.2  # the width of the bars
-    ind = np.arange(len(adaboost.scenario_name))
-    ax.bar(ind + 4 * width / 3, adaboost.result, width, color=adaboost_color,
-           label='Adaboost')
+    ax.set_xticks([1, 2])
+    ax.set_xticklabels(["AdaBoostR2", "Boosting"])
 
-    ind = np.arange(len(boosting.scenario_name))
-    ax.bar(ind + width / 2, boosting.result, width, color=boosting_color, label='Boosting')
+    ax.text(1, float(adaboostR2.result), round(float(adaboostR2.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(2, float(boosting.result), round(float(boosting.result), 3), ha='center', va='bottom', rotation=0)
 
-    ax.set_xticks(ind + width / 2)
-    ax.set_xticklabels(boosting.scenario_name)
-
-    #ax.plot(stacking.scenario_name, stacking.result, color=stacking_color, label='Stacking')
-    #ax.plot(voting.scenario_name, voting.result, color=voting_color, label='Voting')
-    #ax.axis([0, 24, 0, 50])
     plt.xticks(rotation=90)
-    plt.legend()
+
+    ax.set_ylim(bottom=0.36)
+    #ax.set_ylim(top=0.44)
+
     plt.show()
 
 
