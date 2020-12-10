@@ -12,7 +12,7 @@ import copy
 
 class StackingNew:
 
-    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None):
+    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None, base_learner=None):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -20,6 +20,7 @@ class StackingNew:
         self.cross_validation = cross_validation
         self.feature_selection = feature_selection
         self.meta_learner_type = meta_learner_type
+        self.base_learner = base_learner
 
 
         # attributes
@@ -28,13 +29,22 @@ class StackingNew:
         self.num_algorithms = 0
 
     def create_base_learner(self):
-        self.base_learners.append(PerAlgorithmRegressor())
-        self.base_learners.append(SUNNY())
-        self.base_learners.append(ISAC())
-        self.base_learners.append(SATzilla11())
-        self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
-        self.base_learners.append(MultiClassAlgorithmSelector())
+        self.base_learners = list()
+
+        if 1 in self.base_learner:
+            self.trained_models.append(PerAlgorithmRegressor())
+        if 2 in self.base_learner:
+            self.trained_models.append(SUNNY())
+        if 3 in self.base_learner:
+            self.trained_models.append(ISAC())
+        if 4 in self.base_learner:
+            self.trained_models.append(SATzilla11())
+        if 5 in self.base_learner:
+            self.trained_models.append(SurrogateSurvivalForest(criterion='Expectation'))
+        if 6 in self.base_learner:
+            self.trained_models.append(SurrogateSurvivalForest(criterion='PAR10'))
+        if 7 in self.base_learner:
+            self.trained_models.append(MultiClassAlgorithmSelector())
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
@@ -50,8 +60,7 @@ class StackingNew:
                 algorithm_prediction = np.argmin(base_learner.predict(x_test, instance_number))
                 new_feature_data[instance_number][algorithm_prediction] = new_feature_data[instance_number][algorithm_prediction] + 1
 
-        # TODO: bring new_feature_data in correct form
-        scenario.feature_data = new_feature_data
+        scenario.feature_data = pd.DataFrame(data=new_feature_data)
 
         for sub_fold in range(10):
             test_scenario, training_scenario = self.split_scenario(scenario, sub_fold + 1, num_instances)
@@ -70,7 +79,6 @@ class StackingNew:
             algorithm_prediction = np.argmin(base_learner.predict(features_of_test_instance, instance_id))
             new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + 1
 
-        # TODO: bring new_feature_data in correct form
         features_of_test_instance = new_feature_data
 
         final_prediction = np.zeros(self.num_algorithms)

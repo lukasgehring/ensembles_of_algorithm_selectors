@@ -44,8 +44,7 @@ class StackingPreComputed(StackingNew):
                 algorithm_prediction = np.argmin(base_learner.predict(x_test, instance_number))
                 new_feature_data[instance_number][algorithm_prediction] = new_feature_data[instance_number][algorithm_prediction] + 1
 
-        # TODO: bring new_feature_data in correct form
-        scenario.feature_data = new_feature_data
+        scenario.feature_data = pd.DataFrame(data=new_feature_data)
 
         for sub_fold in range(10):
             test_scenario, training_scenario = self.split_scenario(scenario, sub_fold + 1, num_instances)
