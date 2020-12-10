@@ -15,6 +15,7 @@ from ensembles.stacking import Stacking
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
 from ensembles.voting_pre_computed import VotingPreComputed
+from ensembles.stacking_pre_computed import StackingPreComputed
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -243,6 +244,9 @@ def create_approach(approach_names):
             approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True))
         if approach_name == 'voting_pre_computed_cross_wk':
             approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True, cross_validation=True))
+        if approach_name == 'stacking_pre_computed':
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
+        
         if approach_name == 'pre_computed_base_learner':
             approaches.append(PreComputed(base_learner=1))
             approaches.append(PreComputed(base_learner=2))

@@ -10,7 +10,7 @@ from baselines.sunny import SUNNY
 import copy
 
 
-class Stacking:
+class StackingNew:
 
     def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None):
         self.logger = logging.getLogger("stacking")
@@ -83,7 +83,7 @@ class Stacking:
         return final_prediction
 
     def get_name(self):
-        name = "stacking_" + self.meta_learner_type
+        name = "stacking_new_" + self.meta_learner_type
         if self.cross_validation:
             name = name + "_cross_validation"
         if self.feature_selection is not None:
