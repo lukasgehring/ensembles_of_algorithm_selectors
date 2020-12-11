@@ -235,8 +235,12 @@ def create_approach(approach_names):
             approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 7]))
             approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6]))
         if approach_name == 'voting_pre_computed_ranking':
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
+            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
+            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min'))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='min'))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max'))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='max'))
         if approach_name == 'voting_pre_computed_weighting':
             approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True))
             approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True))
