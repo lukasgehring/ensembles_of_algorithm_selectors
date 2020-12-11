@@ -8,6 +8,7 @@ from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
+from ensembles.validation import split_scenario
 import copy
 
 
@@ -64,7 +65,7 @@ class StackingNew:
         scenario.feature_data = pd.DataFrame(data=new_feature_data)
 
         for sub_fold in range(10):
-            test_scenario, training_scenario = self.split_scenario(scenario, sub_fold + 1, num_instances)
+            test_scenario, training_scenario = split_scenario(scenario, sub_fold + 1, num_instances)
 
             self.meta_learners.append(PerAlgorithmRegressor(feature_selection=self.feature_selection), None)
             self.meta_learners[sub_fold][0].fit(test_scenario, fold, amount_of_training_instances)

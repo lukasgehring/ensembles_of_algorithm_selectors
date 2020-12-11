@@ -8,6 +8,7 @@ from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 from ensembles.validation import base_learner_performance, split_scenario
 from ensembles.stacking_new import StackingNew
+from ensembles.validation import split_scenario
 import dill
 import numpy as np
 import pandas as pd
@@ -48,7 +49,7 @@ class StackingPreComputed(StackingNew):
         scenario.feature_data = pd.DataFrame(data=new_feature_data)
 
         for sub_fold in range(10):
-            test_scenario, training_scenario = self.split_scenario(scenario, sub_fold + 1, num_instances)
+            test_scenario, training_scenario = split_scenario(scenario, sub_fold + 1, num_instances)
 
             self.meta_learners.append(PerAlgorithmRegressor(feature_selection=self.feature_selection), None)
             self.meta_learners[sub_fold][0].fit(test_scenario, fold, amount_of_training_instances)
