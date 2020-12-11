@@ -10,6 +10,7 @@ from ensembles.validation import base_learner_performance, split_scenario
 from ensembles.stacking_new import StackingNew
 import dill
 import numpy as np
+import pandas as pd
 import sys
 
 

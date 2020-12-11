@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import pandas as pd
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
 from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
