@@ -46,14 +46,14 @@ class StackingPreComputed(StackingNew):
                 algorithm_prediction = np.argmin(base_learner.predict(x_test, instance_number))
                 new_feature_data[instance_number][algorithm_prediction] = new_feature_data[instance_number][algorithm_prediction] + 1
 
-        scenario.feature_data = pd.DataFrame(data=new_feature_data)
+        scenario.feature_data = pd.DataFrame(data=new_feature_data, index=scenario.feature_data.index)
 
         for sub_fold in range(10):
             test_scenario, training_scenario = split_scenario(scenario, sub_fold + 1, num_instances)
 
-            self.meta_learners.append(PerAlgorithmRegressor(feature_selection=self.feature_selection), None)
+            self.meta_learners.append((PerAlgorithmRegressor(feature_selection=self.feature_selection), 0))
             self.meta_learners[sub_fold][0].fit(test_scenario, fold, amount_of_training_instances)
-            self.meta_learners[sub_fold][1] = base_learner_performance(test_scenario, amount_of_training_instances, self.meta_learners[sub_fold][0])
+            self.meta_learners[sub_fold] = (self.meta_learners[sub_fold][0], base_learner_performance(test_scenario, amount_of_training_instances, self.meta_learners[sub_fold][0]))
 
 
     def predict(self, features_of_test_instance, instance_id: int):
