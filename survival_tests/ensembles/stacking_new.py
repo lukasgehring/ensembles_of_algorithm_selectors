@@ -92,7 +92,10 @@ class StackingNew:
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get all predictions from the base learners
-        new_feature_data = np.zeros(self.num_algorithms)
+        if self.type == 'standard':
+            new_feature_data = np.zeros(self.num_algorithms)
+        elif self.type == 'full_prediction':
+            new_feature_data = list()
 
         for base_learner in self.base_learners:
             # create new feature data
