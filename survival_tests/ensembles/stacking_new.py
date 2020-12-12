@@ -65,6 +65,8 @@ class StackingNew:
             x_train = np.zeros((num_instances, self.num_algorithms))
         elif self.type == 'full_prediction':
             x_train = [[] for x in range(num_instances)]
+        else:
+            sys.exit("Wrong prediction type!")
 
         for i, base_learner in enumerate(self.base_learners):
             if not self.pre_computed:
@@ -76,7 +78,7 @@ class StackingNew:
                     x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + 1
                 elif self.type == 'full_prediction':
                     # TODO: not finished
-                    x_train[instance_number].extend(algorithm_prediction)
+                    x_train[instance_number].extend(algorithm_prediction.flatten())
 
         if self.meta_learner_type == 'random_forest_classifier':
             self.meta_learner = RandomForestClassifier(n_jobs=1, n_estimators=100)
@@ -99,7 +101,7 @@ class StackingNew:
                 algorithm_prediction = np.argmin(algorithm_prediction)
                 new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + 1
             elif self.type == 'full_prediction':
-                new_feature_data.extend(algorithm_prediction)
+                new_feature_data.extend(algorithm_prediction.flatten())
 
         features_of_test_instance = new_feature_data.reshape(1, -1)
 
