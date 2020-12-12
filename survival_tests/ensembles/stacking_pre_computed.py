@@ -18,8 +18,8 @@ import sys
 
 class StackingPreComputed(StackingNew):
 
-    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None):
-        StackingNew.__init__(self, meta_learner_type=meta_learner_type, cross_validation=False, feature_selection=None, base_learner=base_learner, pre_computed=True)
+    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None, feature_type='standard'):
+        StackingNew.__init__(self, meta_learner_type=meta_learner_type, cross_validation=False, feature_selection=None, base_learner=base_learner, pre_computed=True, type=feature_type)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         if 1 in self.base_learner:

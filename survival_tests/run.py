@@ -251,6 +251,9 @@ def create_approach(approach_names):
         if approach_name == 'stacking_pre_computed':
             approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
         
+        if approach_name == 'stacking_full_pre_computed':
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
+        
         if approach_name == 'pre_computed_base_learner':
             approaches.append(PreComputed(base_learner=1))
             approaches.append(PreComputed(base_learner=2))
