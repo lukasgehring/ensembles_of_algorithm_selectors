@@ -37,7 +37,7 @@ class StackingPreComputed(StackingNew):
         if 7 in self.base_learner:
             self.base_learners.append(self.open_base_learner('multiclass', scenario.scenario, fold))
 
-        StackingNew.fit(scenario, fold, amount_of_training_instances)
+        StackingNew.fit(self, scenario, fold, amount_of_training_instances)
 
     def predict(self, features_of_test_instance, instance_id: int):
         return StackingNew.predict(self, features_of_test_instance, instance_id)
