@@ -1,4 +1,5 @@
 from aslib_scenario.aslib_scenario import ASlibScenario
+from sklearn.ensemble import RandomForestClassifier
 
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
@@ -39,22 +40,19 @@ class StackingPreComputed(StackingNew):
         self.num_algorithms = len(scenario.algorithms)
         feature_data = scenario.feature_data.to_numpy()
         num_instances = len(feature_data)
-        new_feature_data = np.zeros((num_instances, self.num_algorithms))
+        x_train = np.zeros((num_instances, self.num_algorithms))
 
         for i, base_learner in enumerate(self.base_learners):
             for instance_number, x_test in enumerate(feature_data):
                 algorithm_prediction = np.argmin(base_learner.predict(x_test, instance_number))
-                new_feature_data[instance_number][algorithm_prediction] = new_feature_data[instance_number][algorithm_prediction] + 1
+                x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + 1
 
-        scenario.feature_data = pd.DataFrame(data=new_feature_data, index=scenario.feature_data.index)
-
-        for sub_fold in range(10):
-            test_scenario, training_scenario = split_scenario(scenario, sub_fold + 1, num_instances)
-
-            self.meta_learners.append((PerAlgorithmRegressor(feature_selection=self.feature_selection), 0))
-            self.meta_learners[sub_fold][0].fit(test_scenario, fold, amount_of_training_instances)
-            self.meta_learners[sub_fold] = (self.meta_learners[sub_fold][0], base_learner_performance(test_scenario, amount_of_training_instances, self.meta_learners[sub_fold][0]))
-
+        self.meta_learner = RandomForestClassifier(n_jobs=1, n_estimators=100)
+        self.meta_learner.set_params(random_state=fold)
+        y_train = list()
+        for data in scenario.performance_data.to_numpy():
+            y_train.append(np.argmin(data))
+        self.meta_learner.fit(x_train, y_train)
 
     def predict(self, features_of_test_instance, instance_id: int):
         return StackingNew.predict(self, features_of_test_instance, instance_id)
