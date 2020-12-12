@@ -18,7 +18,7 @@ from ensembles.validation import base_learner_performance
 
 class StackingNew:
 
-    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None, type='standard'):
+    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None, type='standard', pre_computed=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -28,6 +28,7 @@ class StackingNew:
         self.meta_learner_type = meta_learner_type
         self.base_learner = base_learner
         self.type = type
+        self.pre_computed = pre_computed
 
         # attributes
         self.meta_learner = None
@@ -52,9 +53,9 @@ class StackingNew:
         if 7 in self.base_learner:
             self.base_learners.append(MultiClassAlgorithmSelector())
 
-    def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int, pre_computed=False):
+    def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
-        if not pre_computed:
+        if not self.pre_computed:
             self.create_base_learner()
         self.num_algorithms = len(scenario.algorithms)
         feature_data = scenario.feature_data.to_numpy()
@@ -66,7 +67,7 @@ class StackingNew:
             x_train = [[] for x in range(num_instances)]
 
         for i, base_learner in enumerate(self.base_learners):
-            if not pre_computed:
+            if not self.pre_computed:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
             for instance_number, x_test in enumerate(feature_data):
                 algorithm_prediction = base_learner.predict(x_test, instance_number)

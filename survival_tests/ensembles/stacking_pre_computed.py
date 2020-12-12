@@ -19,7 +19,7 @@ import sys
 class StackingPreComputed(StackingNew):
 
     def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None):
-        StackingNew.__init__(self, meta_learner_type=meta_learner_type, cross_validation=False, feature_selection=None, base_learner=base_learner)
+        StackingNew.__init__(self, meta_learner_type=meta_learner_type, cross_validation=False, feature_selection=None, base_learner=base_learner, pre_computed=True)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         if 1 in self.base_learner:
@@ -37,7 +37,7 @@ class StackingPreComputed(StackingNew):
         if 7 in self.base_learner:
             self.base_learners.append(self.open_base_learner('multiclass', scenario.scenario, fold))
 
-        StackingNew.fit(scenario, fold, amount_of_training_instances, pre_computed=True)
+        StackingNew.fit(scenario, fold, amount_of_training_instances)
 
     def predict(self, features_of_test_instance, instance_id: int):
         return StackingNew.predict(self, features_of_test_instance, instance_id)
