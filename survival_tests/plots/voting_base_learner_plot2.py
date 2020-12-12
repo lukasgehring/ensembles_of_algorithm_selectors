@@ -43,7 +43,7 @@ def generate_sbs_vbs_change_table():
 
     plt.axhline(voting_normal, color='#000', linestyle='dashed', linewidth=2)
 
-    width = 0.5  # the width of the bars
+    width = 0.4  # the width of the bars
     ax.bar(1, voting24567.result, width, color=color1, label='PerAlgorithmRegressor')
     ax.bar(2, voting14567.result, width, color=color1, label='SUNNY')
     ax.bar(3, voting12567.result, width, color=color1, label='SATzilla-11')
@@ -61,12 +61,14 @@ def generate_sbs_vbs_change_table():
     ax.text(5, float(voting12457.result), round(float(voting12457.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(6, float(voting12456.result), round(float(voting12456.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
 
-    plt.xticks(rotation=90)
+    plt.xticks(rotation=45, ha='right')
 
     ax.set_ylim(bottom=0.36)
     ax.set_ylim(top=0.46)
 
     plt.show()
+
+    fig.savefig("2.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):
