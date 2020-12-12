@@ -106,6 +106,7 @@ class StackingNew:
             elif self.type == 'full_prediction':
                 new_feature_data.extend(algorithm_prediction.flatten())
 
+        new_feature_data = np.array(new_feature_data)
         features_of_test_instance = new_feature_data.reshape(1, -1)
 
         prediction = self.meta_learner.predict(features_of_test_instance)
