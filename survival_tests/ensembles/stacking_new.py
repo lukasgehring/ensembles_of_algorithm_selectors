@@ -80,7 +80,7 @@ class StackingNew:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
 
             # calculate the confidence of base learner i
-            if self.type = 'confidence_prediction':
+            if self.type == 'confidence_prediction':
                 self.append(get_confidence(scenario, amount_of_training_instances, base_learner))
 
             # predict with base learner i and create feature data
