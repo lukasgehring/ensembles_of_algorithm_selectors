@@ -16,7 +16,7 @@ from par_10_metric import Par10Metric
 
 class Voting:
 
-    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner=None, rank_method='average'):
+    def __init__(self, ranking=False, weighting=False, cross_validation=False, base_learner=None, rank_method='average', pre_computed=False):
         # logger
         self.logger = logging.getLogger("voting")
         self.logger.addHandler(logging.StreamHandler())
@@ -27,6 +27,7 @@ class Voting:
         self.cross_validation = cross_validation
         self.base_learner = base_learner
         self.rank_method = rank_method
+        self.pre_computed = pre_computed
 
         # attributes
         self.trained_models = list()
@@ -56,9 +57,10 @@ class Voting:
         print(self.trained_models)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        print("Run fit on " + self.get_name() + " for fold " + str(fold))
         self.num_algorithms = len(scenario.algorithms)
-        self.create_base_learner()
+
+        if not self.pre_computed:
+            self.create_base_learner()
 
         if self.cross_validation:
             weights_denorm = np.zeros(len(self.trained_models))
@@ -79,7 +81,8 @@ class Voting:
 
             # train base learner and calculate the weights
             for base_learner in self.trained_models:
-                base_learner.fit(scenario, fold, amount_of_training_instances)
+                if not self.pre_computed:
+                    base_learner.fit(scenario, fold, amount_of_training_instances)
                 if self.weighting:
                     #weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
                     weights_denorm.append(get_confidence(scenario, amount_of_training_instances, base_learner))
