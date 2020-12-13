@@ -31,7 +31,7 @@ def base_learner_performance(scenario: ASlibScenario, amount_of_training_instanc
                                                                     scenario.algorithm_cutoff_time)
     return performance_measure / num_iterations
 
-def get_confidence(self, scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
+def get_confidence(scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
         feature_data = scenario.feature_data.to_numpy()
         performance_data = scenario.performance_data.to_numpy()
         feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
