@@ -31,6 +31,43 @@ def base_learner_performance(scenario: ASlibScenario, amount_of_training_instanc
                                                                     scenario.algorithm_cutoff_time)
     return performance_measure / num_iterations
 
+def get_confidence(self, scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
+        feature_data = scenario.feature_data.to_numpy()
+        performance_data = scenario.performance_data.to_numpy()
+        feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
+
+        err = 0
+
+        for instance_id in range(amount_of_training_instances):
+            x_test = feature_data[instance_id]
+            y_test = performance_data[instance_id]
+
+            accumulated_feature_time = 0
+            if scenario.feature_cost_data is not None:
+                feature_time = feature_cost_data[instance_id]
+                accumulated_feature_time = np.sum(feature_time)
+
+            # contains_non_censored_value = False
+            # for y_element in y_test:
+            #    if y_element < test_scenario.algorithm_cutoff_time:
+            #        contains_non_censored_value = True
+            # if contains_non_censored_value:
+            #    num_counted_test_values += 1
+
+            predictions = base_learner.predict(x_test, instance_id)
+            y_algorithm = np.argmin(y_test)
+            predicted_algorithm = np.argmin(predictions)
+            if y_algorithm != predicted_algorithm:
+                err = err + 1
+
+        err = err / sum(amount_of_training_instances)
+
+        if err < 0.001:
+            err = 0.001
+    
+        confidence = math.log((1 - err) / err) + math.log(self.num_algorithms - 1)
+        return confidence
+
 
 def split_scenario(scenario: ASlibScenario, sub_fold: int, num_instances: int):
     fold_len = int(num_instances / 10)
