@@ -67,7 +67,7 @@ class StackingNew:
         # create new feature data structure
         if self.type == 'standard' or self.type == 'confidence_prediction':
             x_train = np.zeros((num_instances, self.num_algorithms))
-        elif self.type == 'full_prediction':
+        elif self.type == 'full_prediction' or self.type == 'full_prediction_norm':
             x_train = [[] for x in range(num_instances)]
         else:
             sys.exit("Wrong prediction type!")
@@ -101,6 +101,11 @@ class StackingNew:
                 elif self.type == 'full_prediction':
                     x_train[instance_number].extend(algorithm_prediction.flatten())
 
+                # full_prediction_norm -> the full normalzied prediction of all base learners is added to the feature data -> [1 1 1 1 0 0.2 0.5 ...]
+                elif self.type == 'full_prediction_norm':
+                    algorithm_prediction = algorithm_prediction / sum(algorithm_prediction)
+                    x_train[instance_number].extend(algorithm_prediction.flatten())
+
         # setup the meta-learner
         if self.meta_learner_type == 'random_forest_classifier':
             self.meta_learner = RandomForestClassifier(n_jobs=1, n_estimators=100)
@@ -118,7 +123,7 @@ class StackingNew:
         # create new feature data structure
         if self.type == 'standard' or self.type == 'confidence_prediction':
             new_feature_data = np.zeros(self.num_algorithms)
-        elif self.type == 'full_prediction':
+        elif self.type == 'full_prediction' or self.type == 'full_prediction_norm':
             new_feature_data = list()
 
         # create the actual new feature data -> see 'fit' method for more details
@@ -131,6 +136,9 @@ class StackingNew:
                 algorithm_prediction = np.argmin(algorithm_prediction)
                 new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + self.confidence[i]
             elif self.type == 'full_prediction':
+                new_feature_data.extend(algorithm_prediction.flatten())
+            elif self.type == 'full_prediction_norm':
+                algorithm_prediction = algorithm_prediction / sum(algorithm_prediction)
                 new_feature_data.extend(algorithm_prediction.flatten())
 
         new_feature_data = np.array(new_feature_data)
