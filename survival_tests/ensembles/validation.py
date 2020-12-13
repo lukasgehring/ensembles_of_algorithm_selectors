@@ -2,6 +2,7 @@ import copy
 
 from aslib_scenario.aslib_scenario import ASlibScenario
 import numpy as np
+import math
 
 from par_10_metric import Par10Metric
 
