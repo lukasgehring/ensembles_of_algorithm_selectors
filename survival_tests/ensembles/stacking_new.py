@@ -10,7 +10,7 @@ from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
-from ensembles.validation import split_scenario
+from ensembles.validation import split_scenario, get_confidence
 import copy
 
 from ensembles.validation import base_learner_performance
@@ -34,6 +34,7 @@ class StackingNew:
         self.meta_learner = None
         self.base_learners = list()
         self.num_algorithms = 0
+        self.confidence = list()
 
     def create_base_learner(self):
         self.base_learners = list()
@@ -54,67 +55,96 @@ class StackingNew:
             self.base_learners.append(MultiClassAlgorithmSelector())
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
-        # setup
+        # setting for pre computed base learner
         if not self.pre_computed:
             self.create_base_learner()
+        
+        # setup
         self.num_algorithms = len(scenario.algorithms)
         feature_data = scenario.feature_data.to_numpy()
         num_instances = len(feature_data)
 
-        if self.type == 'standard':
+        # create new feature data structure
+        if self.type == 'standard' or self.type == 'confidence_prediction':
             x_train = np.zeros((num_instances, self.num_algorithms))
         elif self.type == 'full_prediction':
             x_train = [[] for x in range(num_instances)]
         else:
             sys.exit("Wrong prediction type!")
 
+        # create the actual new feature data
         for i, base_learner in enumerate(self.base_learners):
+
+            # train the base learner
             if not self.pre_computed:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
+
+            # calculate the confidence of base learner i
+            if self.type = 'confidence_prediction':
+                self.append(get_confidence(scenario, amount_of_training_instances, base_learner))
+
+            # predict with base learner i and create feature data
             for instance_number, x_test in enumerate(feature_data):
                 algorithm_prediction = base_learner.predict(x_test, instance_number)
+
+                # standard -> each base learner does one prediction -> [0 2 0 2 3]
                 if self.type == 'standard':
                     algorithm_prediction = np.argmin(algorithm_prediction)
                     x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + 1
+                
+                # confidence_prediction -> the confidences for the best prediction are added -> [0 1.3 4.2 5.3 0.1]
+                elif self.type == 'confidence_prediction':
+                    algorithm_prediction = np.argmin(algorithm_prediction)
+                    x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + self.confidence[i]
+                
+                # full_prediction -> the full prediction of all base learners is added to the feature data -> [1 1 1 1 0 34.5 245.3 3435. 253.3 253. ...]
                 elif self.type == 'full_prediction':
-                    # TODO: not finished
                     x_train[instance_number].extend(algorithm_prediction.flatten())
 
+        # setup the meta-learner
         if self.meta_learner_type == 'random_forest_classifier':
             self.meta_learner = RandomForestClassifier(n_jobs=1, n_estimators=100)
         else:
             sys.exit("Wrong meta learner type")
         self.meta_learner.set_params(random_state=fold)
+
+        # train the meta learner
         y_train = list()
         for data in scenario.performance_data.to_numpy():
             y_train.append(np.argmin(data))
         self.meta_learner.fit(x_train, y_train)
 
     def predict(self, features_of_test_instance, instance_id: int):
-        # get all predictions from the base learners
-        if self.type == 'standard':
+        # create new feature data structure
+        if self.type == 'standard' or self.type == 'confidence_prediction':
             new_feature_data = np.zeros(self.num_algorithms)
         elif self.type == 'full_prediction':
             new_feature_data = list()
 
-        for base_learner in self.base_learners:
-            # create new feature data
+        # create the actual new feature data -> see 'fit' method for more details
+        for i, base_learner in enumerate(self.base_learners):
             algorithm_prediction = base_learner.predict(features_of_test_instance, instance_id)
             if self.type == 'standard':
                 algorithm_prediction = np.argmin(algorithm_prediction)
                 new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + 1
+            elif self.type == 'confidence_prediction':
+                algorithm_prediction = np.argmin(algorithm_prediction)
+                new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + self.confidence[i]
             elif self.type == 'full_prediction':
                 new_feature_data.extend(algorithm_prediction.flatten())
 
         new_feature_data = np.array(new_feature_data)
         features_of_test_instance = new_feature_data.reshape(1, -1)
 
+        # predict with the meta-learner
         prediction = self.meta_learner.predict(features_of_test_instance)
 
+        # create a final prediction where all algorithms get a 1 except the best one. This one gets a 0.
         final_prediction = np.ones(self.num_algorithms)
         final_prediction[prediction] = 0
 
         return final_prediction
+
 
     def get_name(self):
         name = "stacking_new_" + self.meta_learner_type + "_" + self.type
