@@ -60,12 +60,12 @@ def get_confidence(scenario: ASlibScenario, amount_of_training_instances: int, b
             if y_algorithm != predicted_algorithm:
                 err = err + 1
 
-        err = err / sum(amount_of_training_instances)
+        err = err / amount_of_training_instances
 
         if err < 0.001:
             err = 0.001
     
-        confidence = math.log((1 - err) / err) + math.log(self.num_algorithms - 1)
+        confidence = math.log((1 - err) / err) + math.log(len(scenario.algorithms) - 1)
         return confidence
 
 
