@@ -18,7 +18,7 @@ from ensembles.validation import base_learner_performance
 
 class StackingNew:
 
-    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None, type='standard', pre_computed=False):
+    def __init__(self, meta_learner_type='random_forest_classifier', cross_validation=False, feature_selection=None, base_learner=None, feature_type='standard', pre_computed=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -27,7 +27,7 @@ class StackingNew:
         self.feature_selection = feature_selection
         self.meta_learner_type = meta_learner_type
         self.base_learner = base_learner
-        self.type = type
+        self.feature_type = feature_type
         self.pre_computed = pre_computed
 
         # attributes
@@ -65,9 +65,9 @@ class StackingNew:
         num_instances = len(feature_data)
 
         # create new feature data structure
-        if self.type == 'standard' or self.type == 'confidence_prediction':
+        if self.feature_type == 'standard' or self.feature_type == 'confidence_prediction':
             x_train = np.zeros((num_instances, self.num_algorithms))
-        elif self.type == 'full_prediction' or self.type == 'full_prediction_norm':
+        elif self.feature_type == 'full_prediction' or self.feature_type == 'full_prediction_norm':
             x_train = [[] for x in range(num_instances)]
         else:
             sys.exit("Wrong prediction type!")
@@ -80,29 +80,29 @@ class StackingNew:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
 
             # calculate the confidence of base learner i
-            if self.type == 'confidence_prediction':
-                self.append(get_confidence(scenario, amount_of_training_instances, base_learner))
+            if self.feature_type == 'confidence_prediction':
+                self.confidence.append(get_confidence(scenario, amount_of_training_instances, base_learner))
 
             # predict with base learner i and create feature data
             for instance_number, x_test in enumerate(feature_data):
                 algorithm_prediction = base_learner.predict(x_test, instance_number)
 
                 # standard -> each base learner does one prediction -> [0 2 0 2 3]
-                if self.type == 'standard':
+                if self.feature_type == 'standard':
                     algorithm_prediction = np.argmin(algorithm_prediction)
                     x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + 1
                 
                 # confidence_prediction -> the confidences for the best prediction are added -> [0 1.3 4.2 5.3 0.1]
-                elif self.type == 'confidence_prediction':
+                elif self.feature_type == 'confidence_prediction':
                     algorithm_prediction = np.argmin(algorithm_prediction)
                     x_train[instance_number][algorithm_prediction] = x_train[instance_number][algorithm_prediction] + self.confidence[i]
                 
                 # full_prediction -> the full prediction of all base learners is added to the feature data -> [1 1 1 1 0 34.5 245.3 3435. 253.3 253. ...]
-                elif self.type == 'full_prediction':
+                elif self.feature_type == 'full_prediction':
                     x_train[instance_number].extend(algorithm_prediction.flatten())
 
                 # full_prediction_norm -> the full normalzied prediction of all base learners is added to the feature data -> [1 1 1 1 0 0.2 0.5 ...]
-                elif self.type == 'full_prediction_norm':
+                elif self.feature_type == 'full_prediction_norm':
                     algorithm_prediction = algorithm_prediction / sum(algorithm_prediction)
                     x_train[instance_number].extend(algorithm_prediction.flatten())
 
@@ -121,23 +121,23 @@ class StackingNew:
 
     def predict(self, features_of_test_instance, instance_id: int):
         # create new feature data structure
-        if self.type == 'standard' or self.type == 'confidence_prediction':
+        if self.feature_type == 'standard' or self.feature_type == 'confidence_prediction':
             new_feature_data = np.zeros(self.num_algorithms)
-        elif self.type == 'full_prediction' or self.type == 'full_prediction_norm':
+        elif self.feature_type == 'full_prediction' or self.feature_type == 'full_prediction_norm':
             new_feature_data = list()
 
         # create the actual new feature data -> see 'fit' method for more details
         for i, base_learner in enumerate(self.base_learners):
             algorithm_prediction = base_learner.predict(features_of_test_instance, instance_id)
-            if self.type == 'standard':
+            if self.feature_type == 'standard':
                 algorithm_prediction = np.argmin(algorithm_prediction)
                 new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + 1
-            elif self.type == 'confidence_prediction':
+            elif self.feature_type == 'confidence_prediction':
                 algorithm_prediction = np.argmin(algorithm_prediction)
                 new_feature_data[algorithm_prediction] = new_feature_data[algorithm_prediction] + self.confidence[i]
-            elif self.type == 'full_prediction':
+            elif self.feature_type == 'full_prediction':
                 new_feature_data.extend(algorithm_prediction.flatten())
-            elif self.type == 'full_prediction_norm':
+            elif self.feature_type == 'full_prediction_norm':
                 algorithm_prediction = algorithm_prediction / sum(algorithm_prediction)
                 new_feature_data.extend(algorithm_prediction.flatten())
 
@@ -155,7 +155,7 @@ class StackingNew:
 
 
     def get_name(self):
-        name = "stacking_new_" + self.meta_learner_type + "_" + self.type
+        name = "stacking_new_" + self.meta_learner_type + "_" + self.feature_type
         if self.cross_validation:
             name = name + "_cross_validation"
         if self.feature_selection is not None:
