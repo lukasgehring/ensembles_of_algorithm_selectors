@@ -8,11 +8,12 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 import copy
+import pandas as pd
 
 
 class Stacking:
 
-    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None):
+    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None, feature_importances=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -20,6 +21,7 @@ class Stacking:
         self.cross_validation = cross_validation
         self.feature_selection = feature_selection
         self.meta_learner_type = meta_learner_type
+        self.feature_importances = feature_importances
 
 
         # attributes
@@ -32,9 +34,9 @@ class Stacking:
         self.base_learners.append(SUNNY())
         self.base_learners.append(ISAC())
         #self.base_learners.append(SATzilla11())
-        #self.base_learners.append(MultiClassAlgorithmSelector())
         #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
         #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        #self.base_learners.append(MultiClassAlgorithmSelector())
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
@@ -73,12 +75,13 @@ class Stacking:
                     prediction = base_learner.predict(feature_data[instance_number], instance_number)
                     new_feature_data[instance_number][np.argmin(prediction)] = new_feature_data[instance_number][np.argmin(prediction)] + 1
         # add predictions to the features of the instances
-        new_feature_data = np.concatenate((feature_data, new_feature_data), axis=1)
+        new_feature_data = pd.DataFrame(new_feature_data, index=scenario.feature_data.index, columns=np.arange(self.num_algorithms))
+        new_feature_data = pd.concat([scenario.feature_data, new_feature_data], axis=1, sort=False)
         scenario.feature_data = new_feature_data
 
         # meta learner training with or without feature selection
         if self.meta_learner_type == 'per_algorithm_regressor':
-            self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection)
+            self.meta_learner = PerAlgorithmRegressor(feature_selection=self.feature_selection, feature_importances=self.feature_importances)
         elif self.meta_learner_type == 'multiclass_algorithm_selector':
             self.meta_learner = MultiClassAlgorithmSelector(feature_selection=self.feature_selection)
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)

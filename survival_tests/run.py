@@ -12,6 +12,7 @@ from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
 from ensembles.pre_computed_base_learner import PreComputed
 from ensembles.stacking import Stacking
+from ensembles.stacking_old_pre_computed import StackingOldPreComputed
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
 from ensembles.voting_pre_computed import VotingPreComputed
@@ -253,6 +254,9 @@ def create_approach(approach_names):
             approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='confidence_prediction'))
         if approach_name == 'stacking_full_pre_computed':
             approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
+
+        if approach_name == 'stacking_feature_importance_pre_computed':
+            approaches.append(StackingOldPreComputed(feature_importances=True))
         
         if approach_name == 'pre_computed_base_learner':
             approaches.append(PreComputed(base_learner=1))

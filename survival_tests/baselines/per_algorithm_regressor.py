@@ -1,4 +1,5 @@
 import logging
+import pickle
 import sys
 import pandas as pd
 import numpy as np
@@ -6,6 +7,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_regression, mutual_info_regression
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.utils import resample
 from sklearn.base import clone
 
@@ -17,7 +19,7 @@ from sklearn.pipeline import Pipeline
 
 class PerAlgorithmRegressor:
 
-    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, feature_selection=None, data_weights=None, stump=False):
+    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, feature_selection=None, data_weights=None, stump=False, feature_importances=False):
         self.scikit_regressor = scikit_regressor
         self.logger = logging.getLogger("per_algorithm_regressor")
         self.logger.addHandler(logging.StreamHandler())
@@ -28,6 +30,7 @@ class PerAlgorithmRegressor:
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1
         self.metric = Par10Metric()
+        self.feature_importances = feature_importances
 
         # setup
         self.impute_censored = impute_censored
@@ -64,6 +67,7 @@ class PerAlgorithmRegressor:
             # train the model (with/without stump/weight)
             model = clone(self.scikit_regressor)
             if self.stump:
+                model = DecisionTreeRegressor()
                 model.set_params(random_state=fold, max_depth=1)
             else:
                 model.set_params(random_state=fold)
@@ -75,6 +79,8 @@ class PerAlgorithmRegressor:
             else:
                 if self.data_weights is None:
                     model.fit(X_train, y_train)
+                    if self.feature_importances:
+                        self.save_feature_importance(model, scenario.scenario, len(X_train[0]))
                 else:
                     model.fit(X_train, y_train, sample_weight=self.data_weights)
 
@@ -200,6 +206,22 @@ class PerAlgorithmRegressor:
         performances_of_algorithm_with_id = performances_of_algorithm_with_id[~nan_mask]
 
         return instance_features, performances_of_algorithm_with_id
+
+    # save base learner for later use
+    def save_feature_importance(self, base_learner, scenario_name, num_features):
+        importances = base_learner.feature_importances_
+        indices = np.argsort(importances)[::-1]
+
+        # Print the feature ranking
+        print("Feature ranking:")
+
+        file_name = 'feature_importance/' + scenario_name
+        with open(file_name, 'ab') as f:
+            pickle.dump((-1, num_features), f)
+            for i in indices:
+                data = (i, importances[i])
+                print(data)
+                pickle.dump(data, f)
 
     def get_name(self):
         name = ''
