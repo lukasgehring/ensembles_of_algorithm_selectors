@@ -13,7 +13,7 @@ import pandas as pd
 
 class Stacking:
 
-    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None, feature_importances=False):
+    def __init__(self, meta_learner_type='per_algorithm_regressor', cross_validation=False, feature_selection=None, feature_importances=False, pre_computed=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -22,6 +22,7 @@ class Stacking:
         self.feature_selection = feature_selection
         self.meta_learner_type = meta_learner_type
         self.feature_importances = feature_importances
+        self.pre_computed = pre_computed
 
 
         # attributes
@@ -40,7 +41,8 @@ class Stacking:
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # setup
-        self.create_base_learner()
+        if not self.pre_computed:
+            self.create_base_learner()
         self.num_algorithms = len(scenario.algorithms)
         num_instances = len(scenario.instances)
         feature_data = scenario.feature_data.to_numpy()
@@ -66,7 +68,8 @@ class Stacking:
         else:
             for learner_index, base_learner in enumerate(self.base_learners):
                 # train base learner
-                base_learner.fit(scenario, fold, amount_of_training_instances)
+                if not self.pre_computed:
+                    base_learner.fit(scenario, fold, amount_of_training_instances)
 
                 # create new feature data
                 num_iterations = len(scenario.instances) if amount_of_training_instances == -1 else amount_of_training_instances
