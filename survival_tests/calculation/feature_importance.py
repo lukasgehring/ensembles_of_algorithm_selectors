@@ -32,8 +32,15 @@ def avg_importance(data):
 
     return final_final_data
 
-scenario_name = ["QBF-2011"]
-for name in scenario_name:
+scenario_name = ["ASP-POTASSCO", "BNSL-2016", "CPMP-2015", "CSP-2010", "CSP-Minizinc-Time-2016", "CSP-MZN-2013", "GLUHACK-18", "MAXSAT12-PMS", "MAXSAT15-PMS-INDU"]
+num_algorithms = [11, 8, 4, 2, 20, 11, 8, 6, 29]
+color1 = '#264653'
+color2 = '#2a9d8f'
+color3 = '#e76f51'
+color4 = '#e9c46a'
+color5 = '#251314'
+
+for num_algorithms, name in zip(num_algorithms, scenario_name):
     data = open_base_learner(name)
     final_data = avg_importance(data)
     final_data.sort(key=operator.itemgetter(1))
@@ -49,13 +56,18 @@ for name in scenario_name:
     indices = indices.astype(int)
 
     # Plot the impurity-based feature importances of the forest
-    plt.figure(figsize=(15, 8))  # width:20, height:3
+    fig = plt.figure(figsize=(15, 8))  # width:20, height:3
+    name = name + ": Algorithms = " + str(num_algorithms)
     plt.title(name)
     for i in range(feature_length):
-        if feature_length - indices[i] < 6:
-            plt.bar(i, importances[i], color="b", align="center")
+        if feature_length - indices[i] <= num_algorithms:
+            plt.bar(i, importances[i], color=color3, align="center")
         else:
-            plt.bar(i, importances[i], color="r", align="center")
-    plt.xticks(range(len(final_data)), indices)
+            plt.bar(i, importances[i], color=color1, align="center")
+
+    plt.xlabel("Average feature ranking for all folds and algorithms of the scenario")
     plt.xlim([-1, len(final_data)])
     plt.show()
+
+    filename = name + ".pdf"
+    fig.savefig(filename, bbox_inches='tight')
