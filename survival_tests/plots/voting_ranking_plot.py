@@ -13,8 +13,8 @@ def load_configuration():
 def generate_sbs_vbs_change_table():
     color1 = '#264653'
     color2 = '#2a9d8f'
-    color3 = '#e76f51'
-    color4 = '#e9c46a'
+    color3 = '#E4B363'
+    color4 = '#9A8F97'
     color5 = '#251314'
 
     #TODO: correct version for voting normal??
@@ -39,7 +39,7 @@ def generate_sbs_vbs_change_table():
 
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
-    width = 0.2  # the width of the bars
+    width = 0.19  # the width of the bars
 
     ax.bar(0.7, voting1234567.result, width, color=color1, label='without ranking')
     ax.bar(0.9, voting_rank1234567.result, width, color=color2, label='with avg ranking')
