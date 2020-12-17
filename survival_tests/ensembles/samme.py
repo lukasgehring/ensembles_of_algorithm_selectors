@@ -18,7 +18,7 @@ from number_unsolved_instances import NumberUnsolvedInstances
 
 class SAMME:
 
-    def __init__(self, algorithm_name, num_iterations=200, stump=False):
+    def __init__(self, algorithm_name, num_iterations=10, stump=False):
         self.algorithm_name = algorithm_name
         self.num_iterations = num_iterations
         self.logger = logging.getLogger("boosting")

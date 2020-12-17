@@ -11,6 +11,7 @@ from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
 from ensembles.pre_computed_base_learner import PreComputed
+from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
 from ensembles.stacking_old_pre_computed import StackingOldPreComputed
 from ensembles.voting import Voting
@@ -190,6 +191,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboostR2':
             approaches.append(AdaboostR2('per_algorithm_regressor'))
+        if approach_name == 'samme':
+            approaches.append(SAMME('per_algorithm_regressor'))
         if approach_name == 'adaboost_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True))
         if approach_name == 'adaboost_stump_100':
