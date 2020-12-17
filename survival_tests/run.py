@@ -13,6 +13,7 @@ from ensembles.create_base_learner import CreateBaseLearner
 from ensembles.pre_computed_base_learner import PreComputed
 from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
+from ensembles.stacking_new import StackingNew
 from ensembles.stacking_old_pre_computed import StackingOldPreComputed
 from ensembles.voting import Voting
 from ensembles.voting_cross_validation import Voting_Cross
@@ -219,8 +220,8 @@ def create_approach(approach_names):
             approaches.append(Stacking(feature_selection='SelectKBest_mutual_info_regression'))
         if approach_name == 'stacking_cross_validation':
             approaches.append(Stacking(cross_validation=True))
-        if approach_name == 'stacking_multiclass':
-            approaches.append(Stacking(meta_learner_type='multiclass_algorithm_selector'))
+        if approach_name == 'stacking_sunny':
+            approaches.append(Stacking(meta_learner_type='SUNNY'))
         if approach_name == 'create_base_learner':
             approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
             approaches.append(CreateBaseLearner(algorithm='sunny'))
@@ -253,8 +254,10 @@ def create_approach(approach_names):
         if approach_name == 'voting_pre_computed_cross_wk':
             approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True, cross_validation=True))
         if approach_name == 'stacking_pre_computed':
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction_norm'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='confidence_prediction'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression', feature_type='full_prediction'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm', feature_type='full_prediction'))
         if approach_name == 'stacking_full_pre_computed':
             approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
 

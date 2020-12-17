@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import sys
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
 
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
@@ -109,6 +111,10 @@ class StackingNew:
         # setup the meta-learner
         if self.meta_learner_type == 'random_forest_classifier':
             self.meta_learner = RandomForestClassifier(n_jobs=1, n_estimators=100)
+        elif self.meta_learner_type == 'logistic_regression':
+            self.meta_learner = LogisticRegression()
+        elif self.meta_learner_type == 'linear_svm':
+            self.meta_learner = LinearSVC()
         else:
             sys.exit("Wrong meta learner type")
         self.meta_learner.set_params(random_state=fold)
@@ -146,6 +152,10 @@ class StackingNew:
 
         # predict with the meta-learner
         prediction = self.meta_learner.predict(features_of_test_instance)
+
+        print(features_of_test_instance)
+        print(prediction)
+        print("")
 
         # create a final prediction where all algorithms get a 1 except the best one. This one gets a 0.
         final_prediction = np.ones(self.num_algorithms)
