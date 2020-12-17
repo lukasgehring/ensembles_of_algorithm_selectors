@@ -9,10 +9,12 @@ from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
 
+from ensembles.write_to_database import write_to_database
+
 
 class AdaboostR2:
 
-    def __init__(self, algorithm_name, max_iterations=20):
+    def __init__(self, algorithm_name, max_iterations=20, loss_function='linear'):
         # setup
         self.logger = logging.getLogger("boosting")
         self.logger.addHandler(logging.StreamHandler())
@@ -20,6 +22,7 @@ class AdaboostR2:
         # parameters
         self.algorithm_name = algorithm_name
         self.max_iterations = max_iterations
+        self.loss_function = loss_function
 
         # attributes
         self.current_iteration = 1
@@ -55,7 +58,7 @@ class AdaboostR2:
 
             self.current_iteration = self.current_iteration + 1
             # use write_to_database to write each iteration to database
-            #write_to_database(scenario, self, fold)
+            write_to_database(scenario, self, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get the predictions and confidence values from each base learner
@@ -110,7 +113,16 @@ class AdaboostR2:
             temp_loss.append(abs(predictions.flatten()[index] - y_test[index]))
 
         # calculate loss function for base learner
-        loss = temp_loss / np.amax(temp_loss)
+        if self.loss_function == 'linear':
+            loss = temp_loss / np.amax(temp_loss)
+        elif self.loss_function == 'square':
+            loss = [i ** 2 for i in temp_loss] / (np.amax(temp_loss) ** 2)
+        elif self.loss_function == 'exponential':
+            loss = 0
+            for i in range(len(temp_loss)):
+                temp_loss[i] = 1 - math.exp(-temp_loss[i] / np.amax(temp_loss))
+        else:
+            sys.exit("Unknown loss function")
 
         # calculate average loss
         avg_loss = sum(loss * (self.data_weights / sum(self.data_weights)))
