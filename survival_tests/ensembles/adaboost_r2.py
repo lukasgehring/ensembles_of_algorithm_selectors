@@ -109,8 +109,7 @@ class AdaboostR2:
 
             # calculate loss function for each instance
             predictions = base_learner.predict(x_test, instance_id)
-            index = np.argmin(y_test)
-            temp_loss.append(abs(predictions.flatten()[index] - y_test[index]))
+            temp_loss.append(abs(np.amin(predictions) - np.amin(y_test)))
 
         # calculate loss function for base learner
         if self.loss_function == 'linear':
