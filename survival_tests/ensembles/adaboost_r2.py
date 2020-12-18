@@ -25,7 +25,7 @@ class AdaboostR2:
         self.loss_function = loss_function
 
         # attributes
-        self.current_iteration = 1
+        self.current_iteration = 0
         self.base_learners = list()
         self.beta = list()
         self.data_weights = list()
@@ -37,6 +37,7 @@ class AdaboostR2:
 
         # boosting iterations (stop when avg_loss >= 0.5 or iteration = max_iterations)
         for iteration in range(self.max_iterations):
+            self.current_iteration = self.current_iteration + 1
 
             # choose base learner algorithm
             if self.algorithm_name == 'per_algorithm_regressor':
@@ -56,9 +57,8 @@ class AdaboostR2:
             if not self.update_weights(scenario, self.base_learners[iteration], actual_num_training_instances):
                 break
 
-            self.current_iteration = self.current_iteration + 1
             # use write_to_database to write each iteration to database
-            write_to_database(scenario, self, fold)
+            # write_to_database(scenario, self, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get the predictions and confidence values from each base learner
