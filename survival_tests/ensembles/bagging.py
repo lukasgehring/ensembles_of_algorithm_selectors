@@ -128,7 +128,7 @@ class Bagging:
         if self.use_ranking:
             name = name + "_with_ranking"
             if self.performance_ranking:
-                name = name + "_performance_ranking"
+                name = name + "_averaging"
         else:
             name = name + "_without_ranking"
 

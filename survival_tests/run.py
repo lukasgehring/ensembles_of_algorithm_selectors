@@ -63,10 +63,14 @@ def log_result(result):
 def create_approach(approach_names):
     approaches = list()
     for approach_name in approach_names:
+
+        # SBS and VBS
         if approach_name == 'sbs':
             approaches.append(SingleBestSolver())
         if approach_name == 'oracle':
             approaches.append(Oracle())
+
+        # baselines
         if approach_name == 'ExpectationSurvivalForest':
             approaches.append(SurrogateSurvivalForest(criterion='Expectation'))
         if approach_name == 'PolynomialSurvivalForest':
@@ -98,6 +102,8 @@ def create_approach(approach_names):
             approaches.append(SATzilla07())
         if approach_name == 'isac':
             approaches.append(ISAC())
+
+        # voting
         if approach_name == 'voting':
             approaches.append(Voting(base_learner=[1,2,3,4,5,6,7]))
         if approach_name == 'voting_rank':
@@ -115,23 +121,35 @@ def create_approach(approach_names):
             approaches.append(Voting(base_learner_test=4))
             approaches.append(Voting(base_learner_test=5))
             approaches.append(Voting(base_learner_test=6))
+        if approach_name == 'voting_pre_computed':
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[2, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 3, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 4, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 5, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 6, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 7]))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6]))
+        if approach_name == 'voting_pre_computed_ranking':
+            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
+            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min'))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='min'))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max'))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='max'))
+        if approach_name == 'voting_pre_computed_weighting':
+            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True))
+            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, ranking=True))
+            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True))
+        if approach_name == 'voting_pre_computed_cross_wk':
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True, cross_validation=True))
+
+        # bagging
         if approach_name == 'bagging-per_algorithm_regressor':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
         if approach_name == 'bagging-per_multiclass_algorithm_selector':
             approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
-        if approach_name == 'bagging-per_algorithm_regressor_weight':
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True))
-        if approach_name == 'bagging-SUNNY_weight':
-            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
-        if approach_name == 'bagging-decision_tree':
-            approaches.append(Bagging(num_base_learner=200, base_learner=PerAlgorithmRegressor(scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1, bootstrap=False))))
-            approaches.append(Bagging(num_base_learner=400, base_learner=PerAlgorithmRegressor(
-                scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=1, bootstrap=False))))
-        if approach_name == 'bagging-per_algorithm_regressor_rank':
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, use_ranking=True))
-        if approach_name == 'bagging-per_algorithm_regressor_performance_rank':
-            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True))
         if approach_name == 'bagging-satzilla-11':
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
         if approach_name == 'bagging-ExpectationSurvivalForest':
@@ -140,6 +158,21 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY()))
         if approach_name == 'bagging-ISAC':
             approaches.append(Bagging(num_base_learner=10, base_learner=ISAC()))
+
+        if approach_name == 'bagging-per_algorithm_regressor_weight':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True))
+        if approach_name == 'bagging-SUNNY_weight':
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
+
+        if approach_name == 'bagging-per_algorithm_regressor_rank':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, use_ranking=True))
+
+        if approach_name == 'bagging-per_algorithm_regressor_averaging':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True, weighting=True))
+
+
         if approach_name == 'bagging-number_of_base_learner':
             approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
             approaches.append(Bagging(num_base_learner=8, base_learner=PerAlgorithmRegressor()))
@@ -188,6 +221,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=52, base_learner=SATzilla11()))
             approaches.append(Bagging(num_base_learner=56, base_learner=SATzilla11()))
             approaches.append(Bagging(num_base_learner=60, base_learner=SATzilla11()))
+
+        # boosting
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboostR2':
@@ -210,6 +245,8 @@ def create_approach(approach_names):
             approaches.append(Boosting('multiclass_algorithm_selector', num_iterations=100))
         if approach_name == 'boosting_ExponentialSurvivalForest':
             approaches.append(Boosting('ExponentialSurvivalForest'))
+
+        # stacking
         if approach_name == 'stacking':
             approaches.append(Stacking())
         if approach_name == 'stacking_with_VarianceThreshold':
@@ -222,6 +259,17 @@ def create_approach(approach_names):
             approaches.append(Stacking(cross_validation=True))
         if approach_name == 'stacking_sunny':
             approaches.append(Stacking(meta_learner_type='SUNNY'))
+        if approach_name == 'stacking_pre_computed':
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression', feature_type='full_prediction'))
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm', feature_type='full_prediction'))
+        if approach_name == 'stacking_full_pre_computed':
+            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
+        if approach_name == 'stacking_feature_importance_pre_computed':
+            approaches.append(StackingOldPreComputed(feature_importances=True))
+
+        # pre computed base learner
         if approach_name == 'create_base_learner':
             approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
             approaches.append(CreateBaseLearner(algorithm='sunny'))
@@ -230,48 +278,6 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='expectation'))
             approaches.append(CreateBaseLearner(algorithm='par10'))
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
-        if approach_name == 'voting_pre_computed':
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[2, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6]))
-        if approach_name == 'voting_pre_computed_ranking':
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
-            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min'))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='min'))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max'))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='max'))
-        if approach_name == 'voting_pre_computed_weighting':
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True))
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, ranking=True))
-            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True))
-        if approach_name == 'voting_pre_computed_cross_wk':
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True, cross_validation=True))
-        if approach_name == 'stacking_pre_computed':
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression', feature_type='full_prediction'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm', feature_type='full_prediction'))
-        if approach_name == 'stacking_full_pre_computed':
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
-
-        if approach_name == 'stacking_feature_importance_pre_computed':
-            approaches.append(StackingOldPreComputed(feature_importances=True))
-        
-        if approach_name == 'pre_computed_base_learner':
-            approaches.append(PreComputed(base_learner=1))
-            approaches.append(PreComputed(base_learner=2))
-            approaches.append(PreComputed(base_learner=3))
-            approaches.append(PreComputed(base_learner=4))
-            approaches.append(PreComputed(base_learner=5))
-            approaches.append(PreComputed(base_learner=6))
-            approaches.append(PreComputed(base_learner=7))
     return approaches
 
 
