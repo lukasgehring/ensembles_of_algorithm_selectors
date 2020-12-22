@@ -12,7 +12,7 @@ from ensembles.validation import base_learner_performance
 
 class Bagging:
 
-    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False, performance_ranking=False, weighting=False, oos=False):
+    def __init__(self, num_base_learner: int, base_learner=PerAlgorithmRegressor(), use_ranking=False, performance_ranking=False, weighting=False, weight_type=None):
         self.logger = logging.getLogger("bagging")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -26,7 +26,7 @@ class Bagging:
         self.use_ranking = use_ranking
         self.performance_ranking = performance_ranking
         self.weighting = weighting
-        self.oos = oos
+        self.weight_type = weight_type
 
     # generate number_of_samples bootstrap samples from the scenario and returns them in a list
     def generate_bootstrap_sample(self, scenario: ASlibScenario, fold: int, number_of_samples: int):
@@ -46,7 +46,7 @@ class Bagging:
                 feature_cost_data_sample = None
 
             bootstrap_samples.append((feature_data_sample, performance_data_sample, runstatus_data_sample, feature_runstatus_data_sample, feature_cost_data_sample))
-            if self.weighting and self.oos:
+            if self.weighting and self.weight_type == 'oos':
                 out_of_sample_samples.append(self.get_out_of_sample(scenario, feature_data_sample.drop_duplicates()))
 
             random_seed = random_seed + 1
@@ -87,11 +87,14 @@ class Bagging:
         # train each base learner on a different sample
         for index in range(self.num_base_learner):
             self.base_learners.append(copy.deepcopy(self.base_learner))
+            original_scenario = copy.deepcopy(scenario)
             scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = bootstrap_samples[index]
             self.base_learners[index].fit(scenario, fold, amount_of_training_instances)
             if self.weighting:
-                if self.oos:
+                if self.weight_type == 'oos':
                     scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = out_of_sample_samples[index]
+                elif self.weight_type == 'original_set':
+                    scenario = original_scenario
                 weights_denorm.append(base_learner_performance(scenario, len(scenario.feature_data), self.base_learners[index]))
 
         # Turn around values (lowest (best) gets highest weight) and normalize
@@ -134,7 +137,7 @@ class Bagging:
 
         if self.weighting:
             name = name + "_weighting"
-            if self.oos:
-                name = name + "_oos"
+            if self.weight_type:
+                name = name + '_' + self.weight_type
 
         return name
