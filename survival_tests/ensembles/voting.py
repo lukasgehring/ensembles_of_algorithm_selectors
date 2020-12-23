@@ -31,6 +31,7 @@ class Voting:
 
         # attributes
         self.trained_models = list()
+        self.trained_models_backup = list()
         self.weights = list()
         self.metric = Par10Metric()
         self.num_algorithms = 0
@@ -74,8 +75,11 @@ class Voting:
                     base_learner.fit(training_scenario, fold, amount_of_training_instances)
                     weights_denorm[i] = weights_denorm[i] + base_learner_performance(test_scenario, amount_of_training_instances, base_learner)
             # train base learner on the original scenario
-            for base_learner in self.trained_models:
-                base_learner.fit(scenario, fold, amount_of_training_instances)
+            if not self.pre_computed:
+                for base_learner in self.trained_models:
+                    base_learner.fit(scenario, fold, amount_of_training_instances)
+            else:
+                self.trained_models = self.trained_models_backup
         else:
             weights_denorm = list()
 
