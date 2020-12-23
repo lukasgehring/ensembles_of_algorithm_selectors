@@ -84,8 +84,8 @@ class Voting:
                 if not self.pre_computed:
                     base_learner.fit(scenario, fold, amount_of_training_instances)
                 if self.weighting:
-                    #weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
-                    weights_denorm.append(get_confidence(scenario, amount_of_training_instances, base_learner))
+                    weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
+                    #weights_denorm.append(get_confidence(scenario, amount_of_training_instances, base_learner))
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
@@ -120,7 +120,7 @@ class Voting:
         if self.rank_method != 'average':
             name = name + "_" + self.rank_method
         if self.weighting:
-            name = name + "_weighting_confidence"
+            name = name + "_weighting"
         if self.cross_validation:
             name = name + "_cross"
         if self.base_learner:
