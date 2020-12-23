@@ -143,7 +143,8 @@ def create_approach(approach_names):
             #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, ranking=True))
             #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True))
         if approach_name == 'voting_pre_computed_cross_wk':
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True, cross_validation=True))
+            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, cross_validation=True))
+            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, cross_validation=True))
 
         # bagging
         if approach_name == 'bagging-per_algorithm_regressor':
