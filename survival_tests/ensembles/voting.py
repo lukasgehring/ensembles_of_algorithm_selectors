@@ -11,6 +11,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 
 from ensembles.prediction import predict_with_ranking
 from ensembles.validation import base_learner_performance, split_scenario, get_confidence
+from ensembles.write_to_file import save_weights
 from par_10_metric import Par10Metric
 
 
@@ -94,6 +95,8 @@ class Voting:
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
         self.weights = [float(i) / max(weights_denorm) for i in weights_denorm]
+        if self.weighting:
+            save_weights(scenario, fold, self.get_name(), self.weights)
 
     def predict(self, features_of_test_instance, instance_id: int):
         if self.ranking:
