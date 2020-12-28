@@ -152,7 +152,10 @@ def create_approach(approach_names):
         if approach_name == 'bagging-per_multiclass_algorithm_selector':
             approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
         if approach_name == 'bagging-satzilla-11':
-            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
+            #approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True, performance_ranking=True))
         if approach_name == 'bagging-ExpectationSurvivalForest':
             approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
         if approach_name == 'bagging-SUNNY':
