@@ -1,7 +1,4 @@
 from aslib_scenario.aslib_scenario import ASlibScenario
-import sys
-
-import pickle
 
 from pre_compute.pickle_loader import load_pickle
 
@@ -29,5 +26,5 @@ class Test:
         return self.predictions[str(features_of_test_instance)]
 
     def get_name(self):
-        name = 'create_base_learner'
+        name = self.algorithm
         return name
