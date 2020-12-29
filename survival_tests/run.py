@@ -1,22 +1,19 @@
 import logging
-import sys
 import configparser
 import multiprocessing as mp
-
-from sklearn.ensemble import RandomForestRegressor
 
 import database_utils
 from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
-from ensembles.pre_computed_base_learner import PreComputed
+from ensembles.stacking_h2o import StackingH2O
+from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
 from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
-from ensembles.stacking_new import StackingNew
 from ensembles.stacking_old_pre_computed import StackingOldPreComputed
+from pre_compute.test import Test
 from ensembles.voting import Voting
-from ensembles.voting_cross_validation import Voting_Cross
 from ensembles.voting_pre_computed import VotingPreComputed
 from ensembles.stacking_pre_computed import StackingPreComputed
 from evaluation import evaluate_scenario
@@ -284,6 +281,38 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='expectation'))
             approaches.append(CreateBaseLearner(algorithm='par10'))
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
+
+        if approach_name == 'create_base_learner_prediction':
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
+        if approach_name == 'stacking_h2o':
+            approaches.append(StackingH2O(meta_learner_type='per_algorithm_regressor', pre_computed=True))
     return approaches
 
 
