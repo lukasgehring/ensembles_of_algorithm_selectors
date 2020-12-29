@@ -13,7 +13,8 @@ class GMeans:
         self._n_init = n_init
         self._n_init_kmeans = n_init_kmeans 
         self._n_init_final = n_init_final
-        self._random_state = check_random_state(random_state)
+        # self._random_state = check_random_state(random_state)
+        self._random_state = random_state
         self._kmeans = None
 
 
