@@ -10,7 +10,7 @@ from baselines.satzilla11 import SATzilla11
 from baselines.sunny import SUNNY
 from aslib_scenario.aslib_scenario import ASlibScenario
 
-from pre_compute.pickle_loader import save_prediction
+from pre_compute.pickle_loader import save_pickle
 
 
 class CreateBaseLearnerPrediction:
@@ -47,7 +47,10 @@ class CreateBaseLearnerPrediction:
         self.base_learner.fit(scenario, fold, amount_of_training_instances)
 
     def predict(self, features_of_test_instance, instance_id: int):
-        save_prediction(self, self.algorithm, features_of_test_instance, self.base_learner.predict(features_of_test_instance, instance_id))
+        self.pred[str(features_of_test_instance)] = self.base_learner.predict(features_of_test_instance, instance_id)
+
+        save_pickle(filename='predictions/' + self.algorithm + '_' + self.scenario_name + '_' + str(self.fold), data=self.pred)
+
         return np.zeros(self.num_algorithms)
 
     def get_name(self):

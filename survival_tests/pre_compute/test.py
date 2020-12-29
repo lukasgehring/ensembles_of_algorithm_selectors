@@ -3,7 +3,7 @@ import sys
 
 import pickle
 
-from pre_compute.pickle_loader import read_prediction
+from pre_compute.pickle_loader import load_pickle
 
 
 class Test:
@@ -21,7 +21,7 @@ class Test:
         self.scenario_name = scenario.scenario
         self.fold = fold
 
-        self.predictions = read_prediction(self)
+        self.predictions = load_pickle('predictions/' + self.algorithm + '_' + self.scenario_name + '_' + str(self.fold))
 
 
 
