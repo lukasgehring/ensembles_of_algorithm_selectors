@@ -126,8 +126,9 @@ def create_approach(approach_names):
             approaches.append(Voting(ranking=True))
         if approach_name == 'voting_rank_min':
             approaches.append(Voting(ranking=True, rank_method='min'))
-        if approach_name == 'voting_weight':
-            approaches.append(Voting(weighting=True))
+        if approach_name == 'voting_weighting':
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Voting(base_learner=combination, pre_computed=True, weighting=True))
         if approach_name == 'voting_weight_cross':
             approaches.append(Voting(weighting=True, cross_validation=True))
         if approach_name == 'voting_base_learner_test':
@@ -299,33 +300,54 @@ def create_approach(approach_names):
 
         if approach_name == 'create_base_learner_prediction':
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
+                                           predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
             approaches.append(StackingH2O(meta_learner_type='per_algorithm_regressor', pre_computed=True))
     return approaches

@@ -16,7 +16,7 @@ from pre_compute.pickle_loader import save_pickle
 
 class CreateBaseLearnerPrediction:
 
-    def __init__(self, algorithm, for_cross_validation=False):
+    def __init__(self, algorithm, for_cross_validation=False, predict_full_training_set=False):
         self.algorithm = algorithm
         self.num_algorithms = 0
         self.base_learner = None
@@ -24,6 +24,7 @@ class CreateBaseLearnerPrediction:
         self.fold = 0
         self.pred = {}
         self.for_cross_validation = for_cross_validation
+        self.predict_full_training_set = predict_full_training_set
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.num_algorithms = len(scenario.algorithms)
@@ -74,9 +75,33 @@ class CreateBaseLearnerPrediction:
         else:
             self.base_learner.fit(scenario, fold, amount_of_training_instances)
 
+        if self.predict_full_training_set:
+            # extract data from scenario
+            feature_data = scenario.feature_data.to_numpy()
+            performance_data = scenario.performance_data.to_numpy()
+            feature_cost_data = scenario.feature_cost_data.to_numpy() if scenario.feature_cost_data is not None else None
+
+            num_iterations = len(
+                scenario.instances) if amount_of_training_instances == -1 else amount_of_training_instances
+
+            predictions = np.zeros((len(scenario.instances), self.num_algorithms))
+            for instance_id in range(num_iterations):
+                x_test = feature_data[instance_id]
+                y_test = performance_data[instance_id]
+
+                accumulated_feature_time = 0
+                if scenario.feature_cost_data is not None:
+                    feature_time = feature_cost_data[instance_id]
+                    accumulated_feature_time = np.sum(feature_time)
+
+                prediction = self.base_learner.predict(x_test, instance_id).flatten()
+                predictions[instance_id] = prediction
+            save_pickle(filename='predictions/full_trainingdata_' + self.base_learner.get_name() + '_' + self.scenario_name + '_' + str(self.fold), data=predictions)
+
+
     def predict(self, features_of_test_instance, instance_id: int):
 
-        if not self.for_cross_validation:
+        if not self.for_cross_validation and not self.predict_full_training_set:
             self.pred[str(features_of_test_instance)] = self.base_learner.predict(features_of_test_instance,
                                                                                   instance_id).flatten()
             save_pickle(filename='predictions/' + self.base_learner.get_name() + '_' + self.scenario_name + '_' + str(self.fold), data=self.pred)
