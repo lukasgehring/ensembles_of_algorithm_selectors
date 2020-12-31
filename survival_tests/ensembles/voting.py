@@ -13,6 +13,7 @@ from ensembles.prediction import predict_with_ranking
 from ensembles.validation import base_learner_performance, split_scenario, get_confidence
 from ensembles.write_to_file import save_weights
 from par_10_metric import Par10Metric
+from pre_compute.pickle_loader import load_pickle
 
 
 class Voting:
@@ -36,6 +37,7 @@ class Voting:
         self.weights = list()
         self.metric = Par10Metric()
         self.num_algorithms = 0
+        self.predictions = list()
 
     def create_base_learner(self):
         # clean up list and init base learners
@@ -60,9 +62,11 @@ class Voting:
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.num_algorithms = len(scenario.algorithms)
+        self.create_base_learner()
 
-        if not self.pre_computed:
-            self.create_base_learner()
+        if self.pre_computed:
+            for model in self.trained_models:
+                self.predictions.append(load_pickle(filename='predictions/' + model.get_name() + '_' + scenario.scenario + '_' + str(fold)))
 
         if self.cross_validation:
             weights_denorm = np.zeros(len(self.trained_models))
@@ -90,7 +94,6 @@ class Voting:
                     base_learner.fit(scenario, fold, amount_of_training_instances)
                 if self.weighting:
                     weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
-                    #weights_denorm.append(get_confidence(scenario, amount_of_training_instances, base_learner))
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
@@ -99,6 +102,7 @@ class Voting:
             save_weights(scenario, fold, self.get_name(), self.weights)
 
     def predict(self, features_of_test_instance, instance_id: int):
+
         if self.ranking:
             if self.weighting:
                 return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=self.weights)
@@ -107,14 +111,20 @@ class Voting:
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
-        for i, model in enumerate(self.trained_models):
+
+        for learner_index, model in enumerate(self.trained_models):
+
             # get prediction of base learner and find prediction (lowest value)
-            base_prediction = model.predict(features_of_test_instance, instance_id).reshape(self.num_algorithms)
-            index_of_minimum = np.where(base_prediction == min(base_prediction))
+            if not self.pre_computed:
+                base_prediction = model.predict(features_of_test_instance, instance_id).reshape(self.num_algorithms)
+            else:
+                base_prediction = self.predictions[learner_index][str(features_of_test_instance)]
+
+            index_of_minimum = np.argmin(base_prediction)
 
             # add [1 * weight for base learner] to vote for the algorithm
             if self.weighting:
-                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[i]
+                predictions[index_of_minimum] = predictions[index_of_minimum] + self.weights[learner_index]
             else:
                 predictions[index_of_minimum] = predictions[index_of_minimum] + 1
 

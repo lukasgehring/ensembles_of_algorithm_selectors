@@ -57,6 +57,25 @@ def log_result(result):
     logger.info("Finished experiements for scenario: " + result)
 
 
+def generate_combinations(base_lerners, combinations):
+    if base_lerners == [] or len(base_lerners) < 2:
+        return []
+    else:
+        combinations.append(base_lerners)
+        for lerner in range(len(base_lerners)):
+            base_lerner_copy = list(base_lerners)
+            del base_lerner_copy[lerner]
+            generate_combinations(base_lerner_copy, combinations)
+        return combinations
+
+
+def get_combinations(base_lerners):
+    combinations = list()
+    for combination in set(tuple(i) for i in generate_combinations(base_lerners, [])):
+        combinations.append(list(combination))
+    return combinations
+
+
 def create_approach(approach_names):
     approaches = list()
     for approach_name in approach_names:
@@ -112,12 +131,8 @@ def create_approach(approach_names):
         if approach_name == 'voting_weight_cross':
             approaches.append(Voting(weighting=True, cross_validation=True))
         if approach_name == 'voting_base_learner_test':
-            approaches.append(Voting(base_learner_test=1))
-            approaches.append(Voting(base_learner_test=2))
-            approaches.append(Voting(base_learner_test=3))
-            approaches.append(Voting(base_learner_test=4))
-            approaches.append(Voting(base_learner_test=5))
-            approaches.append(Voting(base_learner_test=6))
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Voting(base_learner=combination, pre_computed=True))
         if approach_name == 'voting_pre_computed':
             approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
             approaches.append(VotingPreComputed(base_learner=[2, 3, 4, 5, 6, 7]))
