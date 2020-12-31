@@ -93,7 +93,11 @@ class Voting:
                 if not self.pre_computed:
                     base_learner.fit(scenario, fold, amount_of_training_instances)
                 if self.weighting:
-                    weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
+                    if self.pre_computed:
+                        predictions = load_pickle(filename='predictions/full_trainingdata_' + base_learner.get_name() + '_' + scenario.scenario + '_' + str(fold))
+                        weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner, pre_computed_predictions=predictions))
+                    else:
+                        weights_denorm.append(base_learner_performance(scenario, amount_of_training_instances, base_learner))
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]

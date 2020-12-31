@@ -7,7 +7,7 @@ import math
 from par_10_metric import Par10Metric
 
 
-def base_learner_performance(scenario: ASlibScenario, amount_of_training_instances: int, base_learner):
+def base_learner_performance(scenario: ASlibScenario, amount_of_training_instances: int, base_learner, pre_computed_predictions=None):
     # extract data from scenario
     feature_data = scenario.feature_data.to_numpy()
     performance_data = scenario.performance_data.to_numpy()
@@ -26,7 +26,10 @@ def base_learner_performance(scenario: ASlibScenario, amount_of_training_instanc
             feature_time = feature_cost_data[instance_id]
             accumulated_feature_time = np.sum(feature_time)
 
-        predicted_scores = base_learner.predict(x_test, instance_id)
+        if pre_computed_predictions is not None:
+            predicted_scores = pre_computed_predictions[instance_id]
+        else:
+            predicted_scores = base_learner.predict(x_test, instance_id)
         performance_measure = performance_measure + metric.evaluate(y_test, predicted_scores,
                                                                     accumulated_feature_time,
                                                                     scenario.algorithm_cutoff_time)
