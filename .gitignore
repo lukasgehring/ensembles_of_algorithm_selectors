@@ -18,6 +18,8 @@
 *.zip
 *.tar.gz
 *.rar
+*.pdf
+*.csv
 
 survival_tests/predictions/*
 

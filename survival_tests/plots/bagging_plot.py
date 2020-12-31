@@ -88,7 +88,7 @@ def generate_sbs_vbs_change_table():
     plt.xlabel('Learing Algorithm')
     plt.ylabel('nPAR10')
 
-    ax.set_ylim(bottom=0.35)
+    ax.set_ylim(bottom=0.3)
     plt.xticks(rotation=45)
     plt.legend()
     plt.show()
