@@ -17,13 +17,14 @@ from pre_compute.pickle_loader import load_pickle
 
 class StackingH2O:
 
-    def __init__(self, meta_learner_type='per_algorithm_regressor', pre_computed=False):
+    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
         # parameters
         self.meta_learner_type = meta_learner_type
         self.pre_computed = pre_computed
+        self.base_learner_type = base_learner
 
 
         # attributes
@@ -35,13 +36,21 @@ class StackingH2O:
         self.predictions = list()
 
     def create_base_learner(self):
-        self.base_learners.append(PerAlgorithmRegressor())
-        self.base_learners.append(SUNNY())
-        #self.base_learners.append(ISAC())
-        #self.base_learners.append(SATzilla11())
-        #self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
-        #self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
-        self.base_learners.append(MultiClassAlgorithmSelector())
+        self.base_learners = list()
+        if 1 in self.base_learner_type:
+            self.base_learners.append(PerAlgorithmRegressor())
+        if 2 in self.base_learner_type:
+            self.base_learners.append(SUNNY())
+        if 3 in self.base_learner_type:
+            self.base_learners.append(ISAC())
+        if 4 in self.base_learner_type:
+            self.base_learners.append(SATzilla11())
+        if 5 in self.base_learner_type:
+            self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+        if 6 in self.base_learner_type:
+            self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
+        if 7 in self.base_learner_type:
+            self.base_learners.append(MultiClassAlgorithmSelector())
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.create_base_learner()
@@ -70,13 +79,21 @@ class StackingH2O:
                     # create new feature data
                     for instance_number in range(instance_counter, instance_counter + len(test_scenario.instances)):
                         prediction = base_learner.predict(feature_data[instance_number], instance_number)
-                        predictions[instance_number] = prediction
+                        predictions[instance_number] = prediction.flatten()
 
                     instance_counter = instance_counter + len(test_scenario.instances)
 
             for i in range(num_instances):
                 for alo_num in range(self.num_algorithms):
                     new_feature_data[i][alo_num + self.num_algorithms * learner_index] = predictions[i][alo_num]
+
+        if self.pre_computed:
+            for base_learner in self.base_learners:
+                self.predictions.append(load_pickle(filename='predictions/' + base_learner.get_name() + '_' + scenario.scenario + '_' + str(fold)))
+        else:
+            self.create_base_learner()
+            for base_learner in self.base_learners:
+                base_learner.fit(scenario, fold, amount_of_training_instances)
 
         # add predictions to the features of the instances
         new_feature_data = pd.DataFrame(new_feature_data, index=scenario.feature_data.index, columns=np.arange(self.num_algorithms * len(self.base_learners)))
@@ -88,15 +105,15 @@ class StackingH2O:
             self.meta_learner = PerAlgorithmRegressor()
         elif self.meta_learner_type == 'SUNNY':
             self.meta_learner = SUNNY()
+        elif self.meta_learner_type == 'ISAC':
+            self.meta_learner = ISAC()
+        elif self.meta_learner_type == 'SATzilla-11':
+            self.meta_learner = SATzilla11()
+        elif self.meta_learner_type == 'multiclass':
+            self.meta_learner = MultiClassAlgorithmSelector()
+        elif self.meta_learner_type == 'Expectation':
+            self.meta_learner = SurrogateSurvivalForest(criterion='Expectation')
         self.meta_learner.fit(scenario, fold, amount_of_training_instances)
-
-        if self.pre_computed:
-            for base_learner in self.base_learners:
-                self.predictions.append(load_pickle(filename='predictions/' + base_learner.get_name() + '_' + scenario.scenario + '_' + str(fold)))
-
-
-
-
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get all predictions from the base learners
@@ -105,12 +122,12 @@ class StackingH2O:
         for learner_index, base_learner in enumerate(self.base_learners):
             # create new feature data
             if self.pre_computed:
-                prediction = self.predictions[learner_index]
+                prediction = self.predictions[learner_index][str(features_of_test_instance)]
             else:
-                prediction = base_learner.predict(features_of_test_instance, instance_id)
+                prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
 
             for alo_num in range(self.num_algorithms):
-                new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[str(features_of_test_instance)][alo_num]
+                new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[alo_num]
 
         features_of_test_instance = np.concatenate((features_of_test_instance, new_feature_data), axis=0)
 
@@ -118,6 +135,6 @@ class StackingH2O:
         return self.meta_learner.predict(features_of_test_instance, instance_id)
 
     def get_name(self):
-        name = "stacking_" + self.meta_learner_type
+        name = "stacking_" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type
 
         return name

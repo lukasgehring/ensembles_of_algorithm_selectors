@@ -7,6 +7,7 @@ from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
+from ensembles.gradient_boosting import GradientBoosting
 from ensembles.stacking_h2o import StackingH2O
 from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
 from ensembles.samme import SAMME
@@ -299,57 +300,60 @@ def create_approach(approach_names):
             approaches.append(CreateBaseLearner(algorithm='multiclass'))
 
         if approach_name == 'create_base_learner_prediction':
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
-                                           predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
+            #                               predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
-                                            predict_full_training_set=True))
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
             approaches.append(
-                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
-                                            predict_full_training_set=True))
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
-                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
-                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
-                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
-            approaches.append(
-                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
-                                            predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
+            #                                predict_full_training_set=True))
             #approaches.append(
             #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
-            approaches.append(StackingH2O(meta_learner_type='per_algorithm_regressor', pre_computed=True))
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='per_algorithm_regressor', pre_computed=True))
+        if approach_name == 'test':
+            approaches.append(GradientBoosting(algorithm_name='per_algorithm_regressor'))
     return approaches
 
 
