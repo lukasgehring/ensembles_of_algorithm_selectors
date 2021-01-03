@@ -1,5 +1,8 @@
 import logging
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
 from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
@@ -34,6 +37,7 @@ class StackingH2O:
         self.scenario_name = ''
         self.fold = 0
         self.predictions = list()
+        self.algorithm_selection_algorithm = False
 
     def create_base_learner(self):
         self.base_learners = list()
@@ -59,6 +63,7 @@ class StackingH2O:
         self.num_algorithms = len(scenario.algorithms)
         num_instances = len(scenario.instances)
         feature_data = scenario.feature_data.to_numpy()
+        performance_data = scenario.performance_data.to_numpy()
         new_feature_data = np.zeros((num_instances, self.num_algorithms * len(self.base_learners)))
 
         for learner_index, base_learner in enumerate(self.base_learners):
@@ -103,17 +108,32 @@ class StackingH2O:
         # meta learner training with or without feature selection
         if self.meta_learner_type == 'per_algorithm_regressor':
             self.meta_learner = PerAlgorithmRegressor()
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'SUNNY':
             self.meta_learner = SUNNY()
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'ISAC':
             self.meta_learner = ISAC()
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'SATzilla-11':
             self.meta_learner = SATzilla11()
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'multiclass':
             self.meta_learner = MultiClassAlgorithmSelector()
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'Expectation':
             self.meta_learner = SurrogateSurvivalForest(criterion='Expectation')
-        self.meta_learner.fit(scenario, fold, amount_of_training_instances)
+            self.algorithm_selection_algorithm = True
+        elif self.meta_learner_type == 'DecisionTree':
+            self.meta_learner = DecisionTreeClassifier()
+        elif self.meta_learner_type == 'RandomForest':
+            self.meta_learner = RandomForestClassifier()
+
+        if self.algorithm_selection_algorithm:
+            self.meta_learner.fit(scenario, fold, amount_of_training_instances)
+        else:
+            label_performance_data = [np.argmin(x) for x in performance_data]
+            self.meta_learner.fit(scenario.feature_data.to_numpy(), label_performance_data)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get all predictions from the base learners
@@ -132,7 +152,12 @@ class StackingH2O:
         features_of_test_instance = np.concatenate((features_of_test_instance, new_feature_data), axis=0)
 
         # final prediction
-        return self.meta_learner.predict(features_of_test_instance, instance_id)
+        if self.algorithm_selection_algorithm:
+            return self.meta_learner.predict(features_of_test_instance, instance_id)
+        else:
+            final_prediction = np.ones(self.num_algorithms)
+            final_prediction[self.meta_learner.predict(features_of_test_instance.reshape(1, -1))] = 0
+            return final_prediction
 
     def get_name(self):
         name = "stacking_" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type
