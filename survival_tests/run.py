@@ -7,7 +7,6 @@ from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
 from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
-from ensembles.gradient_boosting import GradientBoosting
 from ensembles.stacking_h2o import StackingH2O
 from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
 from ensembles.samme import SAMME
@@ -350,10 +349,7 @@ def create_approach(approach_names):
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
-            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
-                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='per_algorithm_regressor', pre_computed=True))
-        if approach_name == 'test':
-            approaches.append(GradientBoosting(algorithm_name='per_algorithm_regressor'))
+            approaches.append(StackingH2O(base_learner=[1, 2, 7], meta_learner_type='DecisionTree', pre_computed=True))
     return approaches
 
 
@@ -383,7 +379,7 @@ amount_of_scenario_training_instances = int(
     config["EXPERIMENTS"]["amount_of_training_scenario_instances"])
 tune_hyperparameters = bool(int(config["EXPERIMENTS"]["tune_hyperparameters"]))
 
-for fold in range(1, 11):
+for fold in range(1, 2):
 
     for scenario in scenarios:
         approaches = create_approach(approach_names)
@@ -398,11 +394,11 @@ for fold in range(1, 11):
                 metrics.append(NumberUnsolvedInstances(True))
             logger.info("Submitted pool task for approach \"" +
                         str(approach.get_name()) + "\" on scenario: " + scenario)
-            pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
-                                                      amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
+            #pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
+            #                                          amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
 
-            #evaluate_scenario(scenario, approach, metrics,
-            #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
+            evaluate_scenario(scenario, approach, metrics,
+                             amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
             print('Finished evaluation of fold')
 
 pool.close()

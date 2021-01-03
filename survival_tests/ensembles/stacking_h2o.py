@@ -50,7 +50,7 @@ class StackingH2O:
         if 4 in self.base_learner_type:
             self.base_learners.append(SATzilla11())
         if 5 in self.base_learner_type:
-            self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+            self.base_learners.append(SurrogateSurvivalForest(criterion='Expectation'))
         if 6 in self.base_learner_type:
             self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
         if 7 in self.base_learner_type:
