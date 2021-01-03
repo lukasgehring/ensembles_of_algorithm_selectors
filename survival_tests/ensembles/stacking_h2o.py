@@ -2,6 +2,9 @@ import logging
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
 from baselines.isac import ISAC
@@ -38,6 +41,7 @@ class StackingH2O:
         self.fold = 0
         self.predictions = list()
         self.algorithm_selection_algorithm = False
+        self.pipe = None
 
     def create_base_learner(self):
         self.base_learners = list()
@@ -133,7 +137,11 @@ class StackingH2O:
             self.meta_learner.fit(scenario, fold, amount_of_training_instances)
         else:
             label_performance_data = [np.argmin(x) for x in performance_data]
-            self.meta_learner.fit(scenario.feature_data.to_numpy(), label_performance_data)
+
+            self.pipe = Pipeline([('imputer', SimpleImputer()), ('standard_scaler', StandardScaler())])
+            X_train = self.pipe.fit_transform(scenario.feature_data.to_numpy(), label_performance_data)
+
+            self.meta_learner.fit(X_train, label_performance_data)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get all predictions from the base learners
@@ -155,8 +163,9 @@ class StackingH2O:
         if self.algorithm_selection_algorithm:
             return self.meta_learner.predict(features_of_test_instance, instance_id)
         else:
+            X_test = self.pipe.transform(features_of_test_instance.reshape(1, -1))
             final_prediction = np.ones(self.num_algorithms)
-            final_prediction[self.meta_learner.predict(features_of_test_instance.reshape(1, -1))] = 0
+            final_prediction[self.meta_learner.predict(X_test)] = 0
             return final_prediction
 
     def get_name(self):
