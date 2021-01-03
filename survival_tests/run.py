@@ -349,7 +349,9 @@ def create_approach(approach_names):
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
-            approaches.append(StackingH2O(base_learner=[1, 2, 7], meta_learner_type='DecisionTree', pre_computed=True))
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='DecisionTree', pre_computed=True))
+                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
     return approaches
 
 
