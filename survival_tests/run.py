@@ -267,7 +267,8 @@ def create_approach(approach_names):
 
         # stacking
         if approach_name == 'stacking':
-            approaches.append(Stacking())
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Stacking(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
         if approach_name == 'stacking_with_VarianceThreshold':
             approaches.append(Stacking(feature_selection='VarianceThreshold'))
         if approach_name == 'stacking_with_SelectKBest_f_regression':
