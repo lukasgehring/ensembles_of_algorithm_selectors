@@ -11,11 +11,9 @@ from ensembles.stacking_h2o import StackingH2O
 from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
 from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
-from ensembles.stacking_old_pre_computed import StackingOldPreComputed
 from pre_compute.test import Test
 from ensembles.voting import Voting
 from ensembles.voting_pre_computed import VotingPreComputed
-from ensembles.stacking_pre_computed import StackingPreComputed
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -278,6 +276,15 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True))
+        if approach_name == 'stacking_meta_learner_predictions_only':
+            base_learner = [1, 2, 3, 4, 5, 6, 7]
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, meta_learner_input='predictions_only'))
         if approach_name == 'stacking_with_VarianceThreshold':
             approaches.append(Stacking(feature_selection='VarianceThreshold'))
         if approach_name == 'stacking_with_SelectKBest_f_regression':
@@ -288,15 +295,6 @@ def create_approach(approach_names):
             approaches.append(Stacking(cross_validation=True))
         if approach_name == 'stacking_sunny':
             approaches.append(Stacking(meta_learner_type='SUNNY'))
-        if approach_name == 'stacking_pre_computed':
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='logistic_regression', feature_type='full_prediction'))
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='linear_svm', feature_type='full_prediction'))
-        if approach_name == 'stacking_full_pre_computed':
-            approaches.append(StackingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], feature_type='full_prediction'))
-        if approach_name == 'stacking_feature_importance_pre_computed':
-            approaches.append(StackingOldPreComputed(feature_importances=True))
 
         # pre computed base learner
         if approach_name == 'create_base_learner':

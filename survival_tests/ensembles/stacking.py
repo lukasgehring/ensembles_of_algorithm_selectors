@@ -1,4 +1,6 @@
 import logging
+import sys
+
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -18,7 +20,7 @@ from pre_compute.pickle_loader import load_pickle
 
 class Stacking:
 
-    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False):
+    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full'):
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -26,6 +28,7 @@ class Stacking:
         self.meta_learner_type = meta_learner_type
         self.pre_computed = pre_computed
         self.base_learner_type = base_learner
+        self.meta_learner_input = meta_learner_input
 
         # attributes
         self.meta_learner = None
@@ -92,7 +95,13 @@ class Stacking:
 
         # add predictions to the features of the instances
         new_feature_data = pd.DataFrame(new_feature_data, index=scenario.feature_data.index, columns=np.arange(self.num_algorithms * len(self.base_learners)))
-        new_feature_data = pd.concat([scenario.feature_data, new_feature_data], axis=1, sort=False)
+        if self.meta_learner_input == 'full':
+            new_feature_data = pd.concat([scenario.feature_data, new_feature_data], axis=1, sort=False)
+        elif self.meta_learner_input == 'predictions_only':
+            pass
+        else:
+            sys.exit('Wrong meta learner input type option')
+
         scenario.feature_data = new_feature_data
 
         # meta learner selection
@@ -149,7 +158,10 @@ class Stacking:
                 new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[alo_num]
 
         # concatenate original feature with new feature
-        features_of_test_instance = np.concatenate((features_of_test_instance, new_feature_data), axis=0)
+        if self.meta_learner_input == 'full':
+            features_of_test_instance = np.concatenate((features_of_test_instance, new_feature_data), axis=0)
+        else:
+            features_of_test_instance = new_feature_data
 
         # final prediction with the meta learner
         if self.algorithm_selection_algorithm:
