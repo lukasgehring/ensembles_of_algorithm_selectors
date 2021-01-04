@@ -269,6 +269,15 @@ def create_approach(approach_names):
         if approach_name == 'stacking':
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Stacking(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
+        if approach_name == 'stacking_meta_learner':
+            base_learner = [1, 2, 3, 4, 5, 6, 7]
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True))
         if approach_name == 'stacking_with_VarianceThreshold':
             approaches.append(Stacking(feature_selection='VarianceThreshold'))
         if approach_name == 'stacking_with_SelectKBest_f_regression':

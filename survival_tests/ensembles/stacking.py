@@ -114,6 +114,9 @@ class Stacking:
         elif self.meta_learner_type == 'Expectation':
             self.meta_learner = SurrogateSurvivalForest(criterion='Expectation')
             self.algorithm_selection_algorithm = True
+        elif self.meta_learner_type == 'PAR10':
+            self.meta_learner = SurrogateSurvivalForest(criterion='PAR10')
+            self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'DecisionTree':
             self.meta_learner = DecisionTreeClassifier()
         elif self.meta_learner_type == 'RandomForest':
