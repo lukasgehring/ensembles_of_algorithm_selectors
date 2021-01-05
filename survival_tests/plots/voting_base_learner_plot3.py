@@ -49,7 +49,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(5, voting2456.result, width, color=color1, label='Multiclass')
 
     ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["2", "4", "5", "6", "7"])
+    ax.set_xticklabels(["SUNNY", "SATzilla", "SF-Exp.", "SF-PAR10", "Multiclass"])
 
     ax.text(1, float(voting4567.result), round(float(voting4567.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(voting2567.result), round(float(voting2567.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -60,7 +60,7 @@ def generate_sbs_vbs_change_table():
     ax.text(5.7, voting_normal - 0.002, round(voting_normal, 3), ha='center', va='bottom', rotation=0)
     # plt.xticks(rotation=45, ha='right')
 
-    plt.title("Voting with base learner 2,4,5,6,7")
+    plt.title("Voting without base learners 'ISAC' and 'PerAlgo'")
     plt.xlabel("left out base learner")
     plt.ylabel("nPAR10")
 
@@ -69,7 +69,7 @@ def generate_sbs_vbs_change_table():
 
     plt.show()
 
-    fig.savefig("3.pdf", bbox_inches='tight')
+    fig.savefig("voting_base_learner3.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

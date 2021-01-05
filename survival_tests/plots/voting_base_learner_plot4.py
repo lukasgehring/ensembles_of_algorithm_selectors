@@ -47,7 +47,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(5, voting1234.result, width, color=color1, label='SurvivalForestPAR10')
 
     ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["1", "2", "3", "4", "6"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-PAR10"])
 
     ax.text(1, float(voting2346.result), round(float(voting2346.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(voting1346.result), round(float(voting1346.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -58,7 +58,7 @@ def generate_sbs_vbs_change_table():
     ax.text(5.7, voting_normal - 0.002, round(voting_normal, 3), ha='center', va='bottom', rotation=0)
     # plt.xticks(rotation=45, ha='right')
 
-    plt.title("Voting with base learner 1,2,3,4,6")
+    plt.title("Voting without base learners 'SF-Exp.' and 'Multiclass'")
     plt.xlabel("left out base learner")
     plt.ylabel("nPAR10")
 
@@ -67,7 +67,7 @@ def generate_sbs_vbs_change_table():
 
     plt.show()
 
-    fig.savefig("4.pdf", bbox_inches='tight')
+    fig.savefig("voting_base_learner4.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):
