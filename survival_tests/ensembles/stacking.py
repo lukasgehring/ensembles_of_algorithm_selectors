@@ -3,6 +3,8 @@ import sys
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -127,9 +129,9 @@ class Stacking:
             self.meta_learner = SurrogateSurvivalForest(criterion='PAR10')
             self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'DecisionTree':
-            self.meta_learner = DecisionTreeClassifier()
-        elif self.meta_learner_type == 'RandomForest':
-            self.meta_learner = RandomForestClassifier()
+            self.meta_learner = DecisionTreeClassifier(random_state=fold)
+        elif self.meta_learner_type == 'SVM':
+            self.meta_learner = LinearSVC(random_state=fold, max_iter=10000)
 
         # fit meta learner
         if self.algorithm_selection_algorithm:
