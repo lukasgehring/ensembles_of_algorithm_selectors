@@ -276,6 +276,8 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='DecisionTree', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True))
         if approach_name == 'stacking_meta_learner_predictions_only':
             base_learner = [1, 2, 3, 4, 5, 6, 7]
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True, meta_learner_input='predictions_only'))
@@ -285,6 +287,8 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True, meta_learner_input='predictions_only'))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True, meta_learner_input='predictions_only'))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='DecisionTree', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, meta_learner_input='predictions_only'))
         if approach_name == 'stacking_with_VarianceThreshold':
             approaches.append(Stacking(feature_selection='VarianceThreshold'))
         if approach_name == 'stacking_with_SelectKBest_f_regression':
