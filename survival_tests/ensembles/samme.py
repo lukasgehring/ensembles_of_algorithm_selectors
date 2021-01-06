@@ -37,7 +37,6 @@ class SAMME:
         actual_num_training_instances = amount_of_training_instances if amount_of_training_instances != -1 else len(scenario.instances)
         self.num_algorithms = len(scenario.algorithms)
         self.data_weights = np.ones(actual_num_training_instances) / actual_num_training_instances
-        print(sum(self.data_weights))
         for iteration in range(self.num_iterations):
             self.current_iteration = self.current_iteration + 1
 
@@ -121,6 +120,8 @@ class SAMME:
         return True
 
     def generate_weighted_sample(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
+        if self.current_iteration == 1:
+            return scenario
         # copy original scenario
         new_scenario = copy.deepcopy(scenario)
 
