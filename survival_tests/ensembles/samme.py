@@ -45,8 +45,8 @@ class SAMME:
                 self.base_learners.append(PerAlgorithmRegressor())
             elif self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector())
-            elif self.algorithm_name == 'ExponentialSurvivalForest':
-                self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential'))
+            elif self.algorithm_name == 'satzilla':
+                self.base_learners.append(SATzilla11())
             else:
                 sys.exit('Wrong base learner for boosting')
 

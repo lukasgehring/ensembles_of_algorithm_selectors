@@ -245,7 +245,9 @@ def create_approach(approach_names):
         if approach_name == 'adaboostR2':
             approaches.append(AdaboostR2('per_algorithm_regressor'))
         if approach_name == 'samme':
-            approaches.append(SAMME('per_algorithm_regressor'))
+            #approaches.append(SAMME('per_algorithm_regressor'))
+            approaches.append(SAMME('satzilla'))
+            approaches.append(SAMME('multiclass_algorithm_selector'))
         if approach_name == 'adaboost_stumpt':
             approaches.append(Boosting('per_algorithm_regressor', stump=True))
         if approach_name == 'adaboost_stump_100':
