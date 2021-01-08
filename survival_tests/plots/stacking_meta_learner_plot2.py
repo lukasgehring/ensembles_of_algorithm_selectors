@@ -64,8 +64,8 @@ def generate_sbs_vbs_change_table():
 
     #plt.xticks(rotation=45, ha='right')
 
-    #ax.set_ylim(bottom=0.45)
-    #ax.set_ylim(top=0.8)
+    ax.set_ylim(bottom=0.35)
+    ax.set_ylim(top=0.85)
 
     plt.title("s_stacking meta-learner comparison")
     plt.xlabel("Meta-learner")
