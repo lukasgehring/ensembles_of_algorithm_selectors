@@ -41,7 +41,7 @@ class SAMME:
             self.current_iteration = self.current_iteration + 1
 
             if self.algorithm_name == 'per_algorithm_regressor':
-                self.base_learners.append(PerAlgorithmRegressor())
+                self.base_learners.append(PerAlgorithmRegressor(stump=True))
             elif self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector())
             elif self.algorithm_name == 'satzilla':
@@ -61,6 +61,7 @@ class SAMME:
         confidence = np.zeros(self.num_algorithms)
 
         for base_learner, beta in zip(self.base_learners, self.beta):
+            print(beta)
             predicted_algorithm = np.argmin(base_learner.predict(features_of_test_instance, instance_id))
             confidence[predicted_algorithm] = confidence[predicted_algorithm] + beta
 
@@ -93,9 +94,9 @@ class SAMME:
             #    num_counted_test_values += 1
 
             predictions = base_learner.predict(x_test, instance_id)
-            y_algorithm = np.argmin(y_test)
+            y_algorithm = np.argwhere(y_test == np.amin(y_test)).flatten()
             predicted_algorithm = np.argmin(predictions)
-            if y_algorithm != predicted_algorithm:
+            if predicted_algorithm not in y_algorithm:
                 err = err + self.data_weights[instance_id]
                 is_correct.append(False)
             else:
@@ -110,6 +111,7 @@ class SAMME:
             return False
 
         beta = math.log((1 - err) / err) + math.log(self.num_algorithms - 1)
+        print(beta)
         self.beta.append(beta)
 
         for i in range(amount_of_training_instances):
