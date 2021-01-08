@@ -51,11 +51,12 @@ def write_to_database(scenario: ASlibScenario, approach, fold: int):
     metrics.append(NumberUnsolvedInstances(True))
     scenario_name = scenario.scenario
     scenario = ASlibScenario()
+    if scenario_name == 'GLUHACK-18':
+        scenario_name = 'GLUHACK-2018'
     scenario.read_scenario('data/aslib_data-master/' + scenario_name)
     metric_results = _evaluate_train_test_split_mod(scenario, approach, metrics, fold)
 
     db_config = load_configuration()
-
     for i, result in enumerate(metric_results):
         publish_results_to_database(db_config, scenario.scenario, fold, approach.get_name(), metrics[i].get_name(), result)
 
