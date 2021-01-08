@@ -41,7 +41,7 @@ class SAMME:
             self.current_iteration = self.current_iteration + 1
 
             if self.algorithm_name == 'per_algorithm_regressor':
-                self.base_learners.append(PerAlgorithmRegressor(stump=True))
+                self.base_learners.append(PerAlgorithmRegressor())
             elif self.algorithm_name == 'multiclass_algorithm_selector':
                 self.base_learners.append(MultiClassAlgorithmSelector())
             elif self.algorithm_name == 'satzilla':
@@ -55,13 +55,13 @@ class SAMME:
             if not self.update_weights(scenario, self.base_learners[iteration], actual_num_training_instances):
                 break
 
-            write_to_database(scenario, self, fold)
+            if self.current_iteration != self.num_iterations:
+                write_to_database(scenario, self, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
         confidence = np.zeros(self.num_algorithms)
 
         for base_learner, beta in zip(self.base_learners, self.beta):
-            print(beta)
             predicted_algorithm = np.argmin(base_learner.predict(features_of_test_instance, instance_id))
             confidence[predicted_algorithm] = confidence[predicted_algorithm] + beta
 
@@ -111,7 +111,6 @@ class SAMME:
             return False
 
         beta = math.log((1 - err) / err) + math.log(self.num_algorithms - 1)
-        print(beta)
         self.beta.append(beta)
 
         for i in range(amount_of_training_instances):
