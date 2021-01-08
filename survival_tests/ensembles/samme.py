@@ -46,6 +46,8 @@ class SAMME:
                 self.base_learners.append(MultiClassAlgorithmSelector())
             elif self.algorithm_name == 'satzilla':
                 self.base_learners.append(SATzilla11())
+            elif self.algorithm_name == 'sunny':
+                self.base_learners.append(SUNNY())
             else:
                 sys.exit('Wrong base learner for boosting')
 
