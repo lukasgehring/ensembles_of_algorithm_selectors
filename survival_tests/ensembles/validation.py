@@ -84,8 +84,8 @@ def split_scenario(scenario: ASlibScenario, sub_fold: int, num_instances: int):
         test_insts = instances[(sub_fold - 1) * fold_len:]
         training_insts = instances[:(sub_fold - 1) * fold_len]
 
-    test = copy.copy(scenario)
-    training = copy.copy(scenario)
+    test = copy.deepcopy(scenario)
+    training = copy.deepcopy(scenario)
 
     # feature_data
     test.feature_data = test.feature_data.drop(training_insts).sort_index()
@@ -118,7 +118,5 @@ def split_scenario(scenario: ASlibScenario, sub_fold: int, num_instances: int):
 
     test.instances = test_insts
     training.instances = training_insts
-
-    scenario.used_feature_groups = None
 
     return test, training
