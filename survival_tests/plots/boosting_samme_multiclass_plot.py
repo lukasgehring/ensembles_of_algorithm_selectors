@@ -46,11 +46,11 @@ def generate_sbs_vbs_change_table():
         "SELECT scenario_name, approach, COUNT(fold), AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme_mulitclass.approach, vbs_sbs.metric, adaboostsamme_mulitclass.result, ((adaboostsamme_mulitclass.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme_mulitclass ON vbs_sbs.scenario_name = adaboostsamme_mulitclass.scenario_name AND vbs_sbs.fold = adaboostsamme_mulitclass.fold AND vbs_sbs.metric = adaboostsamme_mulitclass.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_multiclass_algorithm_selector%' AND scenario_name='SAT18-EXP' GROUP BY scenario_name, approach")
 
     dfs = [asp, bnsl, cpmp, csp, csp_time, csp_mzn, gluhack, maxsat12, maxsat15, qbf, sat03, sat12, sat18]
-    #pd.set_option('display.max_columns', None)
-    #pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
     #print(multiclass_algorithm_selector)
 
-    print(sat12)
+    #print(dfs)
 
     fig = plt.figure(1, figsize=(20, 8))
 
@@ -61,6 +61,8 @@ def generate_sbs_vbs_change_table():
             i = i + 1
         ax = fig.add_subplot(3, 5, i + 1)
 
+        plt.xlim((1, 40))
+
         data = list()
         ticks = list()
 
@@ -69,7 +71,7 @@ def generate_sbs_vbs_change_table():
             ticks.append(int(approach.replace('SAMME_multiclass_algorithm_selector_', '')))
             data.append(result)
         sorted_data = [x for _, x in sorted(zip(ticks, data))]
-        ax.plot(range(len(sorted_data)), sorted_data)
+        ax.plot(range(1, len(sorted_data) + 1), sorted_data)
 
         plt.title(df.scenario_name[0])
         #plt.xlabel('Learning Algorithm')

@@ -64,7 +64,7 @@ def generate_sbs_vbs_change_table():
     #plt.xticks(rotation=45, ha='right')
 
     ax.set_ylim(bottom=0.4)
-    ax.set_ylim(top=0.43)
+    ax.set_ylim(top=0.5)
 
     plt.title("Stacking with all base learners")
     plt.xlabel("left out base learner")
