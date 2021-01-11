@@ -243,7 +243,8 @@ def create_approach(approach_names):
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboostR2':
-            approaches.append(AdaboostR2('per_algorithm_regressor'))
+            #approaches.append(AdaboostR2('per_algorithm_regressor'))
+            approaches.append(AdaboostR2('par10'))
         if approach_name == 'samme':
             #approaches.append(SAMME('per_algorithm_regressor'))
             #approaches.append(SAMME('satzilla'))
