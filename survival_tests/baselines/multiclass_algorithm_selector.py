@@ -1,3 +1,5 @@
+import pickle
+
 from aslib_scenario.aslib_scenario import ASlibScenario
 import pandas as pd
 import numpy as np
@@ -12,7 +14,7 @@ from sklearn.base import clone
 
 class MultiClassAlgorithmSelector:
 
-    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None, feature_selection=None):
+    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None, feature_importance=None):
         self.scikit_classifier= scikit_classifier
         self.logger = logging.getLogger("multiclass_algorithm_selector")
         self.logger.addHandler(logging.StreamHandler())
@@ -24,6 +26,7 @@ class MultiClassAlgorithmSelector:
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1;
         self.data_weights = data_weights
+        self.feature_importance = feature_importance
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.num_algorithms = len(scenario.algorithms)
@@ -44,6 +47,8 @@ class MultiClassAlgorithmSelector:
 
         if self.data_weights is None:
             self.trained_model.fit(X_train, y_train)
+            if self.feature_importances:
+                self.save_feature_importance(self.trained_model, scenario.scenario, len(X_train[0]))
         else:
             self.trained_model.fit(X_train, y_train, sample_weight=self.data_weights)
 
@@ -96,6 +101,22 @@ class MultiClassAlgorithmSelector:
             instance_features = instance_features.to_numpy()
 
         return instance_features, np.asarray(best_algorithm_ids)
+
+    # save base learner for later use
+    def save_feature_importance(self, base_learner, scenario_name, num_features):
+        importances = base_learner.feature_importances_
+        indices = np.argsort(importances)[::-1]
+
+        # Print the feature ranking
+        print("Feature ranking:")
+
+        file_name = 'feature_importance/multiclass' + scenario_name
+        with open(file_name, 'ab') as f:
+            pickle.dump((-1, num_features), f)
+            for i in indices:
+                data = (i, importances[i])
+                print(data)
+                pickle.dump(data, f)
 
     def get_name(self):
         return "multiclass_algorithm_selector"
