@@ -5,16 +5,14 @@ import math
 import numpy as np
 
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
-from baselines.multiclass_algorithm_selector import MultiClassAlgorithmSelector
 from baselines.per_algorithm_regressor import PerAlgorithmRegressor
 from aslib_scenario.aslib_scenario import ASlibScenario
-
 from ensembles.write_to_database import write_to_database
 
 
 class AdaboostR2:
 
-    def __init__(self, algorithm_name, max_iterations=20, loss_function='linear'):
+    def __init__(self, algorithm_name, max_iterations=20, loss_function='linear', different_error_type=False):
         # setup
         self.logger = logging.getLogger("boosting")
         self.logger.addHandler(logging.StreamHandler())
@@ -23,6 +21,7 @@ class AdaboostR2:
         self.algorithm_name = algorithm_name
         self.max_iterations = max_iterations
         self.loss_function = loss_function
+        self.different_error_type = different_error_type
 
         # attributes
         self.current_iteration = 0
@@ -42,10 +41,8 @@ class AdaboostR2:
             # choose base learner algorithm
             if self.algorithm_name == 'per_algorithm_regressor':
                 self.base_learners.append(PerAlgorithmRegressor())
-            elif self.algorithm_name == 'multiclass_algorithm_selector':
-                self.base_learners.append(MultiClassAlgorithmSelector(data_weights=self.data_weights))
-            elif self.algorithm_name == 'ExponentialSurvivalForest':
-                self.base_learners.append(SurrogateSurvivalForest(criterion='Exponential', data_weights=self.data_weights))
+            elif self.algorithm_name == 'par10':
+                self.base_learners.append(SurrogateSurvivalForest(criterion='PAR10'))
             else:
                 sys.exit('Wrong base learner for boosting')
 
@@ -58,7 +55,8 @@ class AdaboostR2:
                 break
 
             # use write_to_database to write each iteration to database
-            # write_to_database(scenario, self, fold)
+            if self.current_iteration < self.max_iterations:
+                write_to_database(scenario, self, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get the predictions and confidence values from each base learner
@@ -109,7 +107,11 @@ class AdaboostR2:
 
             # calculate loss function for each instance
             predictions = base_learner.predict(x_test, instance_id)
-            temp_loss.append(abs(np.amin(predictions) - np.amin(y_test)))
+            if self.different_error_type:
+                temp_loss.append(abs(np.amin(predictions) - np.amin(y_test)))
+            else:
+                y_min = np.argmin(y_test)
+                temp_loss.append(abs(predictions[y_min] - y_test[y_min]))
 
         # calculate loss function for base learner
         if self.loss_function == 'linear':
@@ -117,9 +119,9 @@ class AdaboostR2:
         elif self.loss_function == 'square':
             loss = [i ** 2 for i in temp_loss] / (np.amax(temp_loss) ** 2)
         elif self.loss_function == 'exponential':
-            loss = 0
+            loss = np.zeros(len(temp_loss))
             for i in range(len(temp_loss)):
-                temp_loss[i] = 1 - math.exp(-temp_loss[i] / np.amax(temp_loss))
+                loss[i] = 1 - math.exp(-temp_loss[i] / np.amax(temp_loss))
         else:
             sys.exit("Unknown loss function")
 
@@ -143,13 +145,16 @@ class AdaboostR2:
         new_scenario = copy.deepcopy(scenario)
 
         # create weighted sample
-        new_scenario.feature_data = scenario.feature_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
-        new_scenario.performance_data = scenario.performance_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
+        new_scenario.feature_data = new_scenario.feature_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
+        new_scenario.performance_data = new_scenario.performance_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
         if scenario.feature_cost_data is not None:
-            new_scenario.feature_cost_data = scenario.feature_cost_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
+            new_scenario.feature_cost_data = new_scenario.feature_cost_data.sample(amount_of_training_instances, replace=True, weights=self.data_weights, random_state=fold)
 
         return new_scenario
 
     def get_name(self):
-        name = "adaboostR2_" + self.algorithm_name + "_" + str(self.current_iteration)
+        name = "adaboostR2_" + self.algorithm_name + "_" + self.loss_function + + '_' + str(self.current_iteration)
+        if self.different_error_type:
+            # se = smallest error
+            name = name + '_se'
         return name
