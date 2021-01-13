@@ -3,8 +3,7 @@ import sys
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC, LinearSVC
+from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -22,7 +21,21 @@ from pre_compute.pickle_loader import load_pickle
 
 class Stacking:
 
-    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full'):
+    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full', new_feature_type='full'):
+        """
+        Stacking Ensemble
+
+        Params:
+            - base_learner: List with all base learner numbers for the ensemble. Numbers can go from 1-7
+            - meta_learner_type: Type of meta-learner
+            - pre_computed: True, if predictions of the base learner are pre computed
+            - meta_learner_input [full, predictions_only]: full = predictions + instance features,
+                                                           predictions_only = predictions
+            - new_feature_type [full, small]: full = all predictions of a base learner,
+                                              small = only the best algorithm is selected
+        """
+
+        # logger
         self.logger = logging.getLogger("stacking")
         self.logger.addHandler(logging.StreamHandler())
 
@@ -35,10 +48,13 @@ class Stacking:
         # attributes
         self.meta_learner = None
         self.base_learners = list()
+
         self.num_algorithms = 0
         self.scenario_name = ''
         self.fold = 0
+
         self.predictions = list()
+
         self.algorithm_selection_algorithm = False
         self.pipe = None
 
@@ -66,12 +82,17 @@ class Stacking:
         self.scenario_name = scenario.scenario
         self.fold = fold
         self.num_algorithms = len(scenario.algorithms)
+
         num_instances = len(scenario.instances)
         feature_data = scenario.feature_data.to_numpy()
         performance_data = scenario.performance_data.to_numpy()
 
         # new features in matrix [instances x predictions]
-        new_feature_data = np.zeros((num_instances, self.num_algorithms * len(self.base_learners)))
+        if self.new_feature_type == 'full':
+            new_feature_data = np.zeros((num_instances, self.num_algorithms * len(self.base_learners)))
+
+        elif self.new_feature_type == 'small':
+            new_feature_data = np.zeros((num_instances, len(self.base_learners)))
 
         # if predictions are precomputed
         if self.pre_computed:
@@ -86,21 +107,37 @@ class Stacking:
 
             else:
                 base_learner.fit(scenario, fold, amount_of_training_instances)
+
                 predictions = np.zeros((len(scenario.instances), self.num_algorithms))
+
                 for instance_id, instance_feature in enumerate(feature_data):
                     predictions[instance_id] = base_learner.predict(instance_feature, instance_id)
 
             # insert predictions to new feature data matrix
             for i in range(num_instances):
                 for alo_num in range(self.num_algorithms):
-                    new_feature_data[i][alo_num + self.num_algorithms * learner_index] = predictions[i][alo_num]
+
+                    if self.new_feature_type == 'full':
+                        new_feature_data[i][alo_num + self.num_algorithms * learner_index] = predictions[i][alo_num]
+
+                    elif self.new_feature_type == 'small':
+                        new_feature_data[i][learner_index] = np.argmin(predictions[i][alo_num])
 
         # add predictions to the features of the instances
-        new_feature_data = pd.DataFrame(new_feature_data, index=scenario.feature_data.index, columns=np.arange(self.num_algorithms * len(self.base_learners)))
+        if self.new_feature_type == 'full':
+            new_columns = np.arange(self.num_algorithms * len(self.base_learners))
+
+        elif self.new_feature_type == 'small':
+            new_columns = np.arange(len(self.base_learners))
+
+        new_feature_data = pd.DataFrame(new_feature_data, index=scenario.feature_data.index, columns=new_columns)
+
         if self.meta_learner_input == 'full':
             new_feature_data = pd.concat([scenario.feature_data, new_feature_data], axis=1, sort=False)
+
         elif self.meta_learner_input == 'predictions_only':
             pass
+
         else:
             sys.exit('Wrong meta learner input type option')
 
@@ -128,8 +165,8 @@ class Stacking:
         elif self.meta_learner_type == 'PAR10':
             self.meta_learner = SurrogateSurvivalForest(criterion='PAR10')
             self.algorithm_selection_algorithm = True
-        elif self.meta_learner_type == 'DecisionTree':
-            self.meta_learner = DecisionTreeClassifier(random_state=fold)
+        elif self.meta_learner_type == 'RandomForest':
+            self.meta_learner = RandomForestClassifier(random_state=fold)
         elif self.meta_learner_type == 'SVM':
             self.meta_learner = LinearSVC(random_state=fold, max_iter=10000)
 
@@ -147,8 +184,10 @@ class Stacking:
     def predict(self, features_of_test_instance, instance_id: int):
 
         # get all predictions from the base learners
-        new_feature_data = np.zeros(self.num_algorithms * len(self.base_learners))
-
+        if self.new_feature_type == 'full':
+            new_feature_data = np.zeros(self.num_algorithms * len(self.base_learners))
+        elif self.new_feature_type == 'small':
+            new_feature_data = np.zeros(len(self.base_learners))
         for learner_index, base_learner in enumerate(self.base_learners):
             # create new feature data
             if self.pre_computed:
@@ -157,7 +196,10 @@ class Stacking:
                 prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
 
             for alo_num in range(self.num_algorithms):
-                new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[alo_num]
+                if self.new_feature_type == 'full':
+                    new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[alo_num]
+                elif self.new_feature_type == 'small':
+                    new_feature_data[learner_index] = np.argmin(prediction[alo_num])
 
         # concatenate original feature with new feature
         if self.meta_learner_input == 'full':
