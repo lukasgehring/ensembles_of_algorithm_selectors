@@ -119,11 +119,11 @@ def create_approach(approach_names):
 
         # voting
         if approach_name == 'voting':
-            approaches.append(Voting(base_learner=[1,2,3,4,5,6,7]))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7]))
         if approach_name == 'voting_rank':
-            approaches.append(Voting(ranking=True))
-        if approach_name == 'voting_rank_min':
-            approaches.append(Voting(ranking=True, rank_method='min'))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, pre_computed=True))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min', pre_computed=True))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max', pre_computed=True))
         if approach_name == 'voting_weighting':
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Voting(base_learner=combination, pre_computed=True, weighting=True))
