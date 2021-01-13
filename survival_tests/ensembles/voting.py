@@ -109,9 +109,19 @@ class Voting:
 
         if self.ranking:
             if self.weighting:
-                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=self.weights)
+                if self.pre_computed:
+                    return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                                self.trained_models, weights=self.weights, pre_computed_predictions=self.predictions)
+                else:
+                    return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                                self.trained_models, weights=self.weights)
             else:
-                return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms, self.trained_models, weights=None, rank_method=self.rank_method)
+                if self.pre_computed:
+                    return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                                self.trained_models, weights=None, rank_method=self.rank_method, pre_computed_predictions=self.predictions)
+                else:
+                    return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
+                                                self.trained_models, weights=None, rank_method=self.rank_method)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
