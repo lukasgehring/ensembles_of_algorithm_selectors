@@ -47,7 +47,7 @@ class MultiClassAlgorithmSelector:
 
         if self.data_weights is None:
             self.trained_model.fit(X_train, y_train)
-            if self.feature_importances:
+            if self.feature_importance:
                 self.save_feature_importance(self.trained_model, scenario.scenario, len(X_train[0]))
         else:
             self.trained_model.fit(X_train, y_train, sample_weight=self.data_weights)
