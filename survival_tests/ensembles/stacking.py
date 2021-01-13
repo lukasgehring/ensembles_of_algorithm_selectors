@@ -44,6 +44,7 @@ class Stacking:
         self.pre_computed = pre_computed
         self.base_learner_type = base_learner
         self.meta_learner_input = meta_learner_input
+        self.new_feature_type = new_feature_type
 
         # attributes
         self.meta_learner = None
