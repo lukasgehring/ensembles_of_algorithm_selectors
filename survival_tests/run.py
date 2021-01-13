@@ -368,6 +368,23 @@ def create_approach(approach_names):
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(StackingH2O(base_learner=combination, meta_learner_type='DecisionTree', pre_computed=True))
                 approaches.append(StackingH2O(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
+
+        if approach_name == 'test':
+            approaches.append(Test(algorithm='per_algorithm_regressor'))
+            approaches.append(Test(algorithm='sunny'))
+            approaches.append(Test(algorithm='isac'))
+            approaches.append(Test(algorithm='satzilla'))
+            approaches.append(Test(algorithm='expectation'))
+            approaches.append(Test(algorithm='par10'))
+            approaches.append(Test(algorithm='multiclass'))
+
+            approaches.append(PerAlgorithmRegressor())
+            approaches.append(SUNNY())
+            approaches.append(ISAC())
+            approaches.append(SATzilla11())
+            approaches.append(SurrogateSurvivalForest(criterion='Expectation'))
+            approaches.append(SurrogateSurvivalForest(criterion='PAR10'))
+            approaches.append(MultiClassAlgorithmSelector())
     return approaches
 
 
