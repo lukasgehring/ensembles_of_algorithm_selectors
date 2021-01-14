@@ -27,32 +27,26 @@ def generate_sbs_vbs_change_table():
 
 
     per_algorithm_regressor = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme.approach, vbs_sbs.metric, adaboostsamme.result, ((adaboostsamme.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme ON vbs_sbs.scenario_name = adaboostsamme.scenario_name AND vbs_sbs.fold = adaboostsamme.fold AND vbs_sbs.metric = adaboostsamme.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_per_algorithm_regressor%' GROUP BY scenario_name")
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostr2_per_algorithm_regressor.approach, vbs_sbs.metric, adaboostr2_per_algorithm_regressor.result, ((adaboostr2_per_algorithm_regressor.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostr2_per_algorithm_regressor ON vbs_sbs.scenario_name = adaboostr2_per_algorithm_regressor.scenario_name AND vbs_sbs.fold = adaboostr2_per_algorithm_regressor.fold AND vbs_sbs.metric = adaboostr2_per_algorithm_regressor.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE 'adaboostR2_per_algorithm_regressor_linear_%_se' GROUP BY scenario_name")
     multiclass_algorithm_selector = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme.approach, vbs_sbs.metric, adaboostsamme.result, ((adaboostsamme.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme ON vbs_sbs.scenario_name = adaboostsamme.scenario_name AND vbs_sbs.fold = adaboostsamme.fold AND vbs_sbs.metric = adaboostsamme.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_multiclass_algorithm_selector%' GROUP BY scenario_name")
-    multiclass_algorithm_selector_fix = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme_mulitclass.approach, vbs_sbs.metric, adaboostsamme_mulitclass.result, ((adaboostsamme_mulitclass.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme_mulitclass ON vbs_sbs.scenario_name = adaboostsamme_mulitclass.scenario_name AND vbs_sbs.fold = adaboostsamme_mulitclass.fold AND vbs_sbs.metric = adaboostsamme_mulitclass.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_multiclass_algorithm_selector_40%' GROUP BY scenario_name")
-    satzilla = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme_satzilla.approach, vbs_sbs.metric, adaboostsamme_satzilla.result, ((adaboostsamme_satzilla.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme_satzilla ON vbs_sbs.scenario_name = adaboostsamme_satzilla.scenario_name AND vbs_sbs.fold = adaboostsamme_satzilla.fold AND vbs_sbs.metric = adaboostsamme_satzilla.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_satzilla%' GROUP BY scenario_name")
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostr2_per_algorithm_regressor.approach, vbs_sbs.metric, adaboostr2_per_algorithm_regressor.result, ((adaboostr2_per_algorithm_regressor.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostr2_per_algorithm_regressor ON vbs_sbs.scenario_name = adaboostr2_per_algorithm_regressor.scenario_name AND vbs_sbs.fold = adaboostr2_per_algorithm_regressor.fold AND vbs_sbs.metric = adaboostr2_per_algorithm_regressor.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE 'adaboostR2_per_algorithm_regressor_square_%_se' GROUP BY scenario_name")
 
+    print(per_algorithm_regressor)
     fig = plt.figure(1, figsize=(5, 4))
 
     ax = fig.add_subplot(111)
 
     a = list()
     a.append(np.average(per_algorithm_regressor.result))
-    a.append(np.average(multiclass_algorithm_selector_fix.result))
-    a.append(np.average(satzilla.result))
+    a.append(np.average(multiclass_algorithm_selector.result))
 
     c = list()
     c.append(np.average(per_algorithm_regressor_base_learner.result))
     c.append(np.average(multiclass_base_learner.result))
-    c.append(np.average(satzilla_base_learner.result))
 
     b = list()
     b.append("PerAlgo")
     b.append("Multiclass")
-    b.append("SATzilla")
 
     width = 0.2
     # the width of the bars
@@ -80,7 +74,7 @@ def generate_sbs_vbs_change_table():
     #ax.plot(x, y, 'r', color= color2, linewidth=2, label="SUNNY approximation")
 
     ax.set_ylim(bottom=0.3)
-    ax.set_ylim(top=0.7)
+    #ax.set_ylim(top=0.7)
 
     plt.legend()
 

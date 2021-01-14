@@ -1,10 +1,12 @@
 import operator
 import pickle
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 # open pre computed base learner
-def open_base_learner(scenario_name):
+def open_file(scenario_name):
     file_name = '../feature_importance/' + scenario_name
 
     # code from https://stackoverflow.com/questions/35067957/how-to-read-pickle-file by jsbueno
@@ -24,7 +26,8 @@ def avg_importance(data):
     for data_index, data_value in data:
         if data_index > -1:
             final_data[data_index] = final_data[data_index] + data_value
-    final_data = final_data / feature_length
+
+    final_data = final_data / sum(final_data)
 
     final_final_data = list()
     for i in range(feature_length):
@@ -41,7 +44,7 @@ color4 = '#e9c46a'
 color5 = '#251314'
 
 for num_algorithms, name in zip(num_algorithms, scenario_name):
-    data = open_base_learner(name)
+    data = open_file(name)
     final_data = avg_importance(data)
     final_data.sort(key=operator.itemgetter(1))
 
@@ -60,7 +63,7 @@ for num_algorithms, name in zip(num_algorithms, scenario_name):
     name = name + ": Algorithms = " + str(num_algorithms)
     plt.title(name)
     for i in range(feature_length):
-        if feature_length - indices[i] <= num_algorithms:
+        if feature_length - indices[i] <= 7:
             plt.bar(i, importances[i], color=color3, align="center")
         else:
             plt.bar(i, importances[i], color=color1, align="center")

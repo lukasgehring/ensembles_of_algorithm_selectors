@@ -61,7 +61,7 @@ def generate_sbs_vbs_change_table():
             i = i + 1
         ax = fig.add_subplot(3, 5, i + 1)
 
-        plt.xlim((1, 40))
+        plt.xlim((1, 10))
 
         data = list()
         ticks = list()

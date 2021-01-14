@@ -243,8 +243,8 @@ def create_approach(approach_names):
         if approach_name == 'boosting':
             approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboostR2':
-            #approaches.append(AdaboostR2('per_algorithm_regressor'))
-            approaches.append(AdaboostR2('par10'))
+            approaches.append(AdaboostR2('per_algorithm_regressor'))
+            #approaches.append(AdaboostR2('par10'))
         if approach_name == 'samme':
             #approaches.append(SAMME('per_algorithm_regressor'))
             #approaches.append(SAMME('satzilla'))
@@ -280,7 +280,7 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True))
-            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='DecisionTree', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True))
         if approach_name == 'stacking_meta_learner_predictions_only':
             base_learner = [1, 2, 3, 4, 5, 6, 7]
@@ -365,26 +365,8 @@ def create_approach(approach_names):
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
-            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
-                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='DecisionTree', pre_computed=True))
-                approaches.append(StackingH2O(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
-
-        if approach_name == 'test':
-            approaches.append(Test(algorithm='per_algorithm_regressor'))
-            approaches.append(Test(algorithm='sunny'))
-            approaches.append(Test(algorithm='isac'))
-            approaches.append(Test(algorithm='satzilla'))
-            approaches.append(Test(algorithm='expectation'))
-            approaches.append(Test(algorithm='par10'))
-            approaches.append(Test(algorithm='multiclass'))
-
-            approaches.append(PerAlgorithmRegressor())
-            approaches.append(SUNNY())
-            approaches.append(ISAC())
-            approaches.append(SATzilla11())
-            approaches.append(SurrogateSurvivalForest(criterion='Expectation'))
-            approaches.append(SurrogateSurvivalForest(criterion='PAR10'))
-            approaches.append(MultiClassAlgorithmSelector())
+            approaches.append(StackingH2O(base_learner=[1,2,3,4,5,6,7], meta_learner_type='SUNNY', pre_computed=True))
+            approaches.append(StackingH2O(base_learner=[2,4,5,6], meta_learner_type='SUNNY', pre_computed=True))
     return approaches
 
 
@@ -429,11 +411,11 @@ for fold in range(1, 11):
                 metrics.append(NumberUnsolvedInstances(True))
             logger.info("Submitted pool task for approach \"" +
                         str(approach.get_name()) + "\" on scenario: " + scenario)
-            pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
-                                                      amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
+            #pool.apply_async(evaluate_scenario, args=(scenario, approach, metrics,
+            #                                          amount_of_scenario_training_instances, fold, config, tune_hyperparameters), callback=log_result)
 
-            #evaluate_scenario(scenario, approach, metrics,
-            #                 amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
+            evaluate_scenario(scenario, approach, metrics,
+                             amount_of_scenario_training_instances, fold, config, tune_hyperparameters)
             print('Finished evaluation of fold')
 
 pool.close()
