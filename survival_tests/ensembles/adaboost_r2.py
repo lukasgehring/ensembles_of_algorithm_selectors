@@ -55,8 +55,8 @@ class AdaboostR2:
                 break
 
             # use write_to_database to write each iteration to database
-            if self.current_iteration < self.max_iterations:
-                write_to_database(scenario, self, fold)
+            #if self.current_iteration < self.max_iterations:
+            #    write_to_database(scenario, self, fold)
 
     def predict(self, features_of_test_instance, instance_id: int):
         # get the predictions and confidence values from each base learner
@@ -111,7 +111,7 @@ class AdaboostR2:
                 temp_loss.append(abs(np.amin(predictions) - np.amin(y_test)))
             else:
                 y_min = np.argmin(y_test)
-                temp_loss.append(abs(predictions[y_min] - y_test[y_min]))
+                temp_loss.append(abs(float(predictions[y_min] - y_test[y_min])))
 
         # calculate loss function for base learner
         if self.loss_function == 'linear':
@@ -153,7 +153,7 @@ class AdaboostR2:
         return new_scenario
 
     def get_name(self):
-        name = "adaboostR2_" + self.algorithm_name + "_" + self.loss_function + + '_' + str(self.current_iteration)
+        name = "adaboostR2_" + self.algorithm_name + "_" + self.loss_function + '_' + str(self.current_iteration)
         if self.different_error_type:
             # se = smallest error
             name = name + '_se'
