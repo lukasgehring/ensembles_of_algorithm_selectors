@@ -5,7 +5,6 @@ import multiprocessing as mp
 import database_utils
 from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
-from ensembles.boosting import Boosting
 from ensembles.create_base_learner import CreateBaseLearner
 from ensembles.stacking_h2o import StackingH2O
 from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
@@ -13,7 +12,6 @@ from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
 from pre_compute.test import Test
 from ensembles.voting import Voting
-from ensembles.voting_pre_computed import VotingPreComputed
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -132,30 +130,6 @@ def create_approach(approach_names):
         if approach_name == 'voting_base_learner_test':
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Voting(base_learner=combination, pre_computed=True))
-        if approach_name == 'voting_pre_computed':
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[2, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 3, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 4, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 5, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 6, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 7]))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6]))
-        if approach_name == 'voting_pre_computed_ranking':
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True))
-            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min'))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='min'))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max'))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], ranking=True, rank_method='max'))
-        if approach_name == 'voting_pre_computed_weighting':
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True))
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True))
-            #approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, ranking=True))
-            #approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, ranking=True))
-        if approach_name == 'voting_pre_computed_cross_wk':
-            approaches.append(VotingPreComputed(base_learner=[2, 4, 5, 6, 7], weighting=True, cross_validation=True))
-            approaches.append(VotingPreComputed(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, cross_validation=True))
 
         # bagging
         if approach_name == 'bagging-per_algorithm_regressor':
@@ -240,8 +214,6 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=60, base_learner=SATzilla11()))
 
         # boosting
-        if approach_name == 'boosting':
-            approaches.append(Boosting('per_algorithm_regressor'))
         if approach_name == 'adaboostR2':
             approaches.append(AdaboostR2('per_algorithm_regressor'))
             #approaches.append(AdaboostR2('par10'))
@@ -250,22 +222,6 @@ def create_approach(approach_names):
             #approaches.append(SAMME('satzilla'))
             #approaches.append(SAMME('multiclass_algorithm_selector'))
             approaches.append(SAMME('sunny', num_iterations=100))
-        if approach_name == 'adaboost_stumpt':
-            approaches.append(Boosting('per_algorithm_regressor', stump=True))
-        if approach_name == 'adaboost_stump_100':
-            approaches.append(Boosting('per_algorithm_regressor', num_iterations=100, stump=True))
-        if approach_name == 'adaboost_stump_500':
-            approaches.append(Boosting('per_algorithm_regressor', num_iterations=500, stump=True))
-        if approach_name == 'boosting_stumpt':
-            approaches.append(Boosting('per_algorithm_regressor', stump=True, singlelearner=True))
-        if approach_name == 'boosting_stump_100':
-            approaches.append(Boosting('per_algorithm_regressor', num_iterations=100, stump=True, singlelearner=True))
-        if approach_name == 'boosting_multiclass':
-            approaches.append(Boosting('multiclass_algorithm_selector'))
-        if approach_name == 'boosting_multiclass_100':
-            approaches.append(Boosting('multiclass_algorithm_selector', num_iterations=100))
-        if approach_name == 'boosting_ExponentialSurvivalForest':
-            approaches.append(Boosting('ExponentialSurvivalForest'))
 
         # stacking
         if approach_name == 'stacking':
@@ -365,8 +321,24 @@ def create_approach(approach_names):
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
-            approaches.append(StackingH2O(base_learner=[1,2,3,4,5,6,7], meta_learner_type='SUNNY', pre_computed=True))
-            approaches.append(StackingH2O(base_learner=[2,4,5,6], meta_learner_type='SUNNY', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True))
+            approaches.append(
+                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True))
     return approaches
 
 
