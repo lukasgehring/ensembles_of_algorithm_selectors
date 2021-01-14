@@ -79,6 +79,7 @@ class Voting:
                 for i, base_learner in enumerate(self.trained_models):
                     base_learner.fit(training_scenario, fold, amount_of_training_instances)
                     weights_denorm[i] = weights_denorm[i] + base_learner_performance(test_scenario, amount_of_training_instances, base_learner)
+
             # train base learner on the original scenario
             if not self.pre_computed:
                 for base_learner in self.trained_models:
