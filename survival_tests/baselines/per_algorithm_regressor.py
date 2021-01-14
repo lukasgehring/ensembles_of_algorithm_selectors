@@ -19,7 +19,7 @@ from sklearn.pipeline import Pipeline
 
 class PerAlgorithmRegressor:
 
-    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, feature_selection=None, data_weights=None, stump=False, feature_importances=False):
+    def __init__(self, scikit_regressor=RandomForestRegressor(n_jobs=1, n_estimators=100), impute_censored=False, feature_selection=None, feature_importances=False):
         self.scikit_regressor = scikit_regressor
         self.logger = logging.getLogger("per_algorithm_regressor")
         self.logger.addHandler(logging.StreamHandler())
@@ -35,8 +35,6 @@ class PerAlgorithmRegressor:
         # setup
         self.impute_censored = impute_censored
         self.feature_selection = feature_selection
-        self.data_weights = data_weights
-        self.stump = stump
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         # set attributes
@@ -66,23 +64,16 @@ class PerAlgorithmRegressor:
 
             # train the model (with/without stump/weight)
             model = clone(self.scikit_regressor)
-            if self.stump:
-                model = DecisionTreeRegressor()
-                model.set_params(random_state=fold, max_depth=1)
-            else:
-                model.set_params(random_state=fold)
+            model.set_params(random_state=fold)
 
             if self.impute_censored:
                 censored = y_train >= self.algorithm_cutoff_time
                 model = impute_censored(
                     X_train, y_train, censored, model, distr_func, self.algorithm_cutoff_time)
             else:
-                if self.data_weights is None:
-                    model.fit(X_train, y_train)
-                    if self.feature_importances:
-                        self.save_feature_importance(model, scenario.scenario, len(X_train[0]))
-                else:
-                    model.fit(X_train, y_train, sample_weight=self.data_weights)
+                model.fit(X_train, y_train)
+                if self.feature_importances:
+                    self.save_feature_importance(model, scenario.scenario, len(X_train[0]))
 
             self.trained_models.append(model)
 
@@ -187,9 +178,6 @@ class PerAlgorithmRegressor:
                                                                                          scenario.algorithm_cutoff_time)
 
         return X_for_algorithm_id, y_for_algorithm_id
-
-    def update_weights(self, weights):
-        self.data_weights = weights
 
     def construct_dataset_for_algorithm_id(self, instance_features, performances, algorithm_id: int,
                                            algorithm_cutoff_time):

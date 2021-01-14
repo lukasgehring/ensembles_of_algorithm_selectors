@@ -14,7 +14,7 @@ from sklearn.base import clone
 
 class MultiClassAlgorithmSelector:
 
-    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), data_weights=None, feature_importance=None):
+    def __init__(self, scikit_classifier=RandomForestClassifier(n_jobs=1, n_estimators=100), feature_importance=None):
         self.scikit_classifier= scikit_classifier
         self.logger = logging.getLogger("multiclass_algorithm_selector")
         self.logger.addHandler(logging.StreamHandler())
@@ -25,7 +25,6 @@ class MultiClassAlgorithmSelector:
         self.standard_scaler = None
         self.num_algorithms = 0
         self.algorithm_cutoff_time = -1;
-        self.data_weights = data_weights
         self.feature_importance = feature_importance
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
@@ -45,12 +44,9 @@ class MultiClassAlgorithmSelector:
         self.trained_model = clone(self.scikit_classifier)
         self.trained_model.set_params(random_state=fold)
 
-        if self.data_weights is None:
-            self.trained_model.fit(X_train, y_train)
-            if self.feature_importance:
-                self.save_feature_importance(self.trained_model, scenario.scenario, len(X_train[0]))
-        else:
-            self.trained_model.fit(X_train, y_train, sample_weight=self.data_weights)
+        self.trained_model.fit(X_train, y_train)
+        if self.feature_importance:
+            self.save_feature_importance(self.trained_model, scenario.scenario, len(X_train[0]))
 
     def predict(self, features_of_test_instance, instance_id: int):
         X_test = np.reshape(features_of_test_instance, (1, len(features_of_test_instance)))
