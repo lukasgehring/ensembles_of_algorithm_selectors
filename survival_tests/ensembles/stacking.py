@@ -218,5 +218,5 @@ class Stacking:
             return final_prediction
 
     def get_name(self):
-        name = "stacking" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type
+        name = "stacking" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type + '_' + self.meta_learner_input + '_' + self.new_feature_type
         return name
