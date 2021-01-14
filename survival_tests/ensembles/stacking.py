@@ -116,13 +116,12 @@ class Stacking:
 
             # insert predictions to new feature data matrix
             for i in range(num_instances):
-                for alo_num in range(self.num_algorithms):
-
-                    if self.new_feature_type == 'full':
+                if self.new_feature_type == 'full':
+                    for alo_num in range(self.num_algorithms):
                         new_feature_data[i][alo_num + self.num_algorithms * learner_index] = predictions[i][alo_num]
 
-                    elif self.new_feature_type == 'small':
-                        new_feature_data[i][learner_index] = np.argmin(predictions[i][alo_num])
+                elif self.new_feature_type == 'small':
+                    new_feature_data[i][learner_index] = np.argmin(predictions[i])
 
         # add predictions to the features of the instances
         if self.new_feature_type == 'full':
@@ -196,11 +195,11 @@ class Stacking:
             else:
                 prediction = base_learner.predict(features_of_test_instance, instance_id).flatten()
 
-            for alo_num in range(self.num_algorithms):
-                if self.new_feature_type == 'full':
+            if self.new_feature_type == 'full':
+                for alo_num in range(self.num_algorithms):
                     new_feature_data[alo_num + self.num_algorithms * learner_index] = prediction[alo_num]
-                elif self.new_feature_type == 'small':
-                    new_feature_data[learner_index] = np.argmin(prediction[alo_num])
+            elif self.new_feature_type == 'small':
+                new_feature_data[learner_index] = np.argmin(prediction)
 
         # concatenate original feature with new feature
         if self.meta_learner_input == 'full':
