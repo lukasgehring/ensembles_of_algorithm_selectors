@@ -322,23 +322,23 @@ def create_approach(approach_names):
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
         if approach_name == 'stacking_h2o':
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True, cross_validation=True))
             approaches.append(
-                StackingH2O(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True))
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True, cross_validation=True))
     return approaches
 
 
