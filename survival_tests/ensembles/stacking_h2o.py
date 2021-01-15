@@ -128,7 +128,7 @@ class StackingH2O:
         elif self.meta_learner_type == 'Expectation':
             self.meta_learner = SurrogateSurvivalForest(criterion='Expectation')
             self.algorithm_selection_algorithm = True
-        elif self.meta_learner_type == 'DecisionTree':
+        elif self.meta_learner_type == 'RandomForest':
             self.meta_learner = DecisionTreeClassifier()
         elif self.meta_learner_type == 'RandomForest':
             self.meta_learner = RandomForestClassifier()
@@ -169,6 +169,6 @@ class StackingH2O:
             return final_prediction
 
     def get_name(self):
-        name = "stacking_" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type
+        name = "stackingh2o_" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type
 
         return name
