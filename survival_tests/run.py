@@ -249,16 +249,28 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, meta_learner_input='predictions_only'))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='DecisionTree', pre_computed=True, meta_learner_input='predictions_only'))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, meta_learner_input='predictions_only'))
-        if approach_name == 'stacking_with_VarianceThreshold':
-            approaches.append(Stacking(feature_selection='VarianceThreshold'))
-        if approach_name == 'stacking_with_SelectKBest_f_regression':
-            approaches.append(Stacking(feature_selection='SelectKBest_f_regression'))
-        if approach_name == 'stacking_with_SelectKBest_mutual_info_regression':
-            approaches.append(Stacking(feature_selection='SelectKBest_mutual_info_regression'))
-        if approach_name == 'stacking_cross_validation':
-            approaches.append(Stacking(cross_validation=True))
-        if approach_name == 'stacking_sunny':
-            approaches.append(Stacking(meta_learner_type='SUNNY'))
+        if approach_name == 'stacking_h2o':
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True, cross_validation=True))
+        if approach_name == 'stacking_feature_importance':
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True))
 
         # pre computed base learner
         if approach_name == 'create_base_learner':
@@ -320,25 +332,6 @@ def create_approach(approach_names):
             #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
-        if approach_name == 'stacking_h2o':
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True, cross_validation=True))
-            approaches.append(
-                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True, cross_validation=True))
     return approaches
 
 

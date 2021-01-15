@@ -23,7 +23,7 @@ from pre_compute.pickle_loader import load_pickle
 
 class Stacking:
 
-    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full', new_feature_type='full', cross_validation=False):
+    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full', new_feature_type='full', cross_validation=False, feature_importance=False):
         """
         Stacking Ensemble
 
@@ -49,6 +49,7 @@ class Stacking:
         self.meta_learner_input = meta_learner_input
         self.new_feature_type = new_feature_type
         self.cross_validation = cross_validation
+        self.feature_importance = feature_importance
 
         # attributes
         self.meta_learner = None
@@ -179,7 +180,7 @@ class Stacking:
 
         # meta learner selection
         if self.meta_learner_type == 'per_algorithm_regressor':
-            self.meta_learner = PerAlgorithmRegressor()
+            self.meta_learner = PerAlgorithmRegressor(feature_importances=self.feature_importance)
             self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'SUNNY':
             self.meta_learner = SUNNY()
@@ -191,7 +192,7 @@ class Stacking:
             self.meta_learner = SATzilla11()
             self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'multiclass':
-            self.meta_learner = MultiClassAlgorithmSelector()
+            self.meta_learner = MultiClassAlgorithmSelector(feature_importance=self.feature_importance)
             self.algorithm_selection_algorithm = True
         elif self.meta_learner_type == 'Expectation':
             self.meta_learner = SurrogateSurvivalForest(criterion='Expectation')
