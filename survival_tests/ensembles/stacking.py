@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2, f_classif
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
@@ -23,7 +23,7 @@ from pre_compute.pickle_loader import load_pickle
 
 class Stacking:
 
-    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full', new_feature_type='full', cross_validation=False, feature_importance=False):
+    def __init__(self, base_learner=None, meta_learner_type='per_algorithm_regressor', pre_computed=False, meta_learner_input='full', new_feature_type='full', cross_validation=False, feature_importance=False, feature_selection=None):
         """
         Stacking Ensemble
 
@@ -50,6 +50,7 @@ class Stacking:
         self.new_feature_type = new_feature_type
         self.cross_validation = cross_validation
         self.feature_importance = feature_importance
+        self.feature_selection = feature_selection
 
         # attributes
         self.meta_learner = None
@@ -63,6 +64,7 @@ class Stacking:
 
         self.algorithm_selection_algorithm = False
         self.pipe = None
+        self.feature_selector = None
 
     def create_base_learner(self):
         self.base_learners = list()
@@ -205,6 +207,18 @@ class Stacking:
         elif self.meta_learner_type == 'SVM':
             self.meta_learner = LinearSVC(random_state=fold, max_iter=10000)
 
+        # feature selection
+        if self.feature_selection == 'variance_threshold':
+            self.feature_selector = VarianceThreshold(threshold=.8 * (1 - .8))
+            self.feature_selector.fit(scenario.feature_data)
+            scenario.feature_data = self.feature_selector.transform(scenario.feature_data)
+        elif self.feature_selection == 'select_k_best':
+            self.feature_selector = SelectKBest(f_classif, k=self.num_algorithms)
+            label_performance_data = [np.argmin(x) for x in performance_data]
+            self.feature_selector.fit(scenario.feature_data, label_performance_data)
+            scenario.feature_data = self.feature_selector.transform(scenario.feature_data)
+
+
         # fit meta learner
         if self.algorithm_selection_algorithm:
             self.meta_learner.fit(scenario, fold, amount_of_training_instances)
@@ -242,6 +256,11 @@ class Stacking:
         else:
             features_of_test_instance = new_feature_data
 
+        # feature selection
+        if self.feature_selection is not None:
+            features_of_test_instance = self.feature_selector.transform(features_of_test_instance.reshape(1, -1))
+            features_of_test_instance = features_of_test_instance.flatten()
+
         # final prediction with the meta learner
         if self.algorithm_selection_algorithm:
             return self.meta_learner.predict(features_of_test_instance, instance_id)
@@ -255,4 +274,6 @@ class Stacking:
         name = "stacking" + "_" + str(self.base_learner_type).replace('[', '').replace(']', '').replace(', ', '_') + self.meta_learner_type + '_' + self.meta_learner_input + '_' + self.new_feature_type
         if self.cross_validation:
             name = name + '_cv'
+        if self.feature_selection is not None:
+            name = name + self.feature_selection
         return name
