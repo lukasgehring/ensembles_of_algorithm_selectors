@@ -211,13 +211,12 @@ class Stacking:
         if self.feature_selection == 'variance_threshold':
             self.feature_selector = VarianceThreshold(threshold=.8 * (1 - .8))
             self.feature_selector.fit(scenario.feature_data)
-            scenario.feature_data = self.feature_selector.transform(scenario.feature_data)
+            scenario.feature_data = pd.DataFrame(data=self.feature_selector.transform(scenario.feature_data))
         elif self.feature_selection == 'select_k_best':
             self.feature_selector = SelectKBest(f_classif, k=self.num_algorithms)
             label_performance_data = [np.argmin(x) for x in performance_data]
             self.feature_selector.fit(scenario.feature_data, label_performance_data)
-            scenario.feature_data = self.feature_selector.transform(scenario.feature_data)
-
+            scenario.feature_data = pd.DataFrame(data=self.feature_selector.transform(scenario.feature_data))
 
         # fit meta learner
         if self.algorithm_selection_algorithm:
