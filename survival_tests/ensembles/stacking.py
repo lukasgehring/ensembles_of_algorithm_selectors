@@ -65,6 +65,7 @@ class Stacking:
         self.algorithm_selection_algorithm = False
         self.pipe = None
         self.feature_selector = None
+        self.imputer = None
 
     def create_base_learner(self):
         self.base_learners = list()
@@ -215,6 +216,8 @@ class Stacking:
         elif self.feature_selection == 'select_k_best':
             self.feature_selector = SelectKBest(f_classif, k=self.num_algorithms)
             label_performance_data = [np.argmin(x) for x in performance_data]
+            self.imputer = SimpleImputer()
+            scenario.feature_data = self.imputer.fit_transform(scenario.feature_data)
             self.feature_selector.fit(scenario.feature_data, label_performance_data)
             scenario.feature_data = pd.DataFrame(data=self.feature_selector.transform(scenario.feature_data))
 
@@ -257,6 +260,8 @@ class Stacking:
 
         # feature selection
         if self.feature_selection is not None:
+            if self.imputer is not None:
+                features_of_test_instance = self.imputer.transform(features_of_test_instance)
             features_of_test_instance = self.feature_selector.transform(features_of_test_instance.reshape(1, -1))
             features_of_test_instance = features_of_test_instance.flatten()
 
