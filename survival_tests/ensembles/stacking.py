@@ -261,7 +261,7 @@ class Stacking:
         # feature selection
         if self.feature_selection is not None:
             if self.imputer is not None:
-                features_of_test_instance = self.imputer.transform(features_of_test_instance)
+                features_of_test_instance = self.imputer.transform(features_of_test_instance.reshape(1, -1))
             features_of_test_instance = self.feature_selector.transform(features_of_test_instance.reshape(1, -1))
             features_of_test_instance = features_of_test_instance.flatten()
 
