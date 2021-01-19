@@ -43,7 +43,9 @@ def generate_sbs_vbs_change_table():
     plt.rc('font', family='sans-serif')
     plt.rc('text', usetex=True)
 
-    fig, ax = plt.subplots()  # Create a figure containing a single axes.
+    fig = plt.figure(1, figsize=(7, 5))
+
+    ax = fig.add_subplot(111)
 
     bagging = list()
     bagging.append(float(bagging_per_algorithm_regressor.result))
@@ -62,38 +64,35 @@ def generate_sbs_vbs_change_table():
     base_learner.append(float(multiclass.result))
 
     names = list()
-    names.append("PerAlgorithmRegressor")
-    names.append("SatZilla-11")
-    names.append("Survival Forest Expectation")
+    names.append("PerAlgo")
+    names.append("SatZilla")
+    names.append("SF-Exp")
     names.append("SUNNY")
     names.append("ISAC")
-    names.append("Multiclass Algorithm Selector")
-
-    print(base_learner)
-    print(bagging)
+    names.append("Multiclass")
 
     width = 0.2  # the width of the bars
     ind = np.arange(len(names))
     ax.bar(ind + width, bagging, width, color=color1,
-           label='Bagging with 10 Base Learner')
-    ax.bar(ind, base_learner, width, color=color2, label='Single Learner')
+           label='Bagging with 10 Base Learner', zorder=3)
+    ax.bar(ind, base_learner, width, color=color2, label='Single Learner', zorder=3)
 
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(names)
 
-    # TODO: write values on bars
-    #for i, v in enumerate(base_learner):
-    #    ax.text(v + 3, i + .25, str(v), color='blue', fontweight='bold')
-
     plt.xlabel('Learing Algorithm')
     plt.ylabel('nPAR10')
 
+    plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
+
+    #plt.xticks(rotation=45, ha='right')
+
     ax.set_ylim(bottom=0.3)
-    plt.xticks(rotation=45)
+
     plt.legend()
     plt.show()
 
-    #fig.savefig("foo.pdf", bbox_inches='tight')
+    fig.savefig("plotted/bagging_base_learner.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

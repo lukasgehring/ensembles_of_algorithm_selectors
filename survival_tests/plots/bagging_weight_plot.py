@@ -1,6 +1,7 @@
 import pandas as pd
 import configparser
 from matplotlib import pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 
@@ -13,64 +14,55 @@ def load_configuration():
 def generate_sbs_vbs_change_table():
     color1 = '#264653'
     color2 = '#2a9d8f'
-    color3 = '#e76f51'
-    color4 = '#e9c46a'
+    color3 = '#E4B363'
+    color4 = '#9A8F97'
     color5 = '#251314'
 
     bagging = get_dataframe_for_sql_query(
         "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, final_bagging_base_learner_test.approach, vbs_sbs.metric, final_bagging_base_learner_test.result, ((final_bagging_base_learner_test.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN final_bagging_base_learner_test ON vbs_sbs.scenario_name = final_bagging_base_learner_test.scenario_name AND vbs_sbs.fold = final_bagging_base_learner_test.fold AND vbs_sbs.metric = final_bagging_base_learner_test.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_per_algorithm_RandomForestRegressor_regressor_without_ranking' GROUP BY approach")
     bagging_weighting = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_per_algorithm_RandomForestRegressor_regressor_without_ranking_weighting' GROUP BY scenario_name")
-    bagging_oos = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_per_algorithm_RandomForestRegressor_regressor_without_ranking_weighting_oos' GROUP BY scenario_name")
-    bagging_original_set = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_per_algorithm_RandomForestRegressor_regressor_without_ranking_weighting_original_set' GROUP BY scenario_name")
-    bagging_sunny_weighting = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_sunny_without_ranking_weighting' GROUP BY scenario_name")
-    bagging_sunny_oos = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_sunny_without_ranking_weighting_oos' GROUP BY scenario_name")
-    bagging_data = list()
-    bagging_name = list()
+        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
 
-    bagging_data.append(float(bagging.result))
-    bagging_data.append(float(np.average(bagging_weighting.result)))
-    bagging_data.append(float(np.average(bagging_oos.result)))
-    bagging_data.append(float(np.average(bagging_original_set.result)))
-    bagging_data.append(float(np.average(bagging_sunny_weighting.result)))
-    bagging_data.append(float(np.average(bagging_sunny_oos.result)))
+    plt.rc('font', family='sans-serif')
+    plt.rc('text', usetex=True)
 
-    print(len(bagging_original_set.result))
+    fig = plt.figure(1, figsize=(7, 5))
 
-    bagging_name.append('Bagging')
-    bagging_name.append('Bagging weighting')
-    bagging_name.append('Bagging weighting oos')
-    bagging_name.append('Bagging weighting original')
-    bagging_name.append('Bagging sunny weighting')
-    bagging_name.append('Bagging sunny weighting oos')
+    ax = fig.add_subplot(111)
+
+    number_of_instances = 16484
+
+    width = 0.18  # the width of the bars
+    ax.bar(0.7, bagging.result, width, color=color1, zorder=6)
+    ax.bar(0.9, bagging_weighting.result[0], width, color=color2, zorder=6)
+    ax.bar(1.1, bagging_weighting.result[1], width, color=color3, zorder=6)
+    ax.bar(1.3, bagging_weighting.result[2], width, color=color4, zorder=6)
+    ax.bar(1.7, bagging_weighting.result[3], width, color=color1, zorder=6)
+    ax.bar(1.9, bagging_weighting.result[4], width, color=color2, zorder=6)
+
+    ax.set_xticks([1, 2])
+    ax.set_xticklabels(["PerAlgo", "SUNNY"])
 
 
-    fig, ax = plt.subplots()  # Create a figure containing a single axes.
+    #plt.xticks(rotation=45, ha='right')
 
-    width = 0.5  # the width of the bars
-    ind = np.arange(len(bagging_name))
-    ax.bar(ind, bagging_data, width, color=color1,
-           label='PerAlgorithmRegressor')
+    ax.set_ylabel('nPAR10', fontsize=11)
+    ax.set_ylabel('Lernalgorithm', fontsize=11)
 
-    for i, value in enumerate(bagging_data):
-        ax.text(i, value, round(value, 3), ha='center', va='bottom', rotation=0)
+    ax.set_ylim(bottom=0.36)
+    ax.set_ylim(top=0.46)
 
-    ax.set_xticks(ind)
-    ax.set_xticklabels(bagging_name)
+    plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 
-    plt.xticks(rotation=45)
+    l1 = mpatches.Patch(color=color1, label="Majority Voting")
+    l2 = mpatches.Patch(color=color2, label="Weighted Voting")
+    l3 = mpatches.Patch(color=color3, label="Weighted Voting (out-of-sample)")
+    l4 = mpatches.Patch(color=color4, label="Ranked Voting (original-data)")
 
-    #ax.set_ylim(bottom=0.35)
-    ax.set_ylim(top=0.45)
-    ax.set_ylim(bottom=0.35)
-
-    #plt.xticks(rotation=90)
-    #plt.legend()
+    plt.legend(handles=[l1, l2, l3, l4], loc=2)
     plt.show()
+
+    fig.savefig("plotted/bagging_weighting.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

@@ -38,9 +38,6 @@ def generate_sbs_vbs_change_table():
     for i in ind:
         ylables.append(stacking_feature_selection.approach[i][22:].replace('full_full', '').replace('select_k_best', 'k_best').replace('variance_threshold', 'vt'))
 
-        if i % 2 == 0:
-            continue
-
         if stacking_feature_selection.counter[i] == 130:
             ax.bar(i, stacking_feature_selection.result[i], width, color=color1, zorder=6)
         else:
