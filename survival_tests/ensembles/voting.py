@@ -58,7 +58,6 @@ class Voting:
         if 7 in self.base_learner:
             self.trained_models.append(MultiClassAlgorithmSelector())
 
-        print(self.trained_models)
 
     def fit(self, scenario: ASlibScenario, fold: int, amount_of_training_instances: int):
         self.num_algorithms = len(scenario.algorithms)
@@ -80,12 +79,13 @@ class Voting:
                     base_learner.fit(training_scenario, fold, amount_of_training_instances)
                     weights_denorm[i] = weights_denorm[i] + base_learner_performance(test_scenario, amount_of_training_instances, base_learner)
 
+            # reset trained base learners
+            self.create_base_learner()
             # train base learner on the original scenario
             if not self.pre_computed:
                 for base_learner in self.trained_models:
                     base_learner.fit(scenario, fold, amount_of_training_instances)
-            else:
-                self.trained_models = self.trained_models_backup
+
         else:
             weights_denorm = list()
 

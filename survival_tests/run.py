@@ -126,7 +126,7 @@ def create_approach(approach_names):
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Voting(base_learner=combination, pre_computed=True, weighting=True))
         if approach_name == 'voting_weight_cross':
-            approaches.append(Voting(weighting=True, cross_validation=True))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, cross_validation=True))
         if approach_name == 'voting_base_learner_test':
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Voting(base_learner=combination, pre_computed=True))
