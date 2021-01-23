@@ -115,6 +115,15 @@ def create_approach(approach_names):
         if approach_name == 'isac':
             approaches.append(ISAC())
 
+        if approach_name == 'base_learner':
+            approaches.append(Test('per_algorithm_RandomForestRegressor_regressor'))
+            approaches.append(Test('sunny'))
+            approaches.append(Test('isac'))
+            approaches.append(Test('satzilla-11'))
+            approaches.append(Test('Expectation_algorithm_survival_forest'))
+            approaches.append(Test('PAR10_algorithm_survival_forest'))
+            approaches.append(Test('multiclass_algorithm_selector'))
+
         # voting
         if approach_name == 'voting':
             approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7]))
