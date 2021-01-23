@@ -163,8 +163,9 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
         if approach_name == 'bagging-SUNNY_weight':
             #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
-            #approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='oos'))
+            #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='oos'))
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='original_set'))
         if approach_name == 'bagging-per_algorithm_regressor_rank':
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, use_ranking=True))
