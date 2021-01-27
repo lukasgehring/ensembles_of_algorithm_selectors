@@ -8,6 +8,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 
 from ensembles.prediction import predict_with_ranking
 from ensembles.validation import base_learner_performance
+from ensembles.write_to_database imprort write_to_database
 
 
 class Bagging:
@@ -96,6 +97,9 @@ class Bagging:
                 elif self.weight_type == 'original_set':
                     scenario = original_scenario
                 weights_denorm.append(base_learner_performance(scenario, len(scenario.feature_data), self.base_learners[index]))
+
+            if index != self.num_base_learner:
+                write_to_database(scenario, self, fold)
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
