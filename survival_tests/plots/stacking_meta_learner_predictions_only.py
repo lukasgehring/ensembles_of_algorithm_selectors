@@ -14,7 +14,7 @@ def generate_sbs_vbs_change_table():
     color1 = '#264653'
     color2 = '#2a9d8f'
     color3 = '#e76f51'
-    color4 = '#e9c46a'
+    color4 = '#cf401d'
     color5 = '#251314'
 
     #TODO: correct version for voting normal??
@@ -64,21 +64,21 @@ def generate_sbs_vbs_change_table():
     ax = fig.add_subplot(111)
 
     width = 0.35  # the width of the bars
-    ax.bar(0.8, stacking_per_algorithm_regressor.result, width, color=color1)
+    ax.bar(0.8, stacking_per_algorithm_regressor.result, width, color=color1, label="Stacking with full predictions")
     ax.bar(1.8, stacking_sunny.result, width, color=color1)
     ax.bar(2.8, stacking_isac.result, width, color=color1)
     ax.bar(3.8, stacking_satzilla.result, width, color=color1)
-    ax.bar(4.8, stacking_expectation.result, width, color=color3)
+    ax.bar(4.8, stacking_expectation.result, width, color=color4, label="Best approach with full predictions")
     ax.bar(5.8, stacking_par10.result, width, color=color1)
     ax.bar(6.8, stacking_multiclass.result, width, color=color1)
     ax.bar(7.8, stacking_random_forest.result, width, color=color1)
     ax.bar(8.8, stacking_svm.result, width, color=color1)
 
-    ax.bar(1.2, stacking_per_algorithm_regressor_small.result, width, color=color2)
+    ax.bar(1.2, stacking_per_algorithm_regressor_small.result, width, color=color2, label="Stacking with small predictions")
     ax.bar(2.2, stacking_sunny_small.result, width, color=color2)
     ax.bar(3.2, stacking_isac_small.result, width, color=color2)
     ax.bar(4.2, stacking_satzilla_small.result, width, color=color2)
-    ax.bar(5.2, stacking_expectation_small.result, width, color=color3)
+    ax.bar(5.2, stacking_expectation_small.result, width, color=color3, label="Best approach with small predictions")
     ax.bar(6.2, stacking_par10_small.result, width, color=color2)
     ax.bar(7.2, stacking_multiclass_small.result, width, color=color2)
     ax.bar(8.2, stacking_random_forest_small.result, width, color=color2)
@@ -89,16 +89,16 @@ def generate_sbs_vbs_change_table():
     ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8, 9])
     ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-Exp.", "SF-PAR10", "Multi", "RFC", "SVM"])
 
-    plt.title("f_stacking meta-learner comparison (predictions only)")
     plt.xlabel("Meta-learner")
     plt.ylabel("nPAR10")
 
     ax.set_ylim(bottom=0)
     ax.set_ylim(top=1.2)
 
+    plt.legend()
     plt.show()
 
-    fig.savefig("plotted/stacking_meta_learner.pdf", bbox_inches='tight')
+    fig.savefig("plotted/stacking_meta_learner_predictions_only.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

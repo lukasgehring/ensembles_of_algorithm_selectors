@@ -26,15 +26,16 @@ def generate_sbs_vbs_change_table():
     bagging_40 = get_dataframe_for_sql_query(
         "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_number_of_base_learner.approach, vbs_sbs.metric, bagging_number_of_base_learner.result, ((bagging_number_of_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_number_of_base_learner ON vbs_sbs.scenario_name = bagging_number_of_base_learner.scenario_name AND vbs_sbs.fold = bagging_number_of_base_learner.fold AND vbs_sbs.metric = bagging_number_of_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_40_per_algorithm_RandomForestRegressor_regressor_without_ranking' GROUP BY scenario_name")
 
-    stacking_unsolved_instances = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(result) as unsolved_instances, approach FROM `stacking` WHERE metric='number_unsolved_instances_False' AND approach='stacking_2_4_5_6SUNNY' GROUP BY scenario_name, approach")
-    voting_unsolved_instances = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(result) as unsolved_instances, approach FROM `voting_ranking` WHERE metric='number_unsolved_instances_False' AND approach='voting_ranking_weighting_2_4_5_6_7' GROUP BY scenario_name, approach")
-    samme_unsolved_instances = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(result) as unsolved_instances, approach FROM `adaboostsamme_mulitclass` WHERE metric='number_unsolved_instances_False' AND approach='SAMME_multiclass_algorithm_selector_30' GROUP BY scenario_name, approach")
-    bagging_unsolved_instances = get_dataframe_for_sql_query(
-        "SELECT scenario_name, AVG(result) as unsolved_instances, approach FROM `bagging_number_of_base_learner` WHERE metric='number_unsolved_instances_False' AND approach='bagging_40_per_algorithm_RandomForestRegressor_regressor_without_ranking' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY scenario_name, approach")
+    sunny = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, pre_computed_base_learner.approach, vbs_sbs.metric, pre_computed_base_learner.result, ((pre_computed_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN pre_computed_base_learner ON vbs_sbs.scenario_name = pre_computed_base_learner.scenario_name AND vbs_sbs.fold = pre_computed_base_learner.fold AND vbs_sbs.metric = pre_computed_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='sunny' GROUP BY scenario_name")
+    satzilla = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, pre_computed_base_learner.approach, vbs_sbs.metric, pre_computed_base_learner.result, ((pre_computed_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN pre_computed_base_learner ON vbs_sbs.scenario_name = pre_computed_base_learner.scenario_name AND vbs_sbs.fold = pre_computed_base_learner.fold AND vbs_sbs.metric = pre_computed_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='satzilla-11' GROUP BY scenario_name")
+    exp = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, pre_computed_base_learner.approach, vbs_sbs.metric, pre_computed_base_learner.result, ((pre_computed_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN pre_computed_base_learner ON vbs_sbs.scenario_name = pre_computed_base_learner.scenario_name AND vbs_sbs.fold = pre_computed_base_learner.fold AND vbs_sbs.metric = pre_computed_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='Expectation_algorithm_survival_forest' GROUP BY scenario_name")
+    multi = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, pre_computed_base_learner.approach, vbs_sbs.metric, pre_computed_base_learner.result, ((pre_computed_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN pre_computed_base_learner ON vbs_sbs.scenario_name = pre_computed_base_learner.scenario_name AND vbs_sbs.fold = pre_computed_base_learner.fold AND vbs_sbs.metric = pre_computed_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='multiclass_algorithm_selector' GROUP BY scenario_name")
 
+    best_baseline = [sunny.result[0], satzilla.result[1], satzilla.result[2], satzilla.result[3], satzilla.result[4], exp.result[5], multi.result[6], satzilla.result[7], sunny.result[8], satzilla.result[9], exp.result[10], satzilla.result[11], exp.result[12]]
     plt.rc('font', family='sans-serif')
     plt.rc('text', usetex=True)
 
@@ -55,14 +56,15 @@ def generate_sbs_vbs_change_table():
     plt.axhline(np.average(voting_weighting_ranking_24567.result), color=color2, linestyle='dashed', linewidth=1.4)
 
     ind = np.arange(len(stacking.scenario_name))
-    width = 0.2  # the width of the bars
+    width = 0.15  # the width of the bars
     ax1.bar(ind, stacking.result, width, color=color1, label='Stacking', zorder=6)
     ax1.bar(ind - width, voting_weighting_ranking_24567.result, width, color=color2, label='Voting', zorder=6)
     ax1.bar(ind + width, samme.result, width, color=color3, label='Boosting', zorder=6)
-    ax1.bar(ind + 2 * width, bagging_40.result, width, color=color4, label='Bagging', zorder=6)
+    ax1.bar(ind - 2 * width, bagging_40.result, width, color=color4, label='Bagging', zorder=6)
+    ax1.bar(ind + 2 * width, best_baseline, width, color=color5, label='Best Single Learner', zorder=6)
 
 
-    ax1.set_xticks(ind + width / 2)
+    ax1.set_xticks(ind)
     ax1.set_xticklabels(
         ["ASP-POTASSCO", "BNSL-2016", "CPMP-2015", "CSP-2010", "CSP-Minizinc-Time-2016", "CSP-MZN-2013", "GLUHACK-18",
          "MAXSAT12-PMS", "MAXSAT15-PMS-INDU", "QBF-2011", "SAT03-16\_INDU", "SAT12-INDU", "SAT18-EXP"], fontsize=8)
@@ -70,7 +72,6 @@ def generate_sbs_vbs_change_table():
     plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 
     ax1.set_ylabel('nPAR10', fontsize=11)
-    ax1.set_xlabel('Scenario', fontsize=11)
 
     plt.legend()
     plt.show()
