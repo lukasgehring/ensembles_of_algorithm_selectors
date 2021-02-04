@@ -8,6 +8,7 @@ from aslib_scenario.aslib_scenario import ASlibScenario
 
 from ensembles.prediction import predict_with_ranking
 from ensembles.validation import base_learner_performance
+from ensembles.write_to_database import write_to_database
 
 
 class Bagging:
@@ -19,6 +20,7 @@ class Bagging:
         # attributes
         self.num_algorithms = 0
         self.base_learners = list()
+        self.current_iteration = 0
 
         # parameters
         self.base_learner = base_learner
@@ -86,6 +88,7 @@ class Bagging:
 
         # train each base learner on a different sample
         for index in range(self.num_base_learner):
+            self.current_iteration = index + 1
             self.base_learners.append(copy.deepcopy(self.base_learner))
             original_scenario = copy.deepcopy(scenario)
             scenario.feature_data, scenario.performance_data, scenario.runstatus_data, scenario.feature_runstatus_data, scenario.feature_cost_data = bootstrap_samples[index]
@@ -96,6 +99,9 @@ class Bagging:
                 elif self.weight_type == 'original_set':
                     scenario = original_scenario
                 weights_denorm.append(base_learner_performance(scenario, len(scenario.feature_data), self.base_learners[index]))
+
+            if self.current_iteration != self.num_base_learner:
+                write_to_database(scenario, self, fold)
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
@@ -127,7 +133,7 @@ class Bagging:
 
 
     def get_name(self):
-        name = "bagging_" + str(self.num_base_learner) + "_" + self.base_learner.get_name()
+        name = "bagging_" + str(self.current_iteration) + "_" + self.base_learner.get_name()
         if self.use_ranking:
             name = name + "_with_ranking"
             if self.performance_ranking:
