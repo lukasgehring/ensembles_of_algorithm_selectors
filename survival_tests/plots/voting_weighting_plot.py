@@ -50,6 +50,14 @@ def generate_sbs_vbs_change_table():
     ax.bar(2, voting_weighting_24567.result, width, color=color2, zorder=6)
     ax.bar(2.3, voting_cross_24567.result, width, color=color3, zorder=6)
 
+    ax.text(0.7, float(voting1234567.result), round(float(voting1234567.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(1, float(voting_weighting_1234567.result), round(float(voting_weighting_1234567.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(1.3, float(voting_cross_1234567.result), round(float(voting_cross_1234567.result), 3), ha='center', va='bottom', rotation=0)
+
+    ax.text(1.7, float(voting24567.result), round(float(voting24567.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(2, float(voting_weighting_24567.result), round(float(voting_weighting_24567.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(2.3, float(voting_cross_24567.result), round(float(voting_cross_24567.result), 3), ha='center', va='bottom', rotation=0)
+
 
     ax.set_xticks([1,2])
     ax.set_xticklabels(
@@ -59,8 +67,8 @@ def generate_sbs_vbs_change_table():
 
     ax.set_ylabel('nPAR10', fontsize=11)
 
-    ax.set_ylim(bottom=0.15)
-    ax.set_ylim(top=0.5)
+    ax.set_ylim(bottom=0.35)
+    ax.set_ylim(top=0.42)
 
     plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 

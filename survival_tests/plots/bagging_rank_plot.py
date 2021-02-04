@@ -22,8 +22,11 @@ def generate_sbs_vbs_change_table():
     bagging_ranking = get_dataframe_for_sql_query(
         "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_ranking.approach, vbs_sbs.metric, bagging_ranking.result, ((bagging_ranking.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_ranking ON vbs_sbs.scenario_name = bagging_ranking.scenario_name AND vbs_sbs.fold = bagging_ranking.fold AND vbs_sbs.metric = bagging_ranking.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
     bagging_averaging = get_dataframe_for_sql_query(
-        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_ranking.approach, vbs_sbs.metric, bagging_ranking.result, ((bagging_ranking.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_ranking ON vbs_sbs.scenario_name = bagging_ranking.scenario_name AND vbs_sbs.fold = bagging_ranking.fold AND vbs_sbs.metric = bagging_ranking.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
+        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_averaging.approach, vbs_sbs.metric, bagging_averaging.result, ((bagging_averaging.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_averaging ON vbs_sbs.scenario_name = bagging_averaging.scenario_name AND vbs_sbs.fold = bagging_averaging.fold AND vbs_sbs.metric = bagging_averaging.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
 
+    print(bagging.to_numpy())
+    print(bagging_ranking.to_numpy())
+    print(bagging_averaging.to_numpy())
     plt.rc('font', family='sans-serif')
     plt.rc('text', usetex=True)
 
@@ -31,21 +34,32 @@ def generate_sbs_vbs_change_table():
 
     ax = fig.add_subplot(111)
 
-    width = 0.2  # the width of the bars
-    ax.bar(1, bagging.result, width, color=color1, label='PerAlgorithmRegressor')
-    ax.bar(2, bagging_ranking.result[0], width, color=color1, label='PerAlgorithmRegressor')
-    ax.bar(3, bagging_averaging.result[0], width, color=color1, label='PerAlgorithmRegressor')
-    ax.bar(4, bagging_ranking.result[1], width, color=color1, label='PerAlgorithmRegressor')
-    ax.bar(5, bagging_averaging.result[1], width, color=color1, label='PerAlgorithmRegressor')
+    width = 0.5  # the width of the bars
+    ax.bar(1, bagging.result, width, color=color1, label='Majority Voting', zorder=6)
+    ax.bar(2, bagging_ranking.result[0], width, color=color1, label='Ranking', zorder=6)
+    ax.bar(3, bagging_ranking.result[2], width, color=color1, label='Ranking Weighting', zorder=6)
+    ax.bar(4, bagging_averaging.result[0], width, color=color1, label='Averaging', zorder=6)
+    ax.bar(5, bagging_averaging.result[1], width, color=color1, label='Averaging Weighting', zorder=6)
 
+    ax.text(1, float(bagging.result), round(float(bagging.result), 3), ha='center', va='bottom',
+            rotation=0)
+    ax.text(2, float(bagging_ranking.result[0]), round(float(bagging_ranking.result[0]), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(3, float(bagging_ranking.result[2]), round(float(bagging_ranking.result[2]), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(4, float(bagging_averaging.result[0]), round(float(bagging_averaging.result[0]), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(5, float(bagging_averaging.result[1]), round(float(bagging_averaging.result[1]), 3), ha='center',
+            va='bottom', rotation=0)
     ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["Majority Voting", "Ranked Voting", "Averaging", "Weighted Ranked Voting", "Weighted Averaging"])
+    ax.set_xticklabels(["Majority Voting", "Ranked Voting", "Weighted Ranked Voting", "Averaging", "Weighted Averaging"])
 
     ax.set_ylim(bottom=0.38)
     ax.set_ylim(top=0.44)
 
-    #plt.xticks(rotation=90)
-    plt.legend()
+    ax.set_ylabel('nPAR10', fontsize=11)
+
+    plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
     plt.show()
 
     fig.savefig("plotted/bagging_ranking.pdf", bbox_inches='tight')

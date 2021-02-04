@@ -18,11 +18,14 @@ def generate_sbs_vbs_change_table():
     color4 = '#9A8F97'
     color5 = '#251314'
 
-    bagging = get_dataframe_for_sql_query(
+    bagging_per = get_dataframe_for_sql_query(
         "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, final_bagging_base_learner_test.approach, vbs_sbs.metric, final_bagging_base_learner_test.result, ((final_bagging_base_learner_test.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN final_bagging_base_learner_test ON vbs_sbs.scenario_name = final_bagging_base_learner_test.scenario_name AND vbs_sbs.fold = final_bagging_base_learner_test.fold AND vbs_sbs.metric = final_bagging_base_learner_test.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_per_algorithm_RandomForestRegressor_regressor_without_ranking' GROUP BY approach")
+    bagging_sunny = get_dataframe_for_sql_query(
+        "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, final_bagging_base_learner_test.approach, vbs_sbs.metric, final_bagging_base_learner_test.result, ((final_bagging_base_learner_test.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN final_bagging_base_learner_test ON vbs_sbs.scenario_name = final_bagging_base_learner_test.scenario_name AND vbs_sbs.fold = final_bagging_base_learner_test.fold AND vbs_sbs.metric = final_bagging_base_learner_test.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach='bagging_10_SUNNY_without_ranking' GROUP BY approach")
     bagging_weighting = get_dataframe_for_sql_query(
         "SELECT approach, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, bagging_weighting.approach, vbs_sbs.metric, bagging_weighting.result, ((bagging_weighting.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN bagging_weighting ON vbs_sbs.scenario_name = bagging_weighting.scenario_name AND vbs_sbs.fold = bagging_weighting.fold AND vbs_sbs.metric = bagging_weighting.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach")
 
+    print(bagging_weighting)
     plt.rc('font', family='sans-serif')
     plt.rc('text', usetex=True)
 
@@ -33,12 +36,25 @@ def generate_sbs_vbs_change_table():
     number_of_instances = 16484
 
     width = 0.18  # the width of the bars
-    ax.bar(0.7, bagging.result, width, color=color1, zorder=6)
+    ax.bar(0.7, bagging_per.result, width, color=color1, zorder=6)
     ax.bar(0.9, bagging_weighting.result[0], width, color=color2, zorder=6)
     ax.bar(1.1, bagging_weighting.result[1], width, color=color3, zorder=6)
     ax.bar(1.3, bagging_weighting.result[2], width, color=color4, zorder=6)
-    ax.bar(1.7, bagging_weighting.result[3], width, color=color1, zorder=6)
-    ax.bar(1.9, bagging_weighting.result[4], width, color=color2, zorder=6)
+
+    ax.bar(1.7, bagging_sunny.result, width, color=color1, zorder=6)
+    ax.bar(1.9, bagging_weighting.result[3], width, color=color2, zorder=6)
+    ax.bar(2.1, bagging_weighting.result[4], width, color=color3, zorder=6)
+    ax.bar(2.3, bagging_weighting.result[5], width, color=color4, zorder=6)
+
+    ax.text(0.7, float(bagging_per.result), round(float(bagging_per.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(0.9, bagging_weighting.result[0], round(bagging_weighting.result[0], 3), ha='center', va='bottom', rotation=0)
+    ax.text(1.1, bagging_weighting.result[1], round(bagging_weighting.result[1], 3), ha='center', va='bottom', rotation=0)
+    ax.text(1.3, bagging_weighting.result[2], round(bagging_weighting.result[2], 3), ha='center', va='bottom', rotation=0)
+
+    ax.text(1.7, float(bagging_sunny.result), round(float(bagging_sunny.result), 3), ha='center', va='bottom', rotation=0)
+    ax.text(1.9, bagging_weighting.result[3], round(bagging_weighting.result[3], 3), ha='center', va='bottom', rotation=0)
+    ax.text(2.1, bagging_weighting.result[4], round(bagging_weighting.result[4], 3), ha='center', va='bottom', rotation=0)
+    ax.text(2.3, bagging_weighting.result[5], round(bagging_weighting.result[5], 3), ha='center', va='bottom', rotation=0)
 
     ax.set_xticks([1, 2])
     ax.set_xticklabels(["PerAlgo", "SUNNY"])
@@ -47,19 +63,19 @@ def generate_sbs_vbs_change_table():
     #plt.xticks(rotation=45, ha='right')
 
     ax.set_ylabel('nPAR10', fontsize=11)
-    ax.set_ylabel('Lernalgorithm', fontsize=11)
+    ax.set_xlabel('Lernalgorithm', fontsize=11)
 
-    ax.set_ylim(bottom=0.36)
-    ax.set_ylim(top=0.46)
+    ax.set_ylim(bottom=0.38)
+    ax.set_ylim(top=0.44)
 
     plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 
     l1 = mpatches.Patch(color=color1, label="Majority Voting")
     l2 = mpatches.Patch(color=color2, label="Weighted Voting")
     l3 = mpatches.Patch(color=color3, label="Weighted Voting (out-of-sample)")
-    l4 = mpatches.Patch(color=color4, label="Ranked Voting (original-data)")
+    l4 = mpatches.Patch(color=color4, label="Weighted Voting (original-data)")
 
-    plt.legend(handles=[l1, l2, l3, l4], loc=2)
+    plt.legend(handles=[l1, l2, l3, l4], loc=1)
     plt.show()
 
     fig.savefig("plotted/bagging_weighting.pdf", bbox_inches='tight')
