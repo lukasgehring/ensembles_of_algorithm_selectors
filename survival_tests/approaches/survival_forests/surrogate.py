@@ -31,7 +31,6 @@ class SurrogateSurvivalForest:
         
         
     def fit(self, scenario: ASlibScenario, fold: int, num_instances: int):
-        print("Run fit on " + self.get_name() + " for fold " + str(fold))
         self.num_algorithms = len(scenario.algorithms)
         self.algorithm_cutoff_time = scenario.algorithm_cutoff_time
         np.random.seed(fold)
@@ -101,8 +100,6 @@ class SurrogateSurvivalForest:
 
         else:
             raise ValueError('Unknown decision criterion')
-
-        print("Finished training " + str(self.num_algorithms) + " models on " + str(num_instances) + " instances.")
         
     def evaluate_surrogate(self, risk_func, event_times, survival_functions, performances):
         num_inst = np.size(survival_functions[0], axis=0)

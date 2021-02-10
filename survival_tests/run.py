@@ -1,8 +1,17 @@
 import logging
-import sys
 import configparser
 import multiprocessing as mp
+
 import database_utils
+from ensembles.adaboost_r2 import AdaboostR2
+from ensembles.bagging import Bagging
+from ensembles.create_base_learner import CreateBaseLearner
+from ensembles.stacking_h2o import StackingH2O
+from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
+from ensembles.samme import SAMME
+from ensembles.stacking import Stacking
+from pre_compute.test import Test
+from ensembles.voting import Voting
 from evaluation import evaluate_scenario
 from approaches.single_best_solver import SingleBestSolver
 from approaches.oracle import Oracle
@@ -44,13 +53,36 @@ def log_result(result):
     logger.info("Finished experiements for scenario: " + result)
 
 
+def generate_combinations(base_lerners, combinations):
+    if base_lerners == [] or len(base_lerners) < 2:
+        return []
+    else:
+        combinations.append(base_lerners)
+        for lerner in range(len(base_lerners)):
+            base_lerner_copy = list(base_lerners)
+            del base_lerner_copy[lerner]
+            generate_combinations(base_lerner_copy, combinations)
+        return combinations
+
+
+def get_combinations(base_lerners):
+    combinations = list()
+    for combination in set(tuple(i) for i in generate_combinations(base_lerners, [])):
+        combinations.append(list(combination))
+    return combinations
+
+
 def create_approach(approach_names):
     approaches = list()
     for approach_name in approach_names:
+
+        # SBS and VBS
         if approach_name == 'sbs':
             approaches.append(SingleBestSolver())
         if approach_name == 'oracle':
             approaches.append(Oracle())
+
+        # baselines
         if approach_name == 'ExpectationSurvivalForest':
             approaches.append(SurrogateSurvivalForest(criterion='Expectation'))
         if approach_name == 'PolynomialSurvivalForest':
@@ -82,6 +114,256 @@ def create_approach(approach_names):
             approaches.append(SATzilla07())
         if approach_name == 'isac':
             approaches.append(ISAC())
+
+        if approach_name == 'base_learner':
+            approaches.append(Test('per_algorithm_RandomForestRegressor_regressor'))
+            approaches.append(Test('sunny'))
+            approaches.append(Test('isac'))
+            approaches.append(Test('satzilla-11'))
+            approaches.append(Test('Expectation_algorithm_survival_forest'))
+            approaches.append(Test('PAR10_algorithm_survival_forest'))
+            approaches.append(Test('multiclass_algorithm_selector'))
+
+        # voting
+        if approach_name == 'voting':
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7]))
+        if approach_name == 'voting_rank':
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, pre_computed=True))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min', pre_computed=True))
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='max', pre_computed=True))
+        if approach_name == 'voting_weighting':
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Voting(base_learner=combination, pre_computed=True, weighting=True))
+        if approach_name == 'voting_weight_cross':
+            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], weighting=True, cross_validation=True, pre_computed=True))
+        if approach_name == 'voting_base_learner_test':
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Voting(base_learner=combination, pre_computed=True))
+
+        # bagging
+        if approach_name == 'bagging-per_algorithm_regressor':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-per_multiclass_algorithm_selector':
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
+        if approach_name == 'bagging-satzilla-11':
+            #approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True, performance_ranking=True))
+        if approach_name == 'bagging-ExpectationSurvivalForest':
+            approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='Expectation')))
+        if approach_name == 'bagging-SUNNY':
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY()))
+        if approach_name == 'bagging-ISAC':
+            approaches.append(Bagging(num_base_learner=10, base_learner=ISAC()))
+
+        if approach_name == 'bagging-per_algorithm_regressor_weight':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='oos'))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
+        if approach_name == 'bagging-SUNNY_weight':
+            #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
+            #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='oos'))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='original_set'))
+        if approach_name == 'bagging-per_algorithm_regressor_rank':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, use_ranking=True))
+
+        if approach_name == 'bagging-per_algorithm_regressor_averaging':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True, weighting=True))
+
+
+        if approach_name == 'bagging-number_of_base_learner':
+            approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=8, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=12, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=16, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=20, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=24, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=28, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=32, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=36, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=40, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=44, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=48, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=52, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=56, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=60, base_learner=PerAlgorithmRegressor()))
+        if approach_name == 'bagging-number_of_base_learner_SUNNY':
+            approaches.append(Bagging(num_base_learner=4, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=8, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=12, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=16, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=20, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=24, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=28, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=32, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=36, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=40, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=44, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=48, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=52, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=56, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=60, base_learner=SUNNY()))
+        if approach_name == 'bagging-number_of_base_learner_SATzilla':
+            approaches.append(Bagging(num_base_learner=4, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=8, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=12, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=16, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=20, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=24, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=28, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=32, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=36, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=40, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=44, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=48, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=52, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=56, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=60, base_learner=SATzilla11()))
+
+        # boosting
+        if approach_name == 'adaboostR2':
+            approaches.append(AdaboostR2('per_algorithm_regressor'))
+            #approaches.append(AdaboostR2('par10'))
+        if approach_name == 'samme':
+            #approaches.append(SAMME('per_algorithm_regressor'))
+            #approaches.append(SAMME('satzilla'))
+            #approaches.append(SAMME('multiclass_algorithm_selector'))
+            approaches.append(SAMME('sunny', num_iterations=100))
+
+        # stacking
+        if approach_name == 'stacking':
+            for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
+                approaches.append(Stacking(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
+        if approach_name == 'stacking_meta_learner':
+            base_learner = [1, 2, 3, 4, 5, 6, 7]
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True))
+        if approach_name == 'stacking_meta_learner_predictions_only':
+            base_learner = [1, 2, 3, 4, 5, 6, 7]
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True, meta_learner_input='predictions_only'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, meta_learner_input='predictions_only'))
+        if approach_name == 'stacking_h2o':
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SUNNY', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='ISAC', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SATzilla-11', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='multiclass', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='Expectation', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='PAR10', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='RandomForest', pre_computed=True, cross_validation=True))
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='SVM', pre_computed=True, cross_validation=True))
+        if approach_name == 'stacking_feature_importance':
+            approaches.append(
+                Stacking(base_learner=[1, 2, 3, 4, 5, 6, 7], meta_learner_type='per_algorithm_regressor', pre_computed=True))
+        if approach_name == 'stacking_feature_selection':
+            base_learner = [1, 2, 3, 4, 5, 6, 7]
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True, feature_selection='variance_threshold'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, feature_selection='variance_threshold'))
+
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='per_algorithm_regressor', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SUNNY', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='ISAC', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SATzilla-11', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='Expectation', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='PAR10', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='multiclass', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True, feature_selection='select_k_best'))
+            approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, feature_selection='select_k_best'))
+
+        # pre computed base learner
+        if approach_name == 'create_base_learner':
+            approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
+            approaches.append(CreateBaseLearner(algorithm='sunny'))
+            approaches.append(CreateBaseLearner(algorithm='isac'))
+            approaches.append(CreateBaseLearner(algorithm='satzilla'))
+            approaches.append(CreateBaseLearner(algorithm='expectation'))
+            approaches.append(CreateBaseLearner(algorithm='par10'))
+            approaches.append(CreateBaseLearner(algorithm='multiclass'))
+
+        if approach_name == 'create_base_learner_prediction':
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
+            #                               predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
+            #                                predict_full_training_set=True))
+            #approaches.append(
+            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
     return approaches
 
 
