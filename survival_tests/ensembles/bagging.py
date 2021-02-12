@@ -101,8 +101,8 @@ class Bagging:
                     scenario = original_scenario
                 weights_denorm.append(base_learner_performance(scenario, len(scenario.feature_data), self.base_learners[index]))
 
-            if self.current_iteration != self.num_base_learner:
-                write_to_database(scenario, self, fold)
+            #if self.current_iteration != self.num_base_learner:
+            #    write_to_database(scenario, self, fold)
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
