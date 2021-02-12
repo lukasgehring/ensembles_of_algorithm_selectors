@@ -135,11 +135,9 @@ class Bagging:
     def get_name(self):
         name = "bagging_" + str(self.current_iteration) + "_" + self.base_learner.get_name()
         if self.use_ranking:
-            name = name + "_with_ranking"
+            name = name + "_ranking"
             if self.performance_ranking:
                 name = name + "_averaging"
-        else:
-            name = name + "_without_ranking"
 
         if self.weighting:
             name = name + "_weighting"

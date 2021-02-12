@@ -174,6 +174,38 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, performance_ranking=True, weighting=True))
 
+        if approach_name == 'bagging-base_learner':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=ISAC()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='PAR10')))
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
+
+        if approach_name == 'bagging_weighting-base_learner':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=ISAC(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='PAR10'), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector(), weighting=True))
+
+        if approach_name == 'bagging_ranking-base_learner':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=ISAC(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='PAR10'), use_ranking=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector(), use_ranking=True))
+
+        if approach_name == 'bagging_weighting_ranking-base_learner':
+            approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), use_ranking=True, weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), use_ranking=True, weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=ISAC(), use_ranking=True, weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True, weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='PAR10'), use_ranking=True, weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector(), use_ranking=True, weighting=True))
+
 
         if approach_name == 'bagging-number_of_base_learner':
             approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
