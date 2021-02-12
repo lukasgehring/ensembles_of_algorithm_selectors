@@ -21,6 +21,7 @@ class Bagging:
         self.num_algorithms = 0
         self.base_learners = list()
         self.current_iteration = 0
+        self.weights = None
 
         # parameters
         self.base_learner = base_learner
