@@ -15,7 +15,8 @@ def generate_sbs_vbs_change_table():
     color2 = '#2a9d8f'
     color3 = '#E4B363'
     color4 = '#9A8F97'
-    color5 = '#251314'
+    color5 = '#EE4266'
+    color6 = '#FB8B24'
 
     # voting 1234567
     voting1234567 = get_dataframe_for_sql_query(
@@ -46,13 +47,13 @@ def generate_sbs_vbs_change_table():
     width = 0.12  # the width of the bars
     ax.bar(0.79, voting1234567.result, width, color=color1, label='Majority Voting', zorder=3)
     ax.bar(0.93, voting_ranking_1234567.result, width, color=color2, label='Ranked Voting (avg)', zorder=3)
-    ax.bar(1.07, voting_ranking_max_1234567.result, width, color=color3, label='Ranked Voting (max)', zorder=3)
-    ax.bar(1.21, voting_ranking_min_1234567.result, width, color=color4, label='Ranked Voting (min)', zorder=3)
+    ax.bar(1.07, voting_ranking_max_1234567.result, width, color=color5, label='Ranked Voting (max)', zorder=3)
+    ax.bar(1.21, voting_ranking_min_1234567.result, width, color=color6, label='Ranked Voting (min)', zorder=3)
 
     ax.bar(1.59, voting24567.result, width, color=color1, zorder=3)
     ax.bar(1.73, voting_ranking_24567.result, width, color=color2, zorder=3)
-    ax.bar(1.87, voting_ranking_max_24567.result, width, color=color3, zorder=3)
-    ax.bar(2.01, voting_ranking_min_24567.result, width, color=color4, zorder=3)
+    ax.bar(1.87, voting_ranking_max_24567.result, width, color=color5, zorder=3)
+    ax.bar(2.01, voting_ranking_min_24567.result, width, color=color6, zorder=3)
 
 
     ax.set_xticks([1, 1.8])

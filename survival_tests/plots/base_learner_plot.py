@@ -33,12 +33,12 @@ def generate_sbs_vbs_change_table():
     ax1 = fig.add_subplot(111)
 
     names = list()
-    names.append("SF-Expectation")
+    names.append("SF-Exp")
     names.append("ISAC")
     names.append("Multiclass")
     names.append("SF-PAR10")
     names.append("PerAlgo")
-    names.append("SatZilla")
+    names.append("SATzilla'11")
     names.append("SUNNY")
 
     width = 0.5  # the width of the bars
@@ -62,8 +62,8 @@ def generate_sbs_vbs_change_table():
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.set_ylabel('unsolved instances (\%)')
-    ax2.plot(ind, unsolved_instances.result, marker='s', lw=0, color=color3)
-    ax2.set_yticks(np.arange(6) / 25)
+    ax2.plot(ind, unsolved_instances.result*100, marker='s', lw=0, color=color3)
+    ax2.set_yticks(np.arange(6)*4)
     ax2.tick_params(axis='y', colors=color3)
 
     plt.show()

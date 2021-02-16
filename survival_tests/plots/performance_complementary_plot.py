@@ -21,9 +21,9 @@ y2 = algorithm2
 fig = plt.figure(1, figsize=(9, 3))
 
 plt.subplot(1, 1, 1)
-plt.plot(x1, y1, 'o--', color=color1)
+plt.plot(x1, y1, 'o--', color=color1, linewidth=0)
 
-plt.plot(x1, y2, 'o--', color=color2)
+plt.plot(x1, y2, 'o--', color=color2, linewidth=0)
 plt.title('Performance Complementary')
 plt.ylabel('Algorithm Performance')
 plt.xlabel('Instance')

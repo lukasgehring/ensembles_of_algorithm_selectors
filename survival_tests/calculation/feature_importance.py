@@ -205,5 +205,5 @@ def single_plot(algorithm):
         filename = algorithm + "feature_importance%s.pdf" % name
         fig.savefig(filename, bbox_inches='tight')
 
-plot('multiclass')
-#plot('')
+#plot('multiclass')
+plot('')

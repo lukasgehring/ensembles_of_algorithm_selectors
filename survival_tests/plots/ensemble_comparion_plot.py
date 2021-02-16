@@ -48,7 +48,7 @@ def generate_sbs_vbs_change_table():
 
     ind = np.arange(5)
     width = 0.5  # the width of the bars
-    ax1.bar(4, satzilla.result, width, color=color1, label='Stacking', zorder=6)
+    ax1.bar(4, satzilla.result, width, color=color2, label='Stacking', zorder=6)
     ax1.bar(0, stacking.result, width, color=color1, label='Stacking', zorder=6)
     ax1.bar(1, voting_weighting_ranking_24567.result, width, color=color1, label='Voting', zorder=6)
     ax1.bar(2, samme.result, width, color=color1, label='Boosting', zorder=6)
@@ -69,18 +69,18 @@ def generate_sbs_vbs_change_table():
 
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.set_ylabel('unsolved instances (\%)')
-    ax2.plot(0, stacking_unsolved_instances.unsolved_instances, marker='s', markersize=8, lw=0, color=color3)
-    ax2.plot(1, voting_unsolved_instances.unsolved_instances, marker='s', markersize=8, lw=0, color=color3)
-    ax2.plot(2, samme_unsolved_instances.unsolved_instances, marker='s', markersize=8, lw=0, color=color3)
-    ax2.plot(3, bagging_unsolved_instances.unsolved_instances, marker='s', markersize=8, lw=0, color=color3)
-    ax2.plot(4, satzilla_unsolved_instances.unsolved_instances, marker='s', markersize=8, lw=0, color=color3)
+    ax2.plot(0, stacking_unsolved_instances.unsolved_instances * 100, marker='s', markersize=8, lw=0, color=color3)
+    ax2.plot(1, voting_unsolved_instances.unsolved_instances * 100, marker='s', markersize=8, lw=0, color=color3)
+    ax2.plot(2, samme_unsolved_instances.unsolved_instances * 100, marker='s', markersize=8, lw=0, color=color3)
+    ax2.plot(3, bagging_unsolved_instances.unsolved_instances * 100, marker='s', markersize=8, lw=0, color=color3)
+    ax2.plot(4, satzilla_unsolved_instances.unsolved_instances * 100, marker='s', markersize=8, lw=0, color=color3)
     ax2.tick_params(axis='y', colors=color3)
 
     ax1.set_ylim(bottom=0.2)
     ax1.set_ylim(top=0.5)
 
-    ax2.set_ylim(bottom=0.04)
-    ax2.set_ylim(top=0.1)
+    ax2.set_ylim(bottom=0.04 * 100)
+    ax2.set_ylim(top=0.1 * 100)
 
     ax1.set_xticklabels(["Stacking", "Voting", "Boosting", "Bagging", "SATzilla'11"])
 
