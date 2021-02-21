@@ -5,8 +5,6 @@ import multiprocessing as mp
 import database_utils
 from ensembles.adaboost_r2 import AdaboostR2
 from ensembles.bagging import Bagging
-from ensembles.create_base_learner import CreateBaseLearner
-from ensembles.stacking_h2o import StackingH2O
 from pre_compute.create_base_learner_predictions import CreateBaseLearnerPrediction
 from ensembles.samme import SAMME
 from ensembles.stacking import Stacking
@@ -125,8 +123,9 @@ def create_approach(approach_names):
             approaches.append(Test('multiclass_algorithm_selector'))
 
         # voting
+        # run create_base_learner_prediction before running voting tests
         if approach_name == 'voting':
-            approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7]))
+            approaches.append(Voting(base_learner=[1, 2, 3, 7]))
         if approach_name == 'voting_rank':
             approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, pre_computed=True))
             approaches.append(Voting(base_learner=[1, 2, 3, 4, 5, 6, 7], ranking=True, rank_method='min', pre_computed=True))
@@ -146,7 +145,7 @@ def create_approach(approach_names):
         if approach_name == 'bagging-per_multiclass_algorithm_selector':
             approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector()))
         if approach_name == 'bagging-satzilla-11':
-            #approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11()))
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), weighting=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True, performance_ranking=True))
@@ -162,8 +161,8 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='oos'))
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
         if approach_name == 'bagging-SUNNY_weight':
-            #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
-            #approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='oos'))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True))
+            approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='oos'))
             approaches.append(Bagging(num_base_learner=10, base_learner=PerAlgorithmRegressor(), weighting=True, weight_type='original_set'))
             approaches.append(Bagging(num_base_learner=10, base_learner=SUNNY(), weighting=True, weight_type='original_set'))
         if approach_name == 'bagging-per_algorithm_regressor_rank':
@@ -205,7 +204,6 @@ def create_approach(approach_names):
             approaches.append(Bagging(num_base_learner=10, base_learner=SATzilla11(), use_ranking=True, weighting=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=SurrogateSurvivalForest(criterion='PAR10'), use_ranking=True, weighting=True))
             approaches.append(Bagging(num_base_learner=10, base_learner=MultiClassAlgorithmSelector(), use_ranking=True, weighting=True))
-
 
         if approach_name == 'bagging-number_of_base_learner':
             approaches.append(Bagging(num_base_learner=4, base_learner=PerAlgorithmRegressor()))
@@ -259,14 +257,15 @@ def create_approach(approach_names):
         # boosting
         if approach_name == 'adaboostR2':
             approaches.append(AdaboostR2('per_algorithm_regressor'))
-            #approaches.append(AdaboostR2('par10'))
+            approaches.append(AdaboostR2('par10'))
         if approach_name == 'samme':
-            #approaches.append(SAMME('per_algorithm_regressor'))
-            #approaches.append(SAMME('satzilla'))
-            #approaches.append(SAMME('multiclass_algorithm_selector'))
+            approaches.append(SAMME('per_algorithm_regressor'))
+            approaches.append(SAMME('satzilla'))
+            approaches.append(SAMME('multiclass_algorithm_selector'))
             approaches.append(SAMME('sunny', num_iterations=100))
 
         # stacking
+        # run create_base_learner_prediction before running stacking tests
         if approach_name == 'stacking':
             for combination in get_combinations([1, 2, 3, 4, 5, 6, 7]):
                 approaches.append(Stacking(base_learner=combination, meta_learner_type='SUNNY', pre_computed=True))
@@ -336,64 +335,54 @@ def create_approach(approach_names):
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='RandomForest', pre_computed=True, feature_selection='select_k_best'))
             approaches.append(Stacking(base_learner=base_learner, meta_learner_type='SVM', pre_computed=True, feature_selection='select_k_best'))
 
-        # pre computed base learner
-        if approach_name == 'create_base_learner':
-            approaches.append(CreateBaseLearner(algorithm='per_algorithm_regressor'))
-            approaches.append(CreateBaseLearner(algorithm='sunny'))
-            approaches.append(CreateBaseLearner(algorithm='isac'))
-            approaches.append(CreateBaseLearner(algorithm='satzilla'))
-            approaches.append(CreateBaseLearner(algorithm='expectation'))
-            approaches.append(CreateBaseLearner(algorithm='par10'))
-            approaches.append(CreateBaseLearner(algorithm='multiclass'))
-
         if approach_name == 'create_base_learner_prediction':
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
-            #                               predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False,
+                                           predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=False))
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='per_algorithm_regressor', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=False))
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='sunny', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
-            #                                predict_full_training_set=True))
-            #approaches.append(
-            #    CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='isac', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='satzilla', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='expectation', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=False))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='par10', for_cross_validation=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False,
+                                            predict_full_training_set=True))
+            approaches.append(
+                CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=False))
             approaches.append(
                 CreateBaseLearnerPrediction(algorithm='multiclass', for_cross_validation=True))
     return approaches

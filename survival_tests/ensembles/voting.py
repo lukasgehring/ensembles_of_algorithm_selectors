@@ -1,4 +1,6 @@
+import itertools
 import logging
+import sys
 
 import numpy as np
 from approaches.survival_forests.surrogate import SurrogateSurvivalForest
@@ -38,6 +40,7 @@ class Voting:
         self.metric = Par10Metric()
         self.num_algorithms = 0
         self.predictions = list()
+        self.left_out_learners = []
 
     def create_base_learner(self):
         # clean up list and init base learners
@@ -106,28 +109,97 @@ class Voting:
         if self.weighting:
             save_weights(scenario, fold, self.get_name(), self.weights)
 
+        self.set_left_out_base_learner(scenario, fold)
+
+    def set_left_out_base_learner(self, scenario: ASlibScenario, fold: int):
+        t = range(len(self.trained_models))
+        self.left_out_learners = []
+
+        best_combination = self.left_out_learners
+        best_performance = self.get_par10(scenario, fold)
+        for x in range(1, len(t) - 1):
+            c = list(itertools.combinations(t, x))
+            unq = set(c)
+            for u in unq:
+                print(u)
+                self.left_out_learners = list(u)
+
+                cur_performance = self.get_par10(scenario, fold)
+                if cur_performance < best_performance:
+                    best_performance = cur_performance
+                    best_combination = self.left_out_learners
+
+        self.left_out_learners = best_combination
+
+    def get_par10(self, scenario: ASlibScenario, fold: int):
+        metrics = list()
+        metrics.append(Par10Metric())
+
+        test_scenario, train_scenario = scenario.get_split(indx=fold)
+
+        approach_metric_values = np.zeros(len(metrics))
+
+        num_counted_test_values = 0
+
+        feature_data = train_scenario.feature_data.to_numpy()
+        performance_data = train_scenario.performance_data.to_numpy()
+        feature_cost_data = train_scenario.feature_cost_data.to_numpy() if train_scenario.feature_cost_data is not None else None
+
+        for instance_id in range(0, len(train_scenario.instances)):
+            X_test = feature_data[instance_id]
+            y_test = performance_data[instance_id]
+
+            accumulated_feature_time = 0
+            if train_scenario.feature_cost_data is not None and self.get_name() != 'sbs' and self.get_name() != 'oracle':
+                feature_time = feature_cost_data[instance_id]
+                accumulated_feature_time = np.sum(feature_time)
+
+            contains_non_censored_value = False
+            for y_element in y_test:
+                if y_element < train_scenario.algorithm_cutoff_time:
+                    contains_non_censored_value = True
+            if contains_non_censored_value:
+                num_counted_test_values += 1
+                predicted_scores = self.predict(X_test, instance_id)
+                for i, metric in enumerate(metrics):
+                    runtime = metric.evaluate(y_test, predicted_scores, accumulated_feature_time,
+                                              scenario.algorithm_cutoff_time)
+                    approach_metric_values[i] = (approach_metric_values[i] + runtime)
+
+        approach_metric_values = np.true_divide(approach_metric_values, num_counted_test_values)
+
+        print('PAR10: {0:.10f}'.format(approach_metric_values[0]))
+
+        return approach_metric_values
+
     def predict(self, features_of_test_instance, instance_id: int):
+
+        models = []
+        for i, model in enumerate(self.trained_models):
+            if i not in self.left_out_learners:
+                models.append(model)
+
 
         if self.ranking:
             if self.weighting:
                 if self.pre_computed:
                     return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
-                                                self.trained_models, weights=self.weights, pre_computed_predictions=self.predictions)
+                                                models, weights=self.weights, pre_computed_predictions=self.predictions)
                 else:
                     return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
-                                                self.trained_models, weights=self.weights)
+                                                models, weights=self.weights)
             else:
                 if self.pre_computed:
                     return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
-                                                self.trained_models, weights=None, rank_method=self.rank_method, pre_computed_predictions=self.predictions)
+                                                models, weights=None, rank_method=self.rank_method, pre_computed_predictions=self.predictions)
                 else:
                     return predict_with_ranking(features_of_test_instance, instance_id, self.num_algorithms,
-                                                self.trained_models, weights=None, rank_method=self.rank_method)
+                                                models, weights=None, rank_method=self.rank_method)
 
         # only using the prediction of the algorithm
         predictions = np.zeros(self.num_algorithms)
 
-        for learner_index, model in enumerate(self.trained_models):
+        for learner_index, model in enumerate(models):
 
             # get prediction of base learner and find prediction (lowest value)
             if not self.pre_computed:
