@@ -48,7 +48,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(5, stacking6.result, width, color=color1, label='SurvivalForestPAR10')
 
     ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["PerAlgo", "SUNNY", "SATzilla", "SF-Exp.", "SF-PAR10"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "SATzilla'11", "SF-Exp.", "SF-PAR10"])
 
     ax.text(1, float(stacking1.result), round(float(stacking1.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(stacking2.result), round(float(stacking2.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -59,16 +59,16 @@ def generate_sbs_vbs_change_table():
     ax.text(5.7, voting_normal - 0.002, round(voting_normal, 3), ha='center', va='bottom', rotation=0)
     #plt.xticks(rotation=45, ha='right')
 
-    #ax.set_ylim(bottom=0.4)
+    ax.set_ylim(bottom=0.38)
     ax.set_ylim(top=0.5)
 
-    plt.title("Stacking with all base learners")
+    plt.title("Stacking without base learners 'ISAC' and 'Multiclass'")
     plt.xlabel("left out base learner")
     plt.ylabel("nPAR10")
 
     plt.show()
 
-    fig.savefig("stacking_base_learner1.pdf", bbox_inches='tight')
+    fig.savefig("plotted/stacking_base_learner3_sat.pdf", bbox_inches='tight')
 
 
     # table

@@ -13,9 +13,9 @@ def load_configuration():
 
 def generate_sbs_vbs_change_table():
     color1 = '#264653'
-    color2 = '#2a9d8f'
+    color4 = '#2a9d8f'
     color3 = '#e76f51'
-    color4 = '#e9c46a'
+    color2 = '#e9c46a'
     color5 = '#251314'
 
     voting1234567 = get_dataframe_for_sql_query(
@@ -87,7 +87,7 @@ def generate_sbs_vbs_change_table():
 
     #plt.xticks(rotation=45, ha='right')
 
-    ax.set_ylabel('number of unsolved instances', fontsize=11)
+    ax.set_ylabel('unsolved instances (%)', fontsize=11)
 
     ax.set_ylim(bottom=4)
     ax.set_ylim(top=7)

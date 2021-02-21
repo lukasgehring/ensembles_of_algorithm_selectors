@@ -50,7 +50,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(5, voting1234.result, width, color=color1, label='SurvivalForestPAR10')
 
     ax.set_xticks([1, 2, 3, 4, 5])
-    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-PAR10"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla'11", "SF-PAR10"])
 
     ax.text(1, float(voting2346.result), round(float(voting2346.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(voting1346.result), round(float(voting1346.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)

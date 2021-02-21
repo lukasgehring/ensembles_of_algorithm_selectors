@@ -65,7 +65,7 @@ def generate_sbs_vbs_change_table():
 
     names = list()
     names.append("PerAlgo")
-    names.append("SatZilla")
+    names.append("SATzilla'11")
     names.append("SF-Exp")
     names.append("SUNNY")
     names.append("ISAC")

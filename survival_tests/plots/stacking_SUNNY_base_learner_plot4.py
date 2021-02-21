@@ -45,7 +45,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(4, stacking245.result, width, color=color1, label='SATzilla-11')
 
     ax.set_xticks([1, 2, 3, 4])
-    ax.set_xticklabels(["SUNNY", "SATzilla", "SF-Exp.", "SF-PAR10"])
+    ax.set_xticklabels(["SUNNY", "SATzilla'11", "SF-Exp.", "SF-PAR10"])
 
     ax.text(1, float(stacking456.result), round(float(stacking456.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(stacking256.result), round(float(stacking256.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -64,7 +64,7 @@ def generate_sbs_vbs_change_table():
 
     plt.show()
 
-    fig.savefig("stacking_base_learner4.pdf", bbox_inches='tight')
+    fig.savefig("plotted/stacking_base_learner4_sun.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

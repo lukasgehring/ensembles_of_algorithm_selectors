@@ -19,9 +19,9 @@ def generate_sbs_vbs_change_table():
     color5 = '#251314'
 
     stacking_feature_selection = get_dataframe_for_sql_query(
-        "SELECT approach, AVG(n_par10) as result, COUNT(n_par10) as counter FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, stacking_feature_selection.approach, vbs_sbs.metric, stacking_feature_selection.result, ((stacking_feature_selection.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN stacking_feature_selection ON vbs_sbs.scenario_name = stacking_feature_selection.scenario_name AND vbs_sbs.fold = stacking_feature_selection.fold AND vbs_sbs.metric = stacking_feature_selection.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach ORDER BY approach")
+        "SELECT approach, AVG(n_par10) as result, COUNT(n_par10) as counter FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, stacking_feature_selection.approach, vbs_sbs.metric, stacking_feature_selection.result, ((stacking_feature_selection.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN stacking_feature_selection ON vbs_sbs.scenario_name = stacking_feature_selection.scenario_name AND vbs_sbs.fold = stacking_feature_selection.fold AND vbs_sbs.metric = stacking_feature_selection.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND NOT approach LIKE '%RandomForest%' GROUP BY approach ORDER BY approach")
     stacking = get_dataframe_for_sql_query(
-        "SELECT approach, AVG(n_par10) as result, COUNT(n_par10) as counter FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, stacking.approach, vbs_sbs.metric, stacking.result, ((stacking.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN stacking ON vbs_sbs.scenario_name = stacking.scenario_name AND vbs_sbs.fold = stacking.fold AND vbs_sbs.metric = stacking.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach LIKE '%1_2_3_4_5_6_7%' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY approach ORDER BY approach")
+        "SELECT approach, AVG(n_par10) as result, COUNT(n_par10) as counter FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, stacking.approach, vbs_sbs.metric, stacking.result, ((stacking.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN stacking ON vbs_sbs.scenario_name = stacking.scenario_name AND vbs_sbs.fold = stacking.fold AND vbs_sbs.metric = stacking.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach LIKE '%1_2_3_4_5_6_7%' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND NOT approach LIKE '%RandomForest%' GROUP BY approach ORDER BY approach")
 
     #plt.rc('font', family='sans-serif')
     #plt.rc('text', usetex=True)
@@ -33,7 +33,7 @@ def generate_sbs_vbs_change_table():
     width = 0.25  # the width of the bars
     ind = np.arange(len(stacking_feature_selection.result))
     index = 0
-    permutation = [4, 2, 6, 5, 0, 7, 3, 1, 8]
+    permutation = [4, 2, 6, 5, 0, 3, 1, 7]
     for i in ind:
 
         if i % 2 == 0:
@@ -46,7 +46,7 @@ def generate_sbs_vbs_change_table():
         ax.bar(permutation[i] - width, stacking.result[i*2], width, color=color2, zorder=6)
 
     ax.set_xticks(range(len(permutation)))
-    ax.set_xticklabels(ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-Exp.", "SF-PAR10", "Multiclass", "RF", "SVM"]))
+    ax.set_xticklabels(ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla'11", "SF-Exp.", "SF-PAR10", "Multiclass", "SVM"]))
 
 
     #plt.xticks(rotation=90)

@@ -45,6 +45,10 @@ def generate_sbs_vbs_change_table():
     sat18 = get_dataframe_for_sql_query(
         "SELECT scenario_name, approach, fold, n_par10 as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, adaboostsamme_per_algo_40_it.approach, vbs_sbs.metric, adaboostsamme_per_algo_40_it.result, ((adaboostsamme_per_algo_40_it.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN adaboostsamme_per_algo_40_it ON vbs_sbs.scenario_name = adaboostsamme_per_algo_40_it.scenario_name AND vbs_sbs.fold = adaboostsamme_per_algo_40_it.fold AND vbs_sbs.metric = adaboostsamme_per_algo_40_it.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND NOT scenario_name='CSP-Minizinc-Obj-2016' AND approach LIKE '%SAMME_per_algorithm_regressor%' AND scenario_name='SAT18-EXP'")
 
+    base_learner = get_dataframe_for_sql_query(
+        "SELECT scenario_name, AVG(n_par10) as result FROM (SELECT vbs_sbs.scenario_name, vbs_sbs.fold, pre_computed_base_learner.approach, vbs_sbs.metric, pre_computed_base_learner.result, ((pre_computed_base_learner.result - vbs_sbs.oracle_result)/(vbs_sbs.sbs_result -vbs_sbs.oracle_result)) as n_par10,vbs_sbs.oracle_result, vbs_sbs.sbs_result FROM (SELECT oracle_table.scenario_name, oracle_table.fold, oracle_table.metric, oracle_result, sbs_result FROM (SELECT scenario_name, fold, approach, metric, result as oracle_result FROM `vbs_sbs` WHERE approach='oracle') as oracle_table JOIN (SELECT scenario_name, fold, approach, metric, result as sbs_result FROM `vbs_sbs` WHERE approach='sbs') as sbs_table ON oracle_table.scenario_name = sbs_table.scenario_name AND oracle_table.fold=sbs_table.fold AND oracle_table.metric = sbs_table.metric) as vbs_sbs JOIN pre_computed_base_learner ON vbs_sbs.scenario_name = pre_computed_base_learner.scenario_name AND vbs_sbs.fold = pre_computed_base_learner.fold AND vbs_sbs.metric = pre_computed_base_learner.metric WHERE vbs_sbs.metric='par10') as final WHERE metric='par10' AND approach LIKE '%per_algorithm%' AND NOT scenario_name='CSP-Minizinc-Obj-2016' GROUP BY scenario_name")
+
+
     max_it = 40
 
     dfs = [asp, bnsl, cpmp, csp, csp_time, csp_mzn, gluhack, maxsat12, maxsat15, qbf, sat03, sat12, sat18]
@@ -63,6 +67,9 @@ def generate_sbs_vbs_change_table():
         else:
             pos = i
         ax1 = fig.add_subplot(3, 5, pos + 1)
+
+        ax1.axhline(np.average(base_learner.result[i]), color=color1, linestyle='dashed', linewidth=1.4)
+        print(base_learner.scenario_name[i])
 
         # code by https://stackoverflow.com/questions/23493374/sort-dataframe-index-that-has-a-string-and-number
         # ----------------------

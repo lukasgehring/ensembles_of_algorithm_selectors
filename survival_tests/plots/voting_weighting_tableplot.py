@@ -74,6 +74,46 @@ def generate_sbs_vbs_change_table():
     table = table.replace("\n12 ", "\nSAT18-EXP             ")
     print(table)
 
+    plt.rc('font', family='sans-serif')
+    plt.rc('text', usetex=True)
+
+    fig = plt.figure(1, figsize=(10, 5))
+
+    ax1 = fig.add_subplot(111)
+
+    # ax1.text(13.8, np.average(stacking.result), round(np.average(stacking.result), 2), ha='center', va='bottom', rotation=0, zorder=6)
+    plt.axhline(np.average(voting1234567.result), color=color1, linestyle='dashed', linewidth=1.4)
+
+    # ax1.text(13.8, np.average(samme.result), round(np.average(samme.result), 2), ha='center', va='bottom', rotation=0, zorder=6)
+    plt.axhline(np.average(voting_weighting_1234567.result), color=color2, linestyle='dashed', linewidth=1.4)
+
+    # ax1.text(13.8, np.average(bagging_40.result), round(np.average(bagging_40.result), 2), ha='center', va='bottom', rotation=0, zorder=6)
+    plt.axhline(np.average(voting24567.result), color=color3, linestyle='dashed', linewidth=1.4)
+
+    # ax1.text(13.8, np.average(voting_weighting_ranking_24567.result), round(np.average(voting_weighting_ranking_24567.result), 2), ha='center', va='bottom', rotation=0, zorder=6)
+    plt.axhline(np.average(voting_weighting_24567.result), color=color4, linestyle='dashed', linewidth=1.4)
+
+    ind = np.arange(len(voting1234567.scenario_name))
+    width = 0.2  # the width of the bars
+    ax1.bar(ind - width / 2 - width, voting1234567.result, width, color=color1, label='Voting Ensemble with Majority Voting', zorder=6)
+    ax1.bar(ind - width / 2, voting_weighting_1234567.result, width, color=color2, label='Voting Ensemble with Weighted Voting', zorder=6)
+    ax1.bar(ind + width / 2, voting24567.result, width, color=color3, label='Selected Voting Ensemble with Majority Voting', zorder=6)
+    ax1.bar(ind + width / 2 + width, voting_weighting_24567.result, width, color=color4, label='Selected Voting Ensemble with Weighted Voting', zorder=6)
+
+    ax1.set_xticks(ind)
+    ax1.set_xticklabels(
+        ["ASP-POTASSCO", "BNSL-2016", "CPMP-2015", "CSP-2010", "CSP-Minizinc-Time-2016", "CSP-MZN-2013", "GLUHACK-18",
+         "MAXSAT12-PMS", "MAXSAT15-PMS-INDU", "QBF-2011", "SAT03-16\_INDU", "SAT12-INDU", "SAT18-EXP"], fontsize=8)
+    plt.xticks(rotation=45, ha='right')
+    plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
+
+    ax1.set_ylabel('nPAR10', fontsize=11)
+
+    plt.legend()
+    plt.show()
+
+    fig.savefig("plotted/voting_weighting_comparison_plot.pdf", bbox_inches='tight')
+
 
 def get_dataframe_for_sql_query(sql_query: str):
     db_credentials = get_database_credential_string()

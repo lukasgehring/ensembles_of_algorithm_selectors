@@ -63,7 +63,7 @@ def generate_sbs_vbs_change_table():
     #plt.xticks(rotation=45, ha='right')
 
     ax.set_ylabel('nPAR10', fontsize=11)
-    ax.set_xlabel('Lernalgorithm', fontsize=11)
+    ax.set_xlabel('Learning Algorithm', fontsize=11)
 
     ax.set_ylim(bottom=0.38)
     ax.set_ylim(top=0.44)
