@@ -51,7 +51,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(6, stacking12345.result, width, color=color1, label='SurvivalForestPAR10')
 
     ax.set_xticks([1, 2, 3, 4, 5, 6])
-    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-Exp.", "SF-PAR10"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla'11", "SF-Exp.", "SF-PAR10"])
 
     ax.text(1, float(stacking23456.result), round(float(stacking23456.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(stacking13456.result), round(float(stacking13456.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -72,7 +72,7 @@ def generate_sbs_vbs_change_table():
 
     plt.show()
 
-    fig.savefig("stacking_base_learner2.pdf", bbox_inches='tight')
+    fig.savefig("plotted/stacking_base_learner2_sun.pdf", bbox_inches='tight')
 
 
 def get_dataframe_for_sql_query(sql_query: str):

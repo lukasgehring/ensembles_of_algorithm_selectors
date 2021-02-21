@@ -21,6 +21,7 @@ class Bagging:
         self.num_algorithms = 0
         self.base_learners = list()
         self.current_iteration = 0
+        self.weights = None
 
         # parameters
         self.base_learner = base_learner
@@ -100,8 +101,8 @@ class Bagging:
                     scenario = original_scenario
                 weights_denorm.append(base_learner_performance(scenario, len(scenario.feature_data), self.base_learners[index]))
 
-            if self.current_iteration != self.num_base_learner:
-                write_to_database(scenario, self, fold)
+            #if self.current_iteration != self.num_base_learner:
+            #    write_to_database(scenario, self, fold)
 
         # Turn around values (lowest (best) gets highest weight) and normalize
         weights_denorm = [max(weights_denorm) / float(i + 1) for i in weights_denorm]
@@ -135,11 +136,9 @@ class Bagging:
     def get_name(self):
         name = "bagging_" + str(self.current_iteration) + "_" + self.base_learner.get_name()
         if self.use_ranking:
-            name = name + "_with_ranking"
+            name = name + "_ranking"
             if self.performance_ranking:
                 name = name + "_averaging"
-        else:
-            name = name + "_without_ranking"
 
         if self.weighting:
             name = name + "_weighting"

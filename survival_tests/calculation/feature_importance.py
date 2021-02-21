@@ -48,12 +48,12 @@ def plot(algorithm):
     color8 = '#277da1'
 
     # Plot the impurity-based feature importances of the forest
-    fig = plt.figure(1, figsize=(20, 10))
+    fig = plt.figure(1, figsize=(20, 20))
     plt_counter = 0
 
     for num_algorithms, name in zip(num_algorithms, scenario_name):
         plt_counter = plt_counter + 1
-        ax = fig.add_subplot(3, 5, plt_counter)
+        ax = fig.add_subplot(5, 3, plt_counter)
 
         data = open_file(algorithm + name)
         print(name)
@@ -103,6 +103,7 @@ def plot(algorithm):
                 ax.bar(i, importances[i], color=color1, align="center")
 
         plt.xlabel("Average feature ranking for all folds and algorithms of the scenario")
+        plt.ylabel("feature importance")
         plt.xlim([-1, len(final_data)])
 
     l1 = mpatches.Patch(color=color1, label='Original Feature Data')
@@ -187,7 +188,7 @@ def single_plot(algorithm):
                 ax.bar(i, importances[i], color=color1, align="center")
 
         plt.xlabel("Average feature ranking for all folds and algorithms of the scenario")
-        plt.xlabel("feature importance")
+        plt.ylabel("feature importance")
         plt.xlim([-1, len(final_data)])
 
         l1 = mpatches.Patch(color=color1, label='Original Feature Data')
@@ -205,5 +206,5 @@ def single_plot(algorithm):
         filename = algorithm + "feature_importance%s.pdf" % name
         fig.savefig(filename, bbox_inches='tight')
 
-plot('multiclass')
-#plot('')
+single_plot('multiclass')
+single_plot('')

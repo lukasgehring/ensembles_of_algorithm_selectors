@@ -48,13 +48,13 @@ def generate_sbs_vbs_change_table():
     ax.bar(1, stacking1.result, width, color=color1, label='PerAlgorithmRegressor')
     ax.bar(2, stacking2.result, width, color=color1, label='SUNNY')
     ax.bar(3, stacking3.result, width, color=color1, label='ISAC')
-    ax.bar(4, stacking4.result, width, color=color1, label='SATzilla-11')
+    ax.bar(4, stacking4.result, width, color=color1, label="SATzilla'11")
     ax.bar(5, stacking5.result, width, color=color1, label='SurvivalForestExpectation')
     ax.bar(6, stacking6.result, width, color=color1, label='SurvivalForestPAR10')
     ax.bar(7, stacking7.result, width, color=color1, label='Multiclass')
 
     ax.set_xticks([1, 2, 3, 4, 5, 6, 7])
-    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-Exp.", "SF-PAR10", "Multiclass"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla'11", "SF-Exp.", "SF-PAR10", "Multiclass"])
 
     ax.text(1, float(stacking1.result), round(float(stacking1.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(stacking2.result), round(float(stacking2.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
@@ -76,7 +76,7 @@ def generate_sbs_vbs_change_table():
 
     plt.show()
 
-    fig.savefig("stacking_base_learner1.pdf", bbox_inches='tight')
+    fig.savefig("plotted/stacking_base_learner1_exp.pdf", bbox_inches='tight')
 
 
     # table

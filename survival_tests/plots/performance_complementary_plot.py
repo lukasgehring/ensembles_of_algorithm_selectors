@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 color1 = '#264653'
 color2 = '#2a9d8f'
@@ -21,13 +22,22 @@ y2 = algorithm2
 fig = plt.figure(1, figsize=(9, 3))
 
 plt.subplot(1, 1, 1)
-plt.plot(x1, y1, 'o--', color=color1)
-
-plt.plot(x1, y2, 'o--', color=color2)
+for x, y in zip(x1, y1):
+    plt.bar(x-0.15, y, color=color1, width=0.3, zorder=6)
+for x, y in zip(x1, y2):
+    plt.bar(x+0.15, y, color=color2, width=0.3, zorder=6)
 plt.title('Performance Complementary')
-plt.ylabel('Algorithm Performance')
+plt.ylabel('Solver Performance')
 plt.xlabel('Instance')
 plt.xticks(x1)
+
+plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
+
+l1 = mpatches.Patch(color=color1, label="Solver A")
+l2 = mpatches.Patch(color=color2, label="Solver B")
+
+
+plt.legend(handles=[l1, l2], loc=2)
 
 plt.show()
 

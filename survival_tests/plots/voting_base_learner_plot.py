@@ -56,7 +56,7 @@ def generate_sbs_vbs_change_table():
     ax.bar(7, voting123456.result, width, color=color1, label='Multiclass')
 
     ax.set_xticks([1, 2, 3, 4, 5, 6, 7])
-    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla", "SF-Exp.", "SF-PAR10", "Multiclass"])
+    ax.set_xticklabels(["PerAlgo", "SUNNY", "ISAC", "SATzilla'11", "SF-Exp.", "SF-PAR10", "Multiclass"])
 
     ax.text(1, float(voting234567.result), round(float(voting234567.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)
     ax.text(2, float(voting134567.result), round(float(voting134567.result) - voting_normal, 3), ha='center', va='bottom', rotation=0)

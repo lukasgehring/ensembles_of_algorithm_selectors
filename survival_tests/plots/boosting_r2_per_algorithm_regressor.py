@@ -24,6 +24,8 @@ def generate_sbs_vbs_change_table():
 
     plt.rc('font', family='sans-serif')
     plt.rc('text', usetex=True)
+    plt.rcParams['text.usetex'] = True
+    plt.rcParams['text.latex.preamble'] = [r'\usepackage{amsmath}']
 
     fig = plt.figure(1, figsize=(10, 5))
 
@@ -51,8 +53,8 @@ def generate_sbs_vbs_change_table():
 
     plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 
-    l1 = mpatches.Patch(color=color1, label="error with best solver")
-    l2 = mpatches.Patch(color=color3, label="error with best PAR10 value")
+    l1 = mpatches.Patch(color=color1, label=r'AdaBoost.R2 with $err_{L_1^{\text{top1}}}$')
+    l2 = mpatches.Patch(color=color3, label=r'AdaBoost.R2 with $err_{L_1^{\text{min}}}$')
 
     fig.legend(handles=[l1, l2], prop={'size': 13})
     plt.legend()

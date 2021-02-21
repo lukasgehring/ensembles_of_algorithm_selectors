@@ -13,9 +13,9 @@ def load_configuration():
 
 def generate_sbs_vbs_change_table():
     color1 = '#264653'
-    color2 = '#2a9d8f'
+    color4 = '#2a9d8f'
     color3 = '#e76f51'
-    color4 = '#e9c46a'
+    color2 = '#e9c46a'
     color5 = '#251314'
 
     voting1234567 = get_dataframe_for_sql_query(
@@ -43,17 +43,43 @@ def generate_sbs_vbs_change_table():
 
     ax = fig.add_subplot(111)
 
-    number_of_instances = 16484
+    multiplyer = 100
 
     width = 0.18  # the width of the bars
-    ax.bar(0.7, number_of_instances * voting1234567.unsolved_instances, width, color=color1, zorder=6)
-    ax.bar(0.9, number_of_instances * voting_weighting_1234567.unsolved_instances, width, color=color2, zorder=6)
-    ax.bar(1.1, number_of_instances * voting_cross_1234567.unsolved_instances, width, color=color3, zorder=6)
-    ax.bar(1.3, number_of_instances * voting_ranking_1234567.unsolved_instances, width, color=color4, zorder=6)
-    ax.bar(1.7, number_of_instances * voting24567.unsolved_instances, width, color=color1, zorder=6)
-    ax.bar(1.9, number_of_instances * voting_weighting_24567.unsolved_instances, width, color=color2, zorder=6)
-    ax.bar(2.1, number_of_instances * voting_cross_24567.unsolved_instances, width, color=color3, zorder=6)
-    ax.bar(2.3, number_of_instances * voting_ranking_24567.unsolved_instances, width, color=color4, zorder=6)
+    ax.bar(0.7, multiplyer * voting1234567.unsolved_instances, width, color=color1, zorder=6)
+    ax.bar(0.9, multiplyer * voting_weighting_1234567.unsolved_instances, width, color=color2, zorder=6)
+    ax.bar(1.1, multiplyer * voting_cross_1234567.unsolved_instances, width, color=color3, zorder=6)
+    ax.bar(1.3, multiplyer * voting_ranking_1234567.unsolved_instances, width, color=color4, zorder=6)
+    ax.bar(1.7, multiplyer * voting24567.unsolved_instances, width, color=color1, zorder=6)
+    ax.bar(1.9, multiplyer * voting_weighting_24567.unsolved_instances, width, color=color2, zorder=6)
+    ax.bar(2.1, multiplyer * voting_cross_24567.unsolved_instances, width, color=color3, zorder=6)
+    ax.bar(2.3, multiplyer * voting_ranking_24567.unsolved_instances, width, color=color4, zorder=6)
+
+    ax.text(0.7, float(multiplyer * voting1234567.unsolved_instances),
+            round(float(multiplyer * voting1234567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(0.9, float(multiplyer * voting_weighting_1234567.unsolved_instances),
+            round(float(multiplyer * voting_weighting_1234567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(1.1, float(multiplyer * voting_cross_1234567.unsolved_instances),
+            round(float(multiplyer * voting_cross_1234567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(1.3, float(multiplyer * voting_ranking_1234567.unsolved_instances),
+            round(float(multiplyer * voting_ranking_1234567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(1.7, float(multiplyer * voting24567.unsolved_instances),
+            round(float(multiplyer * voting24567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(1.9, float(multiplyer * voting_weighting_24567.unsolved_instances),
+            round(float(multiplyer * voting_weighting_24567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(2.1, float(multiplyer * voting_cross_24567.unsolved_instances),
+            round(float(multiplyer * voting_cross_24567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+    ax.text(2.3, float(multiplyer * voting_ranking_24567.unsolved_instances),
+            round(float(multiplyer * voting_ranking_24567.unsolved_instances), 3), ha='center',
+            va='bottom', rotation=0)
+
 
     ax.set_xticks([1,2])
     ax.set_xticklabels(["Voting", "Selected Voting"])
@@ -61,10 +87,10 @@ def generate_sbs_vbs_change_table():
 
     #plt.xticks(rotation=45, ha='right')
 
-    ax.set_ylabel('number of unsolved instances', fontsize=11)
+    ax.set_ylabel('unsolved instances (%)', fontsize=11)
 
-    ax.set_ylim(bottom=650)
-    #ax.set_ylim(top=0.06)
+    ax.set_ylim(bottom=4)
+    ax.set_ylim(top=7)
 
     plt.grid(b=True, which='major', linestyle='-', axis='y', zorder=0)
 

@@ -65,7 +65,7 @@ def generate_sbs_vbs_change_table():
 
     names = list()
     names.append("PerAlgo")
-    names.append("SatZilla")
+    names.append("SATzilla'11")
     names.append("SF-Exp")
     names.append("SUNNY")
     names.append("ISAC")
@@ -74,7 +74,7 @@ def generate_sbs_vbs_change_table():
     width = 0.25  # the width of the bars
     ind = np.arange(len(names))
     ax.bar(ind + width, bagging, width, color=color1,
-           label='Bagging with 10 Base Learner', zorder=3)
+           label='Bagging with 10 base learners', zorder=3)
     ax.bar(ind, base_learner, width, color=color2, label='Single Learner', zorder=3)
 
     ax.set_xticks(ind + width / 2)
